@@ -11,7 +11,7 @@ import { format } from "date-fns";
 import { Task } from "./TaskCard";
 
 interface AddTaskFormProps {
-  onAddTask: (task: Omit<Task, 'id'>) => void;
+  onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
 }
 
 export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
