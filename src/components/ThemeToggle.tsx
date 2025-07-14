@@ -7,6 +7,11 @@ export function ThemeToggle() {
   const { user, themePreference, updateThemePreference } = useAuth();
   const [isDark, setIsDark] = useState(true);
 
+  // Initialize dark mode immediately
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   useEffect(() => {
     // Set theme based on user preference or default to dark
     const shouldBeDark = themePreference ? themePreference === 'dark' : true;

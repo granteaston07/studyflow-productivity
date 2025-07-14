@@ -54,6 +54,11 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyMo
   const [currentMessage, setCurrentMessage] = useState(Math.floor(Math.random() * encouragingMessages.length));
   const [currentTime, setCurrentTime] = useState(new Date());
 
+  // Force dark mode in study mode
+  useEffect(() => {
+    document.documentElement.classList.add('dark');
+  }, []);
+
   // Rotate messages every 1 minute with random selection
   useEffect(() => {
     const messageInterval = setInterval(() => {
@@ -65,9 +70,15 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyMo
 
   // Update current time every second
   useEffect(() => {
-    const timeInterval = setInterval(() => {
+    const updateTime = () => {
       setCurrentTime(new Date());
-    }, 1000);
+    };
+
+    // Update immediately
+    updateTime();
+
+    // Then update every second
+    const timeInterval = setInterval(updateTime, 1000);
 
     return () => clearInterval(timeInterval);
   }, []);
