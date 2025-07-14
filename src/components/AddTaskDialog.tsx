@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Calendar, BookOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,10 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
     priority: 'medium' as Task['priority'],
     dueDate: undefined as Date | undefined
   });
+  
+  const [customSubjects, setCustomSubjects] = useState<string[]>([]);
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customSubjectInput, setCustomSubjectInput] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,7 +53,14 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
     setOpen(false);
   };
 
-  const subjects = [
+  useEffect(() => {
+    const saved = localStorage.getItem('customSubjects');
+    if (saved) {
+      setCustomSubjects(JSON.parse(saved));
+    }
+  }, []);
+
+  const defaultSubjects = [
     'Math',
     'Science',
     'English',
@@ -57,6 +68,19 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
     'History',
     'Personal'
   ];
+
+  const allSubjects = [...defaultSubjects, ...customSubjects];
+
+  const handleAddCustomSubject = () => {
+    if (customSubjectInput.trim() && !allSubjects.includes(customSubjectInput.trim())) {
+      const newCustomSubjects = [...customSubjects, customSubjectInput.trim()];
+      setCustomSubjects(newCustomSubjects);
+      localStorage.setItem('customSubjects', JSON.stringify(newCustomSubjects));
+      setTaskData({ ...taskData, subject: customSubjectInput.trim() });
+      setCustomSubjectInput('');
+      setShowCustomInput(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -92,24 +116,74 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Subject</Label>
-              <Select
-                value={taskData.subject}
-                onValueChange={(value) => setTaskData({ ...taskData, subject: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects.map((subject) => (
-                    <SelectItem key={subject} value={subject}>
+              <div className="space-y-2">
+                <Select
+                  value={taskData.subject}
+                  onValueChange={(value) => {
+                    if (value === 'add-custom') {
+                      setShowCustomInput(true);
+                    } else {
+                      setTaskData({ ...taskData, subject: value });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allSubjects.map((subject) => (
+                      <SelectItem key={subject} value={subject}>
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-4 w-4" />
+                          {subject}
+                        </div>
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="add-custom">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4" />
-                        {subject}
+                        <Plus className="h-4 w-4" />
+                        Add Custom
                       </div>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+                
+                {showCustomInput && (
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Enter custom subject"
+                      value={customSubjectInput}
+                      onChange={(e) => setCustomSubjectInput(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomSubject();
+                        }
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={handleAddCustomSubject}
+                      >
+                        Add
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setShowCustomInput(false);
+                          setCustomSubjectInput('');
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
