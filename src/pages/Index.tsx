@@ -1,219 +1,283 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate, Link } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { TaskCard } from '@/components/TaskCard';
-import { AddTaskDialog } from '@/components/AddTaskDialog';
-import { TaskPrioritization } from '@/components/TaskPrioritization';
-import { ProgressTracker } from '@/components/ProgressTracker';
-import { StudyLinks } from '@/components/StudyLinks';
-import { QuickNotes } from '@/components/QuickNotes';
-import { FocusTimer } from '@/components/FocusTimer';
-import { FloatingStatus } from '@/components/FloatingStatus';
-import { AIStudySuggestions } from '@/components/AIStudySuggestions';
-import { ThemeToggle } from '@/components/ThemeToggle';
-import { useAuth } from '@/hooks/useAuth';
-import { useTasks, Task } from '@/hooks/useTasks';
-import { Clock, Calendar, Star, GraduationCap, AlertCircle, CheckCircle2, BookOpen, LogOut, User, Loader2 } from 'lucide-react';
-import { format, isToday, isPast, startOfDay } from 'date-fns';
-import tasklyLogo from '@/assets/taskly-logo.png';
+import { useState, useEffect } from "react";
+import { Brain, CheckSquare, Timer, Plus } from "lucide-react";
+import { TaskCard, Task } from "@/components/TaskCard";
+import { AddTaskDialog } from "@/components/AddTaskDialog";
+import { TaskPrioritization } from "@/components/TaskPrioritization";
+import { ProgressTracker } from "@/components/ProgressTracker";
+import { FocusTimer } from "@/components/FocusTimer";
+import { StudyLinks } from "@/components/StudyLinks";
+import { QuickNotes } from "@/components/QuickNotes";
+import { FloatingStatus } from "@/components/FloatingStatus";
+import { Badge } from "@/components/ui/badge";
 
-export default function Index() {
-  const { user, loading, signOut } = useAuth();
-  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
+const INITIAL_TASKS: Task[] = [
+  {
+    id: '1',
+    title: 'Complete Math Homework - Chapter 5 Exercises',
+    subject: 'Math',
+    dueDate: new Date(2024, 11, 16), // Tomorrow
+    completed: false,
+    priority: 'high',
+    status: 'pending'
+  },
+  {
+    id: '2',
+    title: 'Study for History Quiz on World War II',
+    subject: 'History',
+    dueDate: new Date(2024, 11, 18),
+    completed: false,
+    priority: 'high',
+    status: 'in-progress'
+  },
+  {
+    id: '3',
+    title: 'Write English Essay - Book Report',
+    subject: 'English',
+    dueDate: new Date(2024, 11, 20),
+    completed: false,
+    priority: 'medium',
+    status: 'pending'
+  },
+  {
+    id: '4',
+    title: 'Science Lab Report - Chemical Reactions',
+    subject: 'Science',
+    dueDate: new Date(2024, 11, 14), // Yesterday - overdue
+    completed: false,
+    priority: 'high',
+    status: 'overdue'
+  },
+  {
+    id: '5',
+    title: 'Read Chapter 3 of Biology Textbook',
+    subject: 'Science',
+    dueDate: new Date(2024, 11, 15), // Today
+    completed: true,
+    priority: 'medium',
+    status: 'completed'
+  }
+];
+
+const Index = () => {
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
-
-  // Redirect to auth if not logged in
-  if (!loading && !user) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  // Show loading while checking auth or loading tasks
-  if (loading || tasksLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
-      </div>
-    );
-  }
-
-  // Listen to timer updates
+  
+  // Update timer state from FocusTimer component
   useEffect(() => {
-    const handleTimerUpdate = (event: CustomEvent) => {
-      setTimerActive(event.detail.active);
-      setTimeRemaining(event.detail.timeRemaining);
-    };
-
-    window.addEventListener('timerUpdate', handleTimerUpdate as EventListener);
-    return () => window.removeEventListener('timerUpdate', handleTimerUpdate as EventListener);
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined' && (window as any).timerState) {
+        const { isActive, timeLeft } = (window as any).timerState;
+        setTimerActive(isActive);
+        setTimeRemaining(timeLeft);
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
   }, []);
 
   const handleToggleTask = (taskId: string) => {
-    toggleTask(taskId);
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { 
+              ...task, 
+              completed: !task.completed,
+              status: !task.completed ? 'completed' : 
+                     task.dueDate && task.dueDate < new Date() ? 'overdue' : 'pending'
+            }
+          : task
+      )
+    );
   };
 
   const handleUpdateDueDate = (taskId: string, dueDate: Date | undefined) => {
-    updateTask(taskId, { dueDate });
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { 
+              ...task, 
+              dueDate,
+              status: dueDate && dueDate < new Date() ? 'overdue' : 'pending'
+            }
+          : task
+      )
+    );
   };
 
-  const handleAddTask = async (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    await addTask(newTaskData);
+  const handleAddTask = (newTaskData: Omit<Task, 'id'>) => {
+    const newTask: Task = {
+      ...newTaskData,
+      id: Date.now().toString()
+    };
+    setTasks(prevTasks => [newTask, ...prevTasks]);
   };
 
   const handleUpdateStatus = (taskId: string, status: Task['status']) => {
-    updateTask(taskId, { status });
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, status } : task
+      )
+    );
   };
 
   const handleDeleteTask = (taskId: string) => {
-    deleteTask(taskId);
+    setTasks(prev => prev.filter(task => task.id !== taskId));
   };
 
-  // Filter tasks
   const activeTasks = tasks.filter(task => !task.completed);
-  const overdueTasks = tasks.filter(task => task.status === 'overdue' || (task.dueDate && isPast(startOfDay(task.dueDate)) && !task.completed));
-  const todayTasks = tasks.filter(task => task.dueDate && isToday(task.dueDate) && !task.completed);
-
-  // Sort tasks with completed at bottom
-  const sortedTasks = [...tasks].sort((a, b) => {
-    if (a.completed && !b.completed) return 1;
-    if (!a.completed && b.completed) return -1;
-    return 0;
+  const overdueTasks = tasks.filter(task => task.status === 'overdue');
+  const todayTasks = tasks.filter(task => {
+    if (!task.dueDate) return false;
+    const today = new Date();
+    const taskDate = task.dueDate;
+    return taskDate.toDateString() === today.toDateString();
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-secondary/10">
-      <div className="container mx-auto px-4 py-8 animate-fade-in">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="bg-card/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <img src={tasklyLogo} alt="Taskly" className="h-10 w-10 animate-float" />
-              <div className="animate-slide-up">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent hover:animate-pulse-glow transition-all duration-300">
-                  Taskly
-                </h1>
-                <p className="text-sm text-muted-foreground animate-fade-in">AI-Powered Student Productivity</p>
+              <div className="bg-gradient-to-br from-primary to-ai-primary text-primary-foreground p-2 rounded-lg">
+                <Brain className="h-6 w-6" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-foreground">Taskly</h1>
+                <p className="text-sm text-muted-foreground">AI Todo List • Smart Task Management</p>
               </div>
             </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground animate-slide-down">
-              Welcome, {user?.user_metadata?.display_name || user?.email}
-            </span>
-            <div className="animate-bounce-in">
-              <ThemeToggle />
+            
+            <div className="flex items-center gap-4">
+              {overdueTasks.length > 0 && (
+                <Badge variant="destructive" className="bg-error text-error-foreground animate-pulse">
+                  {overdueTasks.length} overdue
+                </Badge>
+              )}
+              {todayTasks.length > 0 && (
+                <Badge variant="secondary" className="bg-warning-light text-warning">
+                  {todayTasks.length} due today
+                </Badge>
+              )}
             </div>
-            <Button variant="ghost" size="sm" onClick={signOut} className="hover:animate-wiggle">
-              <LogOut className="h-4 w-4" />
-            </Button>
           </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="flex items-center justify-between animate-slide-down">
-              <div className="flex items-center gap-4">
-                <h2 className="text-2xl font-semibold">Your Tasks</h2>
-                <div className="flex gap-2">
-                  {overdueTasks.length > 0 && (
-                    <Badge variant="destructive" className="gap-1 animate-bounce-in">
-                      <AlertCircle className="h-3 w-3" />
-                      {overdueTasks.length} overdue
-                    </Badge>
-                  )}
-                  {todayTasks.length > 0 && (
-                    <Badge variant="secondary" className="gap-1 animate-bounce-in">
-                      <Clock className="h-3 w-3" />
-                      {todayTasks.length} due today
-                    </Badge>
-                  )}
-                </div>
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="space-y-8">
+          {/* Welcome Section */}
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
+              Welcome back! Let's stay productive.
+            </h2>
+            <p className="text-muted-foreground">
+              You have {activeTasks.length} active tasks • AI recommendations ready
+            </p>
+          </div>
+
+          {/* Tasks Section */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="h-5 w-5 text-primary" />
+                <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
-              <div className="animate-rotate-bounce">
-                <AddTaskDialog onAddTask={handleAddTask} />
-              </div>
+              <AddTaskDialog onAddTask={handleAddTask} />
             </div>
 
-            <div className="space-y-4">
-              {sortedTasks.map((task, index) => (
-                <div key={task.id} className="animate-slide-up hover:animate-pulse-glow transition-all duration-300" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <TaskCard
-                    task={task}
+            {/* Task List */}
+            <div className="space-y-3">
+              {tasks.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No tasks yet. Add your first task to get started!</p>
+                </div>
+              ) : (
+                [...tasks]
+                  .sort((a, b) => {
+                    // Sort completed tasks to bottom
+                    if (a.completed && !b.completed) return 1;
+                    if (!a.completed && b.completed) return -1;
+                    return 0;
+                  })
+                  .map(task => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
                     onToggle={handleToggleTask}
                     onUpdateDueDate={handleUpdateDueDate}
                     onUpdateStatus={handleUpdateStatus}
                     onDelete={handleDeleteTask}
-                  />
-                </div>
-              ))}
-              {tasks.length === 0 && (
-                <div className="text-center py-12 text-muted-foreground animate-bounce-in">
-                  <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50 animate-float" />
-                  <p>No tasks yet. Add your first task to get started!</p>
-                </div>
+                    />
+                  ))
               )}
             </div>
-          </div>
+          </section>
 
-          <div className="space-y-6">
-            <div className="animate-slide-down" style={{ animationDelay: '0.2s' }}>
-              <TaskPrioritization tasks={tasks} />
-            </div>
-            <div className="animate-slide-down" style={{ animationDelay: '0.4s' }}>
+          {/* AI Task Prioritization */}
+          <section>
+            <TaskPrioritization tasks={tasks} />
+          </section>
+
+
+          {/* Two Column Layout for Progress and Study Links */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Progress Tracker */}
+            <div id="progress-tracker">
               <ProgressTracker tasks={tasks} />
             </div>
-            <div className="animate-slide-down" style={{ animationDelay: '0.6s' }}>
+            
+            {/* Study Links and Quick Notes Column */}
+            <div className="space-y-8">
               <StudyLinks />
-            </div>
-            <div className="animate-slide-down" style={{ animationDelay: '0.8s' }}>
               <QuickNotes />
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          <div className="animate-slide-up" style={{ animationDelay: '1s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <Star className="h-5 w-5 text-primary animate-wiggle" />
-              <h3 className="text-xl font-semibold">AI Study Suggestions</h3>
-            </div>
-            <AIStudySuggestions tasks={tasks} />
-          </div>
-
-          <div className="animate-slide-up" style={{ animationDelay: '1.2s' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <Clock className="h-5 w-5 text-primary animate-pulse" />
-              <h3 className="text-xl font-semibold">Focus Timer</h3>
+          {/* Focus Timer */}
+          <section id="focus-timer">
+            <div className="flex items-center gap-2 mb-6">
+              <Timer className="h-5 w-5 text-primary" />
+              <h3 className="text-xl font-semibold text-foreground">Focus Session</h3>
             </div>
             <FocusTimer />
-          </div>
+          </section>
+
+          {/* Quick Stats Footer */}
+          <footer className="pt-8 border-t border-border">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-primary">{tasks.length}</p>
+                <p className="text-sm text-muted-foreground">Total Tasks</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</p>
+                <p className="text-sm text-muted-foreground">Completed</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</p>
+                <p className="text-sm text-muted-foreground">In Progress</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-error">{overdueTasks.length}</p>
+                <p className="text-sm text-muted-foreground">Overdue</p>
+              </div>
+            </div>
+            
+            <div className="text-center mt-8 pt-6 border-t border-border">
+              <p className="text-sm text-muted-foreground">
+                Built with ❤️ for students • Made in 2025
+              </p>
+            </div>
+          </footer>
         </div>
-
-        <footer className="text-center py-8 border-t border-border/50 animate-fade-in" style={{ animationDelay: '1.5s' }}>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="animate-bounce-in" style={{ animationDelay: '1.6s' }}>
-              <div className="text-2xl font-bold text-primary">{tasks.length}</div>
-              <div className="text-sm text-muted-foreground">Total Tasks</div>
-            </div>
-            <div className="animate-bounce-in" style={{ animationDelay: '1.7s' }}>
-              <div className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</div>
-              <div className="text-sm text-muted-foreground">Completed</div>
-            </div>
-            <div className="animate-bounce-in" style={{ animationDelay: '1.8s' }}>
-              <div className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</div>
-              <div className="text-sm text-muted-foreground">In Progress</div>
-            </div>
-            <div className="animate-bounce-in" style={{ animationDelay: '1.9s' }}>
-              <div className="text-2xl font-bold text-error">{overdueTasks.length}</div>   
-              <div className="text-sm text-muted-foreground">Overdue</div>
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground animate-shimmer">
-            Made in 2025 • Built with ❤️ for students
-          </p>
-        </footer>
-      </div>
-
+      </main>
+      
+      {/* Floating Status Window */}
       <FloatingStatus 
         tasks={tasks} 
         timerActive={timerActive} 
@@ -221,4 +285,6 @@ export default function Index() {
       />
     </div>
   );
-}
+};
+
+export default Index;
