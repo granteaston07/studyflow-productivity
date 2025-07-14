@@ -53,6 +53,19 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     }
   };
 
+  const getPriorityColor = (priority: Task['priority']) => {
+    switch (priority) {
+      case 'high':
+        return 'bg-error';
+      case 'medium':
+        return 'bg-warning';
+      case 'low':
+        return 'bg-success';
+      default:
+        return 'bg-muted';
+    }
+  };
+
   const formatDueDate = (date?: Date) => {
     if (!date) return null;
     
@@ -85,12 +98,18 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
         
         <div className="flex-1 space-y-2">
           <div className="flex items-start justify-between gap-2">
-            <h3 className={cn(
-              "font-medium text-foreground leading-tight",
-              task.completed && "line-through text-muted-foreground"
-            )}>
-              {task.title}
-            </h3>
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "w-2 h-2 rounded-full shrink-0",
+                getPriorityColor(task.priority)
+              )} />
+              <h3 className={cn(
+                "font-medium text-foreground leading-tight",
+                task.completed && "line-through text-muted-foreground"
+              )}>
+                {task.title}
+              </h3>
+            </div>
             
             <div className="flex items-center gap-2">
               <Badge
