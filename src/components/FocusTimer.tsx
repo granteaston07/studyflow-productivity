@@ -16,7 +16,7 @@ interface TimerSession {
 }
 
 const AI_SUGGESTED_SESSIONS: TimerSession[] = [
-  { type: 'work', duration: 25, label: 'Focus Timer' },
+  { type: 'work', duration: 25, label: 'Homework' },
   { type: 'work', duration: 45, label: 'Deep Work' },
   { type: 'work', duration: 15, label: 'Quick Task' },
   { type: 'break', duration: 5, label: 'Short Break' },
