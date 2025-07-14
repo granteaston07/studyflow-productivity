@@ -96,7 +96,7 @@ const Index = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="p-2">
-                <TasklyLogo size={40} />
+                <TasklyLogo size={28} />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Taskly</h1>
@@ -225,11 +225,11 @@ const Index = () => {
             
             <div className="text-center mt-8 pt-6 border-t border-border">
               <div className="flex flex-col items-center gap-2">
-                <p className="text-sm font-medium text-foreground">Built for Students</p>
+                <p className="text-sm font-medium text-foreground">Created by Grant Easton</p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>Made in 2025</span>
+                  <span>Built for Students</span>
                   <span>•</span>
-                  <span>Created by Grant Easton</span>
+                  <span>Made in 2025</span>
                 </div>
               </div>
             </div>
