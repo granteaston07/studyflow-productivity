@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Brain } from 'lucide-react';
+import { Loader2, Brain, Eye, EyeOff } from 'lucide-react';
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [showSignUpPassword, setShowSignUpPassword] = useState(false);
 
   // Redirect if already authenticated
   if (user && !loading) {
@@ -85,13 +87,28 @@ export default function Auth() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password" className="text-foreground">Password</Label>
-                  <Input
-                    id="signin-password"
-                    name="password"
-                    type="password"
-                    required
-                    className="bg-background border-border text-foreground"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signin-password"
+                      name="password"
+                      type={showSignInPassword ? "text" : "password"}
+                      required
+                      className="bg-background border-border text-foreground pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute inset-y-0 right-0 px-3 py-0 h-full hover:bg-transparent"
+                      onClick={() => setShowSignInPassword(!showSignInPassword)}
+                    >
+                      {showSignInPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <Button 
                   type="submit" 
@@ -136,14 +153,29 @@ export default function Auth() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password" className="text-foreground">Password</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    minLength={6}
-                    required
-                    className="bg-background border-border text-foreground"
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      name="password"
+                      type={showSignUpPassword ? "text" : "password"}
+                      minLength={6}
+                      required
+                      className="bg-background border-border text-foreground pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute inset-y-0 right-0 px-3 py-0 h-full hover:bg-transparent"
+                      onClick={() => setShowSignUpPassword(!showSignUpPassword)}
+                    >
+                      {showSignUpPassword ? (
+                        <EyeOff className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      ) : (
+                        <Eye className="h-4 w-4 text-muted-foreground hover:text-foreground" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
                 <Button 
                   type="submit" 
