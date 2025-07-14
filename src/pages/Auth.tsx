@@ -44,15 +44,15 @@ export default function Auth() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-card border-border">
+      <Card className="w-full max-w-md bg-card border-border shadow-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <BookOpen className="h-8 w-8 text-primary" />
@@ -65,35 +65,37 @@ export default function Auth() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-muted">
+              <TabsTrigger value="signin" className="text-foreground data-[state=active]:bg-background">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="text-foreground data-[state=active]:bg-background">Sign Up</TabsTrigger>
             </TabsList>
             
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">Email</Label>
+                  <Label htmlFor="signin-email" className="text-foreground">Email</Label>
                   <Input
                     id="signin-email"
                     name="email"
                     type="email"
                     placeholder="student@university.edu"
                     required
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Password</Label>
+                  <Label htmlFor="signin-password" className="text-foreground">Password</Label>
                   <Input
                     id="signin-password"
                     name="password"
                     type="password"
                     required
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" 
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
@@ -111,38 +113,41 @@ export default function Auth() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Display Name</Label>
+                  <Label htmlFor="signup-name" className="text-foreground">Display Name</Label>
                   <Input
                     id="signup-name"
                     name="displayName"
                     type="text"
                     placeholder="Your Name"
                     required
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">Email</Label>
+                  <Label htmlFor="signup-email" className="text-foreground">Email</Label>
                   <Input
                     id="signup-email"
                     name="email"
                     type="email"
                     placeholder="student@university.edu"
                     required
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Password</Label>
+                  <Label htmlFor="signup-password" className="text-foreground">Password</Label>
                   <Input
                     id="signup-password"
                     name="password"
                     type="password"
                     minLength={6}
                     required
+                    className="bg-background border-border text-foreground"
                   />
                 </div>
                 <Button 
                   type="submit" 
-                  className="w-full" 
+                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" 
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
