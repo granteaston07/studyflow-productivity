@@ -61,7 +61,7 @@ export function QuickNotes() {
         </div>
 
         {/* Notes List */}
-        <div className="space-y-2 max-h-24 overflow-y-auto">
+        <div className="space-y-2 max-h-20 overflow-y-auto">
           {notes.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-2">
               No notes yet. Add your first note above!
