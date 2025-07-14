@@ -166,6 +166,7 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
                   onClick={() => {
                     if (!timerActive || timerPaused) {
                       setSelectedSession(session);
+                      onUpdateDuration(session.duration * 60);
                     }
                   }}
                   disabled={timerActive && !timerPaused}
