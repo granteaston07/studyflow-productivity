@@ -96,7 +96,7 @@ const Index = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="p-2">
-                <TasklyLogo size={28} />
+                <TasklyLogo size={48} />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Taskly</h1>
