@@ -32,7 +32,7 @@ export function QuickNotes() {
   };
 
   return (
-    <Card className="h-64">
+    <Card className="h-80">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
           <NotebookPen className="h-4 w-4 text-primary" />
@@ -40,7 +40,7 @@ export function QuickNotes() {
         </CardTitle>
       </CardHeader>
       
-      <CardContent className="space-y-2 h-48 flex flex-col">
+      <CardContent className="space-y-2 h-64 flex flex-col">
         {/* Add Note */}
         <div className="space-y-2 flex-shrink-0">
           <Textarea
@@ -60,10 +60,10 @@ export function QuickNotes() {
           </Button>
         </div>
 
-        {/* Notes List */}
-        <div className="space-y-1 flex-1 overflow-y-auto min-h-0">
+        {/* Notes List - Shows 3 notes before scrolling */}
+        <div className="space-y-1 flex-1 overflow-y-auto min-h-0" style={{ maxHeight: '180px' }}>
           {notes.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-2">
+            <p className="text-xs text-muted-foreground text-center py-4">
               No notes yet. Add your first note above!
             </p>
           ) : (
@@ -71,8 +71,9 @@ export function QuickNotes() {
               <div
                 key={note.id}
                 className="group p-2 rounded-md bg-background/50 border border-border/50 relative flex-shrink-0"
+                style={{ minHeight: '52px' }}
               >
-                <p className="text-xs text-foreground pr-6 line-clamp-2">{note.content}</p>
+                <p className="text-xs text-foreground pr-6 line-clamp-2 leading-relaxed">{note.content}</p>
                 <Button
                   variant="ghost"
                   size="sm"
