@@ -23,18 +23,42 @@ const encouragingMessages = [
   "You're building something incredible today 🏗️",
   "Stay curious, stay focused, stay brilliant 🧠",
   "Every expert was once a beginner 🌱",
-  "Your dedication is your superpower 💫"
+  "Your dedication is your superpower 💫",
+  "Knowledge is the key to unlocking your potential 🔑",
+  "Small consistent actions lead to extraordinary results 🎯",
+  "You're investing in your future self right now 💰",
+  "Excellence is not an act, but a habit 🏆",
+  "Your mind is your most powerful tool 🧰",
+  "Every challenge is an opportunity to grow 🌿",
+  "Stay disciplined, stay determined, stay victorious 👑",
+  "Learning today, leading tomorrow 🌅",
+  "Your commitment to growth is inspiring 🌟",
+  "Knowledge grows when shared, wisdom when applied 💡",
+  "The best investment you can make is in yourself 📈",
+  "Every moment of focus is a step toward mastery 🎯",
+  "Your potential is limitless, your dedication is admirable 🚀",
+  "Success is the sum of small efforts repeated daily 🔄",
+  "You're not just studying, you're transforming 🦋",
+  "Embrace the process, trust your journey 🛤️",
+  "Your hard work will speak for itself 📢",
+  "Today's efforts are tomorrow's achievements 🏅",
+  "Stay focused on your goals, not your obstacles 🎯",
+  "You're capable of more than you know 💪",
+  "Learning is the gift that keeps on giving 🎁",
+  "Your persistence will pay off magnificently 💎",
+  "Every study session brings you closer to your dreams 🌙",
+  "You're not just learning facts, you're building character 🏗️"
 ];
 
 export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyModeProps) => {
-  const [currentMessage, setCurrentMessage] = useState(0);
+  const [currentMessage, setCurrentMessage] = useState(Math.floor(Math.random() * encouragingMessages.length));
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Rotate messages every 10 seconds
+  // Rotate messages every 1 minute with random selection
   useEffect(() => {
     const messageInterval = setInterval(() => {
-      setCurrentMessage((prev) => (prev + 1) % encouragingMessages.length);
-    }, 10000);
+      setCurrentMessage(Math.floor(Math.random() * encouragingMessages.length));
+    }, 60000); // 1 minute
 
     return () => clearInterval(messageInterval);
   }, []);
