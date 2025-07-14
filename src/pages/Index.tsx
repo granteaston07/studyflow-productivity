@@ -67,20 +67,8 @@ const Index = () => {
 
   // Redirect to auth if not logged in
   if (!user) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-6">
-          <h2 className="text-2xl font-bold mb-4">Please sign in to continue</h2>
-          <p className="text-muted-foreground mb-6">You need to be logged in to access Taskly.</p>
-          <button 
-            onClick={() => window.location.href = '/auth'}
-            className="bg-primary text-primary-foreground px-6 py-2 rounded-md hover:bg-primary/90"
-          >
-            Sign In
-          </button>
-        </div>
-      </div>
-    );
+    window.location.href = '/auth';
+    return null;
   }
 
   const activeTasks = tasks.filter(task => !task.completed);

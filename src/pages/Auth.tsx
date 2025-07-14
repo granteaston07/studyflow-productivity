@@ -51,17 +51,17 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md bg-card border-border">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <BookOpen className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
               Taskly
             </span>
           </div>
-          <CardTitle>Welcome to Taskly</CardTitle>
-          <CardDescription>AI-Powered Student Productivity</CardDescription>
+          <CardTitle className="text-foreground">Welcome to Taskly</CardTitle>
+          <CardDescription className="text-muted-foreground">AI-Powered Student Productivity</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
