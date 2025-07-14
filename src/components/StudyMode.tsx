@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { ProgressTracker } from "@/components/ProgressTracker";
 import { Task } from "@/components/TaskCard";
 
 interface StudyModeProps {
@@ -126,11 +125,13 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyMo
             </div>
           )}
 
-          {/* Progress Section */}
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl p-8 border border-border/50">
-              <h3 className="text-xl font-semibold text-foreground mb-6">Today's Progress</h3>
-              <ProgressTracker tasks={tasks} />
+          {/* Simple Progress Percentage */}
+          <div className="space-y-3">
+            <div className="text-6xl md:text-7xl font-bold text-primary">
+              {tasks.length > 0 ? Math.round((tasks.filter(t => t.completed).length / tasks.length) * 100) : 0}%
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {tasks.filter(t => t.completed).length} of {tasks.length} tasks completed
             </div>
           </div>
 
