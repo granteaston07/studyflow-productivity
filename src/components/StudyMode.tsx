@@ -115,15 +115,15 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onEx
       </header>
 
       {/* Main content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-8">
-        <div className="max-w-4xl w-full text-center space-y-12">
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-6">
+        <div className="max-w-4xl w-full text-center space-y-8">
           
           {/* Current Time - Large Display */}
-          <div className="space-y-2">
-            <div className="text-8xl md:text-9xl font-bold text-foreground tracking-tight">
+          <div className="space-y-1">
+            <div className="text-7xl md:text-8xl font-bold text-foreground tracking-tight">
               {formatTime(currentTime)}
             </div>
-            <div className="text-lg text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               {currentTime.toLocaleDateString([], { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -135,24 +135,25 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onEx
 
           {/* Encouraging Message */}
           <div className="animate-fade-in">
-            <p className="text-2xl md:text-3xl font-medium text-foreground leading-relaxed">
+            <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
               {encouragingMessages[currentMessage]}
             </p>
           </div>
 
           {/* Timer Display (if active) */}
           {timerActive && (
-            <div className="space-y-4">
-              <div className="text-primary text-sm font-medium uppercase tracking-wide">
+            <div className="space-y-3">
+              <div className="text-primary text-xs font-medium uppercase tracking-wide">
                 Focus Session Active
               </div>
-              <div className="text-6xl md:text-7xl font-bold text-primary">
+              <div className="text-5xl md:text-6xl font-bold text-primary">
                 {formatTimerTime(timeRemaining)}
               </div>
               <div className="flex justify-center gap-3">
                 <Button
                   onClick={onPauseTimer}
                   variant="outline"
+                  size="sm"
                   className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
                 >
                   {timerPaused ? 'Resume' : 'Pause'}
@@ -160,6 +161,7 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onEx
                 <Button
                   onClick={onResetTimer}
                   variant="outline"
+                  size="sm"
                   className="hover:bg-error/10 hover:text-error hover:border-error/30"
                 >
                   Reset
@@ -169,32 +171,32 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onEx
           )}
 
           {/* Simple Progress Percentage */}
-          <div className="space-y-3">
-            <div className="text-6xl md:text-7xl font-bold text-primary">
+          <div className="space-y-2">
+            <div className="text-5xl md:text-6xl font-bold text-primary">
               {tasks.length > 0 ? Math.round((tasks.filter(t => t.completed).length / tasks.length) * 100) : 0}%
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-xs text-muted-foreground">
               {tasks.filter(t => t.completed).length} of {tasks.length} tasks completed
             </div>
           </div>
 
           {/* Minimal task summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-primary">{tasks.length}</div>
-              <div className="text-sm text-muted-foreground">Total Tasks</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-primary">{tasks.length}</div>
+              <div className="text-xs text-muted-foreground">Total Tasks</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-success">{tasks.filter(t => t.completed).length}</div>
-              <div className="text-sm text-muted-foreground">Completed</div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</div>
+              <div className="text-xs text-muted-foreground">Completed</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</div>
-              <div className="text-sm text-muted-foreground">In Progress</div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</div>
+              <div className="text-xs text-muted-foreground">In Progress</div>
             </div>
-            <div className="space-y-2">
-              <div className="text-3xl font-bold text-error">{tasks.filter(t => t.status === 'overdue').length}</div>
-              <div className="text-sm text-muted-foreground">Overdue</div>
+            <div className="space-y-1">
+              <div className="text-2xl font-bold text-error">{tasks.filter(t => t.status === 'overdue').length}</div>
+              <div className="text-xs text-muted-foreground">Overdue</div>
             </div>
           </div>
 

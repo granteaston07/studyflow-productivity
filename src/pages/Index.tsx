@@ -46,12 +46,19 @@ const Index = () => {
 
   // Timer control functions
   const startTimer = (duration?: number) => {
-    if (duration) {
+    if (duration && !timerActive) {
       setTimeRemaining(duration);
       setSelectedSessionDuration(duration);
     }
     setTimerActive(true);
     setTimerPaused(false);
+  };
+
+  const updateTimerDuration = (duration: number) => {
+    if (!timerActive) {
+      setTimeRemaining(duration);
+      setSelectedSessionDuration(duration);
+    }
   };
 
   const pauseTimer = () => {
@@ -298,6 +305,7 @@ const Index = () => {
               timeRemaining={timeRemaining}
               timerPaused={timerPaused}
               onStartTimer={startTimer}
+              onUpdateDuration={updateTimerDuration}
               onPauseTimer={pauseTimer}
               onResetTimer={resetTimer}
             />
