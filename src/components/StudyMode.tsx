@@ -8,7 +8,10 @@ interface StudyModeProps {
   tasks: Task[];
   timerActive: boolean;
   timeRemaining: number;
+  timerPaused: boolean;
   onExit: () => void;
+  onPauseTimer: () => void;
+  onResetTimer: () => void;
 }
 
 const encouragingMessages = [
@@ -50,7 +53,7 @@ const encouragingMessages = [
   "You're building habits that will last a lifetime 🏗️"
 ];
 
-export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyModeProps) => {
+export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onExit, onPauseTimer, onResetTimer }: StudyModeProps) => {
   const [currentMessage, setCurrentMessage] = useState(Math.floor(Math.random() * encouragingMessages.length));
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -139,12 +142,28 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyMo
 
           {/* Timer Display (if active) */}
           {timerActive && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div className="text-primary text-sm font-medium uppercase tracking-wide">
                 Focus Session Active
               </div>
               <div className="text-6xl md:text-7xl font-bold text-primary">
                 {formatTimerTime(timeRemaining)}
+              </div>
+              <div className="flex justify-center gap-3">
+                <Button
+                  onClick={onPauseTimer}
+                  variant="outline"
+                  className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                >
+                  {timerPaused ? 'Resume' : 'Pause'}
+                </Button>
+                <Button
+                  onClick={onResetTimer}
+                  variant="outline"
+                  className="hover:bg-error/10 hover:text-error hover:border-error/30"
+                >
+                  Reset
+                </Button>
               </div>
             </div>
           )}

@@ -19,22 +19,50 @@ import { useAuth } from "@/hooks/useAuth";
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
+  // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [timerPaused, setTimerPaused] = useState(false);
+  const [selectedSessionDuration, setSelectedSessionDuration] = useState(25 * 60); // 25 minutes default
   const [studyMode, setStudyMode] = useState(false);
   
-  // Update timer state from FocusTimer component
+  // Timer logic - runs independently of which component is displayed
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (typeof window !== 'undefined' && (window as any).timerState) {
-        const { isActive, timeLeft } = (window as any).timerState;
-        setTimerActive(isActive);
-        setTimeRemaining(timeLeft);
-      }
-    }, 1000);
-    
-    return () => clearInterval(interval);
-  }, []);
+    let interval: NodeJS.Timeout | null = null;
+
+    if (timerActive && !timerPaused && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (timeRemaining === 0 && timerActive) {
+      setTimerActive(false);
+      // Timer completed - could trigger notification here
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [timerActive, timerPaused, timeRemaining]);
+
+  // Timer control functions
+  const startTimer = (duration?: number) => {
+    if (duration) {
+      setTimeRemaining(duration);
+      setSelectedSessionDuration(duration);
+    }
+    setTimerActive(true);
+    setTimerPaused(false);
+  };
+
+  const pauseTimer = () => {
+    setTimerPaused(!timerPaused);
+  };
+
+  const resetTimer = () => {
+    setTimerActive(false);
+    setTimerPaused(false);
+    setTimeRemaining(selectedSessionDuration);
+  };
 
   const handleToggleTask = async (taskId: string) => {
     await toggleTask(taskId);
@@ -125,18 +153,15 @@ const Index = () => {
   // If study mode is active, show the StudyMode component
   if (studyMode) {
     return (
-      <>
-        <StudyMode
-          tasks={tasks}
-          timerActive={timerActive}
-          timeRemaining={timeRemaining}
-          onExit={handleExitStudyMode}
-        />
-        {/* Keep FocusTimer running in background for timer state */}
-        <div style={{ display: 'none' }}>
-          <FocusTimer />
-        </div>
-      </>
+      <StudyMode
+        tasks={tasks}
+        timerActive={timerActive}
+        timeRemaining={timeRemaining}
+        timerPaused={timerPaused}
+        onExit={handleExitStudyMode}
+        onPauseTimer={pauseTimer}
+        onResetTimer={resetTimer}
+      />
     );
   }
 
@@ -268,7 +293,14 @@ const Index = () => {
               <Timer className="h-5 w-5 text-primary" />
               <h3 className="text-xl font-semibold text-foreground">Focus Session</h3>
             </div>
-            <FocusTimer />
+            <FocusTimer 
+              timerActive={timerActive}
+              timeRemaining={timeRemaining}
+              timerPaused={timerPaused}
+              onStartTimer={startTimer}
+              onPauseTimer={pauseTimer}
+              onResetTimer={resetTimer}
+            />
           </section>
 
           {/* Quick Stats Footer */}

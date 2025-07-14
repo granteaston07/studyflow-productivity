@@ -15,6 +15,15 @@ interface TimerSession {
   label: string;
 }
 
+interface FocusTimerProps {
+  timerActive: boolean;
+  timeRemaining: number;
+  timerPaused: boolean;
+  onStartTimer: (duration?: number) => void;
+  onPauseTimer: () => void;
+  onResetTimer: () => void;
+}
+
 const AI_SUGGESTED_SESSIONS: TimerSession[] = [
   { type: 'work', duration: 25, label: 'Homework' },
   { type: 'work', duration: 45, label: 'Deep Work' },
@@ -23,63 +32,22 @@ const AI_SUGGESTED_SESSIONS: TimerSession[] = [
   { type: 'break', duration: 15, label: 'Long Break' },
 ];
 
-export function FocusTimer() {
+export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTimer, onPauseTimer, onResetTimer }: FocusTimerProps) {
   const [selectedSession, setSelectedSession] = useState<TimerSession>(AI_SUGGESTED_SESSIONS[0]);
-  const [timeLeft, setTimeLeft] = useState(selectedSession.duration * 60); // in seconds
-  const [isActive, setIsActive] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const [customMinutes, setCustomMinutes] = useState(25);
   const [customType, setCustomType] = useState<'work' | 'break'>('work');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  useEffect(() => {
-    setTimeLeft(selectedSession.duration * 60);
-    setIsActive(false);
-    setIsPaused(false);
-  }, [selectedSession]);
-
-  // Expose timer state to parent component
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      (window as any).timerState = {
-        isActive: isActive && !isPaused,
-        timeLeft
-      };
-    }
-  }, [isActive, isPaused, timeLeft]);
-
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (isActive && !isPaused && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft(timeLeft => timeLeft - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      setIsActive(false);
-      // Timer completed - could trigger notification here
-    } else if (isPaused) {
-      if (interval) clearInterval(interval);
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [isActive, isPaused, timeLeft]);
-
   const toggleTimer = () => {
-    if (!isActive) {
-      setIsActive(true);
-      setIsPaused(false);
+    if (!timerActive) {
+      onStartTimer(selectedSession.duration * 60);
     } else {
-      setIsPaused(!isPaused);
+      onPauseTimer();
     }
   };
 
   const resetTimer = () => {
-    setIsActive(false);
-    setIsPaused(false);
-    setTimeLeft(selectedSession.duration * 60);
+    onResetTimer();
   };
 
   const formatTime = (seconds: number) => {
@@ -90,7 +58,7 @@ export function FocusTimer() {
 
   const getProgress = () => {
     const totalSeconds = selectedSession.duration * 60;
-    return ((totalSeconds - timeLeft) / totalSeconds) * 100;
+    return ((totalSeconds - timeRemaining) / totalSeconds) * 100;
   };
 
   const getSessionIcon = (type: 'work' | 'break') => {
@@ -204,7 +172,7 @@ export function FocusTimer() {
               {selectedSession.label}
             </Badge>
             <div className="text-6xl font-bold text-primary tabular-nums">
-              {formatTime(timeLeft)}
+              {formatTime(timeRemaining)}
             </div>
           </div>
           
@@ -224,7 +192,7 @@ export function FocusTimer() {
             size="lg"
             className="flex items-center gap-2 px-8"
           >
-            {!isActive || isPaused ? (
+            {!timerActive || timerPaused ? (
               <>
                 <Play className="h-5 w-5" />
                 Start
