@@ -23,18 +23,42 @@ const encouragingMessages = [
   "You're building something incredible today 🏗️",
   "Stay curious, stay focused, stay brilliant 🧠",
   "Every expert was once a beginner 🌱",
-  "Your dedication is your superpower 💫"
+  "Your dedication is your superpower 💫",
+  "Consistency is the key to mastery 🔑",
+  "Small daily improvements lead to massive results 🌊",
+  "Your hard work is an investment in your future 💎",
+  "Knowledge grows when shared, keep learning 🌳",
+  "Challenges are opportunities in disguise 🎭",
+  "You're stronger than you think you are 💪",
+  "Every moment of struggle is building character 🏔️",
+  "Success is the sum of small efforts repeated 🔄",
+  "Your potential is unlimited, keep pushing 🚀",
+  "Today's effort is tomorrow's strength 💪",
+  "Focus on the process, not just the outcome 🎯",
+  "You're writing your success story right now ✍️",
+  "Persistence beats resistance every time 🏃‍♂️",
+  "Your mind is your most powerful tool 🧠",
+  "Every study session makes you smarter 📖",
+  "You're investing in the best version of yourself 💫",
+  "Knowledge is power, and you're gaining it 🔋",
+  "Your effort today shapes your tomorrow 🌅",
+  "Stay focused, stay determined, stay amazing 🔥",
+  "You're capable of more than you realize 🌟",
+  "Learning never stops, and neither do you 🔄",
+  "Your dedication inspires others around you 👥",
+  "Every challenge overcome makes you stronger 💪",
+  "You're building habits that will last a lifetime 🏗️"
 ];
 
 export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyModeProps) => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Rotate messages every 10 seconds
+  // Rotate messages every 1 minute
   useEffect(() => {
     const messageInterval = setInterval(() => {
       setCurrentMessage((prev) => (prev + 1) % encouragingMessages.length);
-    }, 10000);
+    }, 60000);
 
     return () => clearInterval(messageInterval);
   }, []);
