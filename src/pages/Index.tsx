@@ -73,12 +73,19 @@ const Index = () => {
   }
 
   const activeTasks = tasks.filter(task => !task.completed);
-  const overdueTasks = tasks.filter(task => task.status === 'overdue');
+  
+  // Check for overdue tasks by comparing due date to current time
+  const now = new Date();
+  const overdueTasks = tasks.filter(task => {
+    if (!task.dueDate || task.completed) return false;
+    return task.dueDate < now;
+  });
+  
   const todayTasks = tasks.filter(task => {
-    if (!task.dueDate) return false;
+    if (!task.dueDate || task.completed) return false;
     const today = new Date();
     const taskDate = task.dueDate;
-    return taskDate.toDateString() === today.toDateString();
+    return taskDate.toDateString() === today.toDateString() && task.dueDate >= now;
   });
 
   return (

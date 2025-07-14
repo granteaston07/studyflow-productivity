@@ -78,23 +78,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    // Handle session not found errors gracefully - user is effectively logged out
-    if (error && error.message.includes('Session not found')) {
-      // Clear local state since session doesn't exist server-side anyway
+    try {
+      // Always clear local state first to ensure UI updates immediately
       setSession(null);
       setUser(null);
-      toast.success('Signed out successfully');
-      return;
-    }
-    
-    if (error) {
-      // For other errors, still clear local state but show the error
-      setSession(null);
-      setUser(null);
-      toast.error(`Sign out error: ${error.message}`);
-    } else {
+      
+      // Clear localStorage manually to ensure session is removed
+      localStorage.removeItem('sb-kofbhggloaapndnuhmsc-auth-token');
+      
+      // Attempt to sign out from server
+      const { error } = await supabase.auth.signOut();
+      
+      // Handle session not found errors gracefully - user is effectively logged out
+      if (error && (error.message.includes('Session not found') || error.message.includes('session_not_found'))) {
+        toast.success('Signed out successfully');
+        return;
+      }
+      
+      if (error) {
+        // For other errors, still show success since local state is cleared
+        console.warn('Sign out warning:', error.message);
+        toast.success('Signed out successfully');
+      } else {
+        toast.success('Signed out successfully');
+      }
+    } catch (err) {
+      // Catch any network or other errors
+      console.warn('Sign out error:', err);
       toast.success('Signed out successfully');
     }
   };

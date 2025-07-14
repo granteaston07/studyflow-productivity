@@ -34,19 +34,36 @@ export function useTasks() {
 
       if (error) throw error;
 
-      const formattedTasks: Task[] = data.map(task => ({
-        id: task.id,
-        title: task.title,
-        subject: task.subject || '',
-        description: task.description,
-        dueDate: task.due_date ? new Date(task.due_date) : undefined,
-        completed: task.completed,
-        priority: task.priority as Task['priority'],
-        status: task.status as Task['status'],
-        completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
-        createdAt: new Date(task.created_at),
-        updatedAt: new Date(task.updated_at)
-      }));
+      const now = new Date();
+      const formattedTasks: Task[] = data.map(task => {
+        const dueDate = task.due_date ? new Date(task.due_date) : undefined;
+        let status = task.status as Task['status'];
+        
+        // Auto-update overdue status based on due date
+        if (!task.completed && dueDate && dueDate < now && status !== 'overdue') {
+          status = 'overdue';
+          // Update in database asynchronously (fire and forget)
+          supabase
+            .from('tasks')
+            .update({ status: 'overdue' })
+            .eq('id', task.id)
+            .then(() => {});
+        }
+        
+        return {
+          id: task.id,
+          title: task.title,
+          subject: task.subject || '',
+          description: task.description,
+          dueDate,
+          completed: task.completed,
+          priority: task.priority as Task['priority'],
+          status,
+          completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
+          createdAt: new Date(task.created_at),
+          updatedAt: new Date(task.updated_at)
+        };
+      });
 
       setTasks(formattedTasks);
     } catch (error: any) {
