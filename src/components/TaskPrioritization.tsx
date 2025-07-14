@@ -1,5 +1,6 @@
-import { Brain, Sparkles, Clock, AlertTriangle, TrendingUp } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { Brain, Sparkles, Clock, AlertTriangle, TrendingUp, ChevronDown } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Task } from "./TaskCard";
@@ -17,6 +18,7 @@ interface AIRecommendation {
 }
 
 export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
   // AI-powered task analysis
   const analyzeTaskPriority = (task: Task): AIRecommendation => {
     let score = 0;
@@ -126,116 +128,71 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     }
   };
 
-  if (recommendations.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-ai-primary" />
-            AI Task Prioritization
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="text-center py-8">
-          <Sparkles className="h-12 w-12 text-ai-primary mx-auto mb-4 opacity-50" />
-          <p className="text-muted-foreground">
-            All caught up! Add some tasks to get AI-powered recommendations.
-          </p>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-ai-primary" />
-          AI Task Prioritization
-          <Badge variant="secondary" className="bg-ai-primary/20 text-ai-primary">
-            <Sparkles className="h-3 w-3 mr-1" />
-            AI Powered
-          </Badge>
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Smart recommendations based on deadlines, complexity, and your schedule
-        </p>
+    <Card className="bg-card/50 border-ai-accent/20">
+      <CardHeader className="pb-3">
+        <Button
+          variant="ghost"
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="flex items-center justify-between w-full p-0 h-auto hover:bg-transparent"
+        >
+          <div className="flex items-center gap-2">
+            <Brain className="h-4 w-4 text-ai-primary" />
+            <span className="font-medium">AI Recommendations</span>
+            <Badge variant="secondary" className="text-xs bg-ai-primary/20 text-ai-primary">
+              {recommendations.length}
+            </Badge>
+          </div>
+          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+        </Button>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {recommendations.map((rec, index) => (
-          <div 
-            key={rec.task.id} 
-            className="p-4 rounded-lg border bg-card hover:bg-muted/50 transition-colors"
-          >
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div className="flex items-center gap-2">
-                <div className="bg-ai-primary/20 text-ai-primary px-2 py-1 rounded text-xs font-bold">
-                  #{index + 1}
+      
+      {isExpanded && (
+        <CardContent className="pt-0">
+          <div className="space-y-3">
+            {recommendations.slice(0, 3).map((rec, index) => (
+              <div key={rec.task.id} className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+                <div className="flex-shrink-0">
+                  <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    rec.urgencyLevel === 'critical' || rec.urgencyLevel === 'high' ? 'bg-error text-error-foreground' :
+                    rec.urgencyLevel === 'medium' ? 'bg-warning text-warning-foreground' :
+                    'bg-success text-success-foreground'
+                  }`}>
+                    {index + 1}
+                  </div>
                 </div>
-                <Badge 
-                  variant="outline" 
-                  className={`text-xs ${getUrgencyColor(rec.urgencyLevel)}`}
-                >
-                  {getUrgencyIcon(rec.urgencyLevel)}
-                  {rec.urgencyLevel.toUpperCase()}
-                </Badge>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h4 className="font-medium text-foreground truncate text-sm">{rec.task.title}</h4>
+                    {rec.task.subject && (
+                      <Badge variant="secondary" className="shrink-0 text-xs">
+                        {rec.task.subject}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mb-1">
+                    <div className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      <span>{rec.estimatedDuration}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <AlertTriangle className={`h-3 w-3 ${
+                        rec.urgencyLevel === 'critical' || rec.urgencyLevel === 'high' ? 'text-error' :
+                        rec.urgencyLevel === 'medium' ? 'text-warning' : 'text-success'
+                      }`} />
+                      <span className="capitalize">{rec.urgencyLevel}</span>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-muted-foreground">{rec.reasons[0]}</p>
+                </div>
               </div>
-              <div className="text-right">
-                <div className="text-sm font-medium text-ai-primary">
-                  Score: {rec.score}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  Est. {rec.estimatedDuration}
-                </div>
-              </div>
-            </div>
-            
-            <h4 className="font-medium text-foreground mb-2 leading-tight">
-              {rec.task.title}
-            </h4>
-            
-            <div className="space-y-2">
-              {rec.reasons.map((reason, idx) => (
-                <div key={idx} className="text-xs text-muted-foreground flex items-center gap-1">
-                  <div className="w-1 h-1 bg-ai-primary rounded-full"></div>
-                  {reason}
-                </div>
-              ))}
-            </div>
-            
-            <div className="flex items-center justify-between mt-3 pt-3 border-t border-border">
-              <div className="flex items-center gap-2">
-                {rec.task.subject && (
-                  <Badge variant="outline" className="text-xs">
-                    {rec.task.subject}
-                  </Badge>
-                )}
-                {rec.task.dueDate && (
-                  <span className="text-xs text-muted-foreground">
-                    Due {new Date(rec.task.dueDate).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric' 
-                    })}
-                  </span>
-                )}
-              </div>
-              <Button size="sm" variant="outline" className="text-xs">
-                Start Now
-              </Button>
-            </div>
+            ))}
           </div>
-        ))}
-        
-        <div className="mt-6 p-4 bg-ai-primary/10 rounded-lg border border-ai-primary/20">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-ai-primary" />
-            <span className="text-sm font-medium text-ai-primary">AI Productivity Tip</span>
-          </div>
-          <p className="text-xs text-muted-foreground">
-            Start with your highest-scored task to maximize productivity. 
-            The AI considers deadlines, complexity, and task momentum for optimal scheduling.
-          </p>
-        </div>
-      </CardContent>
+        </CardContent>
+      )}
     </Card>
   );
 }

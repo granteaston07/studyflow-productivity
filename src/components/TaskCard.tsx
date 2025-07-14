@@ -22,9 +22,10 @@ interface TaskCardProps {
   task: Task;
   onToggle: (id: string) => void;
   onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
+  onUpdateStatus: (id: string, status: Task['status']) => void;
 }
 
-export function TaskCard({ task, onToggle, onUpdateDueDate }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus }: TaskCardProps) {
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
       case 'completed':
@@ -78,7 +79,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate }: TaskCardProps) {
         <Checkbox
           checked={task.completed}
           onCheckedChange={() => onToggle(task.id)}
-          className="mt-1"
+          className="mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success"
         />
         
         <div className="flex-1 space-y-2">
@@ -94,9 +95,17 @@ export function TaskCard({ task, onToggle, onUpdateDueDate }: TaskCardProps) {
               <Badge
                 variant="secondary"
                 className={cn(
-                  "text-xs font-medium px-2 py-1 shrink-0",
-                  getStatusColor(task.status)
+                  "text-xs font-medium px-2 py-1 shrink-0 cursor-pointer transition-opacity",
+                  getStatusColor(task.status),
+                  (task.status === 'pending' || task.status === 'in-progress') && "hover:opacity-80"
                 )}
+                onClick={() => {
+                  if (task.status === 'pending') {
+                    onUpdateStatus(task.id, 'in-progress');
+                  } else if (task.status === 'in-progress') {
+                    onUpdateStatus(task.id, 'pending');
+                  }
+                }}
               >
                 <span className="flex items-center gap-1">
                   {getStatusIcon(task.status)}

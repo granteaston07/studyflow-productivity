@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { GraduationCap, CheckSquare, Timer, Brain, ExternalLink } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskForm } from "@/components/AddTaskForm";
@@ -6,6 +6,7 @@ import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { FocusTimer } from "@/components/FocusTimer";
 import { StudyLinks } from "@/components/StudyLinks";
+import { FloatingStatus } from "@/components/FloatingStatus";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -60,6 +61,8 @@ const INITIAL_TASKS: Task[] = [
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [timerActive, setTimerActive] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(0);
 
   const handleToggleTask = (taskId: string) => {
     setTasks(prevTasks =>
@@ -97,6 +100,14 @@ const Index = () => {
     };
     setTasks(prevTasks => [newTask, ...prevTasks]);
     setShowAddForm(false);
+  };
+
+  const handleUpdateStatus = (taskId: string, status: Task['status']) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, status } : task
+      )
+    );
   };
 
   const activeTasks = tasks.filter(task => !task.completed);
@@ -153,15 +164,6 @@ const Index = () => {
             </p>
           </div>
 
-          {/* AI Task Prioritization */}
-          <section>
-            <div className="flex items-center gap-2 mb-6">
-              <Brain className="h-5 w-5 text-ai-primary" />
-              <h3 className="text-xl font-semibold text-foreground">AI Recommendations</h3>
-            </div>
-            <TaskPrioritization tasks={tasks} />
-          </section>
-
           {/* Tasks Section */}
           <section className="space-y-6">
             <div className="flex items-center justify-between">
@@ -197,23 +199,32 @@ const Index = () => {
                     task={task}
                     onToggle={handleToggleTask}
                     onUpdateDueDate={handleUpdateDueDate}
+                    onUpdateStatus={handleUpdateStatus}
                   />
                 ))
               )}
             </div>
           </section>
 
+          {/* AI Task Prioritization */}
+          <section>
+            <TaskPrioritization tasks={tasks} />
+          </section>
+
+
           {/* Two Column Layout for Progress and Study Links */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Progress Tracker */}
-            <ProgressTracker tasks={tasks} />
+            <div id="progress-tracker">
+              <ProgressTracker tasks={tasks} />
+            </div>
             
             {/* Study Links */}
             <StudyLinks />
           </div>
 
           {/* Focus Timer */}
-          <section>
+          <section id="focus-timer">
             <div className="flex items-center gap-2 mb-6">
               <Timer className="h-5 w-5 text-primary" />
               <h3 className="text-xl font-semibold text-foreground">Focus Session</h3>
@@ -250,6 +261,13 @@ const Index = () => {
           </footer>
         </div>
       </main>
+      
+      {/* Floating Status Window */}
+      <FloatingStatus 
+        tasks={tasks} 
+        timerActive={timerActive} 
+        timeRemaining={timeRemaining} 
+      />
     </div>
   );
 };
