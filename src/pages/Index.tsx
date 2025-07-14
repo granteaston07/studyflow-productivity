@@ -9,7 +9,7 @@ import { StudyLinks } from "@/components/StudyLinks";
 import { QuickNotes } from "@/components/QuickNotes";
 import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { TasklyLogo } from "@/components/TasklyLogo";
+import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -181,10 +181,10 @@ const Index = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="p-2">
-                <TasklyLogo size={48} />
+                <StudyFlowLogo size={48} />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-foreground">Taskly</h1>
+                <h1 className="text-xl font-bold text-foreground">StudyFlow</h1>
                 <p className="text-sm text-muted-foreground">AI-Powered Student Productivity</p>
               </div>
             </div>
@@ -361,7 +361,7 @@ const Index = () => {
                 
                 <div className="text-xs text-muted-foreground leading-relaxed max-w-4xl mx-auto">
                   <p className="mb-2">
-                    Taskly is committed to protecting your privacy and ensuring the security of your personal data. 
+                    StudyFlow is committed to protecting your privacy and ensuring the security of your personal data. 
                     We collect and process information in accordance with applicable data protection laws.
                   </p>
                   <p className="mb-2">
@@ -369,13 +369,13 @@ const Index = () => {
                     information with third parties without your explicit consent, except as required by law.
                   </p>
                   <p>
-                    By using Taskly, you agree to our Terms of Service and Privacy Policy. 
+                    By using StudyFlow, you agree to our Terms of Service and Privacy Policy. 
                     If you have questions about data handling, please contact us.
                   </p>
                 </div>
                 
                 <div className="text-xs text-muted-foreground/80">
-                  <p>© 2025 Taskly. All Rights Reserved.</p>
+                  <p>© 2025 StudyFlow. All Rights Reserved.</p>
                   <p className="mt-1">Educational use only. Not affiliated with any educational institution.</p>
                 </div>
               </div>

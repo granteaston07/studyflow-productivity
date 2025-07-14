@@ -1,6 +1,6 @@
 import { Check } from "lucide-react";
 
-export function TasklyLogo({ size = 32 }: { size?: number }) {
+export function StudyFlowLogo({ size = 32 }: { size?: number }) {
   return (
     <div 
       className="relative bg-gradient-to-br from-card to-card/90 border-2 border-border rounded-lg shadow-sm flex flex-col overflow-hidden"
