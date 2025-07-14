@@ -90,8 +90,8 @@ export function useTasks() {
         description: data.description,
         dueDate: data.due_date ? new Date(data.due_date) : undefined,
         completed: data.completed,
-        priority: data.priority,
-        status: data.status,
+        priority: data.priority as Task['priority'],
+        status: data.status as Task['status'],
         completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at)
