@@ -128,7 +128,7 @@ const Index = () => {
           {/* Welcome Section */}
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
-              Welcome back! Let's stay productive.
+              Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! Let's stay productive.
             </h2>
             <p className="text-muted-foreground">
               You have {activeTasks.length} active tasks • AI recommendations ready
