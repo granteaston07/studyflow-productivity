@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Brain, CheckSquare, Timer, Plus } from "lucide-react";
+import { Brain, CheckSquare, Timer, Plus, LogOut } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
 import { TaskPrioritization } from "@/components/TaskPrioritization";
@@ -11,11 +11,12 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TasklyLogo } from "@/components/TasklyLogo";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, signOut } = useAuth();
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -108,6 +109,14 @@ const Index = () => {
                 </Badge>
               )}
               <ThemeToggle />
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => signOut()}
+                className="hover:bg-error/10 hover:text-error hover:border-error/30"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
