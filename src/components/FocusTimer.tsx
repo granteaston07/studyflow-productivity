@@ -23,6 +23,8 @@ interface FocusTimerProps {
   onUpdateDuration: (duration: number) => void;
   onPauseTimer: () => void;
   onResetTimer: () => void;
+  selectedSession?: TimerSession;
+  onSessionChange?: (session: TimerSession) => void;
 }
 
 const AI_SUGGESTED_SESSIONS: TimerSession[] = [
@@ -33,18 +35,26 @@ const AI_SUGGESTED_SESSIONS: TimerSession[] = [
   { type: 'break', duration: 15, label: 'Long Break' },
 ];
 
-export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer }: FocusTimerProps) {
-  const [selectedSession, setSelectedSession] = useState<TimerSession>(AI_SUGGESTED_SESSIONS[0]);
+export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer, selectedSession: parentSelectedSession, onSessionChange }: FocusTimerProps) {
+  const [selectedSession, setSelectedSession] = useState<TimerSession>(parentSelectedSession || AI_SUGGESTED_SESSIONS[0]);
   const [customMinutes, setCustomMinutes] = useState(25);
   const [customType, setCustomType] = useState<'work' | 'break'>('work');
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Update local state when parent session changes
+  useEffect(() => {
+    if (parentSelectedSession) {
+      setSelectedSession(parentSelectedSession);
+    }
+  }, [parentSelectedSession]);
 
   // Update parent timer when session changes (only if timer is not active)
   useEffect(() => {
     if (!timerActive || timerPaused) {
       onUpdateDuration(selectedSession.duration * 60);
+      onSessionChange?.(selectedSession);
     }
-  }, [selectedSession, onUpdateDuration, timerActive, timerPaused]);
+  }, [selectedSession, onUpdateDuration, onSessionChange, timerActive, timerPaused]);
 
   const toggleTimer = () => {
     if (!timerActive) {

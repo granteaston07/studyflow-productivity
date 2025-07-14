@@ -24,6 +24,7 @@ const Index = () => {
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [timerPaused, setTimerPaused] = useState(false);
   const [selectedSessionDuration, setSelectedSessionDuration] = useState(25 * 60); // 25 minutes default
+  const [selectedSession, setSelectedSession] = useState<any>({ type: 'work', duration: 25, label: 'Homework' });
   const [studyMode, setStudyMode] = useState(false);
   
   // Timer logic - runs independently of which component is displayed
@@ -308,6 +309,8 @@ const Index = () => {
               onUpdateDuration={updateTimerDuration}
               onPauseTimer={pauseTimer}
               onResetTimer={resetTimer}
+              selectedSession={selectedSession}
+              onSessionChange={setSelectedSession}
             />
           </section>
 
