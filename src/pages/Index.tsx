@@ -11,56 +11,8 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 
-const INITIAL_TASKS: Task[] = [
-  {
-    id: '1',
-    title: 'Complete Math Homework - Chapter 5 Exercises',
-    subject: 'Math',
-    dueDate: new Date(2024, 11, 16), // Tomorrow
-    completed: false,
-    priority: 'high',
-    status: 'pending'
-  },
-  {
-    id: '2',
-    title: 'Study for History Quiz on World War II',
-    subject: 'History',
-    dueDate: new Date(2024, 11, 18),
-    completed: false,
-    priority: 'high',
-    status: 'in-progress'
-  },
-  {
-    id: '3',
-    title: 'Write English Essay - Book Report',
-    subject: 'English',
-    dueDate: new Date(2024, 11, 20),
-    completed: false,
-    priority: 'medium',
-    status: 'pending'
-  },
-  {
-    id: '4',
-    title: 'Science Lab Report - Chemical Reactions',
-    subject: 'Science',
-    dueDate: new Date(2024, 11, 14), // Yesterday - overdue
-    completed: false,
-    priority: 'high',
-    status: 'overdue'
-  },
-  {
-    id: '5',
-    title: 'Read Chapter 3 of Biology Textbook',
-    subject: 'Science',
-    dueDate: new Date(2024, 11, 15), // Today
-    completed: true,
-    priority: 'medium',
-    status: 'completed'
-  }
-];
-
 const Index = () => {
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   
@@ -271,9 +223,14 @@ const Index = () => {
             </div>
             
             <div className="text-center mt-8 pt-6 border-t border-border">
-              <p className="text-sm text-muted-foreground">
-                Built with ❤️ for students • Made in 2025
-              </p>
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-sm font-medium text-foreground">Built for Students</p>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Made in 2025</span>
+                  <span>•</span>
+                  <span>Created by Grant Easton</span>
+                </div>
+              </div>
             </div>
           </footer>
         </div>

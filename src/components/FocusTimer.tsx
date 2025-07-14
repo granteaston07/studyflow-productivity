@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
-import { Play, Pause, RotateCcw, Coffee, Brain } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface TimerSession {
   type: 'work' | 'break';
@@ -24,6 +28,9 @@ export function FocusTimer() {
   const [timeLeft, setTimeLeft] = useState(selectedSession.duration * 60); // in seconds
   const [isActive, setIsActive] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [customMinutes, setCustomMinutes] = useState(25);
+  const [customType, setCustomType] = useState<'work' | 'break'>('work');
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     setTimeLeft(selectedSession.duration * 60);
@@ -94,6 +101,16 @@ export function FocusTimer() {
     return type === 'work' ? 'text-primary bg-primary-light' : 'text-success bg-success-light';
   };
 
+  const handleCustomTimer = () => {
+    const customSession: TimerSession = {
+      type: customType,
+      duration: customMinutes,
+      label: `Custom ${customType === 'work' ? 'Focus' : 'Break'}`
+    };
+    setSelectedSession(customSession);
+    setDialogOpen(false);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -105,7 +122,50 @@ export function FocusTimer() {
       <CardContent className="space-y-6">
         {/* AI Suggested Sessions */}
         <div className="space-y-3">
-          <p className="text-sm font-medium text-foreground">AI Suggested Sessions</p>
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-foreground">AI Suggested Sessions</p>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="flex items-center gap-2">
+                  <Plus className="h-4 w-4" />
+                  Custom
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create Custom Timer</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="timer-type">Timer Type</Label>
+                    <Select value={customType} onValueChange={(value) => setCustomType(value as 'work' | 'break')}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="work">Focus Session</SelectItem>
+                        <SelectItem value="break">Break Time</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="timer-minutes">Duration (minutes)</Label>
+                    <Input
+                      id="timer-minutes"
+                      type="number"
+                      min="1"
+                      max="180"
+                      value={customMinutes}
+                      onChange={(e) => setCustomMinutes(parseInt(e.target.value) || 1)}
+                    />
+                  </div>
+                  <Button onClick={handleCustomTimer} className="w-full">
+                    Create Timer
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
           <div className="flex flex-wrap gap-2">
             {AI_SUGGESTED_SESSIONS.map((session, index) => {
               const Icon = getSessionIcon(session.type);
