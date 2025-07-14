@@ -1,58 +1,64 @@
 import { Check } from "lucide-react";
 
 export function TasklyLogo({ size = 32 }: { size?: number }) {
-  const clipboardWidth = size;
-  const clipboardHeight = size * 1.2;
-  const clipWidth = size * 0.4;
-  const clipHeight = size * 0.15;
-  
   return (
-    <div className="relative" style={{ width: clipboardWidth, height: clipboardHeight }}>
-      {/* Clipboard Base */}
-      <div 
-        className="absolute bg-gradient-to-br from-card to-card/90 border-2 border-border rounded-lg shadow-sm"
-        style={{
-          width: clipboardWidth,
-          height: clipboardHeight,
-          top: clipHeight * 0.5
-        }}
-      />
-      
+    <div 
+      className="relative bg-gradient-to-br from-card to-card/90 border-2 border-border rounded-lg shadow-sm flex flex-col overflow-hidden"
+      style={{ width: size, height: size }}
+    >
       {/* Clipboard Clip */}
       <div 
         className="absolute bg-gradient-to-br from-primary to-primary-dark rounded-sm shadow-md"
         style={{
-          width: clipWidth,
-          height: clipHeight,
-          left: (clipboardWidth - clipWidth) / 2,
-          top: 0
+          width: size * 0.35,
+          height: size * 0.12,
+          left: size * 0.325,
+          top: -size * 0.06
         }}
       />
       
       {/* Todo List Items with Checkmarks */}
-      <div className="absolute inset-0 flex flex-col justify-center items-start pl-2" style={{ paddingTop: clipHeight }}>
+      <div className="flex-1 flex flex-col justify-center px-1.5 py-1" style={{ paddingTop: size * 0.15 }}>
         {/* First checkmark */}
         <div className="flex items-center gap-1 mb-0.5">
-          <div className="w-2 h-2 rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-            <Check className="w-1 h-1 text-primary-foreground" strokeWidth={3} />
+          <div 
+            className="rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0"
+            style={{ width: size * 0.15, height: size * 0.15 }}
+          >
+            <Check className="text-primary-foreground" style={{ width: size * 0.08, height: size * 0.08 }} strokeWidth={3} />
           </div>
-          <div className="w-3 h-0.5 bg-muted-foreground/60 rounded-full" />
+          <div 
+            className="bg-muted-foreground/60 rounded-full flex-shrink-0"
+            style={{ width: size * 0.3, height: size * 0.04 }}
+          />
         </div>
         
         {/* Second checkmark */}
         <div className="flex items-center gap-1 mb-0.5">
-          <div className="w-2 h-2 rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-            <Check className="w-1 h-1 text-primary-foreground" strokeWidth={3} />
+          <div 
+            className="rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0"
+            style={{ width: size * 0.15, height: size * 0.15 }}
+          >
+            <Check className="text-primary-foreground" style={{ width: size * 0.08, height: size * 0.08 }} strokeWidth={3} />
           </div>
-          <div className="w-4 h-0.5 bg-muted-foreground/60 rounded-full" />
+          <div 
+            className="bg-muted-foreground/60 rounded-full flex-shrink-0"
+            style={{ width: size * 0.35, height: size * 0.04 }}
+          />
         </div>
         
         {/* Third checkmark */}
         <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-            <Check className="w-1 h-1 text-primary-foreground" strokeWidth={3} />
+          <div 
+            className="rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0"
+            style={{ width: size * 0.15, height: size * 0.15 }}
+          >
+            <Check className="text-primary-foreground" style={{ width: size * 0.08, height: size * 0.08 }} strokeWidth={3} />
           </div>
-          <div className="w-2.5 h-0.5 bg-muted-foreground/60 rounded-full" />
+          <div 
+            className="bg-muted-foreground/60 rounded-full flex-shrink-0"
+            style={{ width: size * 0.25, height: size * 0.04 }}
+          />
         </div>
       </div>
     </div>
