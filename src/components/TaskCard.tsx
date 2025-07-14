@@ -1,4 +1,4 @@
-import { Check, Clock, AlertTriangle, Calendar, Edit } from "lucide-react";
+import { Check, Clock, AlertTriangle, Calendar, Edit, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -23,9 +23,10 @@ interface TaskCardProps {
   onToggle: (id: string) => void;
   onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
   onUpdateStatus: (id: string, status: Task['status']) => void;
+  onDelete: (id: string) => void;
 }
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete }: TaskCardProps) {
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
       case 'completed':
@@ -74,7 +75,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus }: Ta
   };
 
   return (
-    <Card className="p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm">
+    <Card className="p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover-scale">
       <div className="flex items-start gap-3">
         <Checkbox
           checked={task.completed}
@@ -147,6 +148,16 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus }: Ta
                   </div>
                 </PopoverContent>
               </Popover>
+              
+              {/* Delete Task Button */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onDelete(task.id)}
+                className="h-6 w-6 p-0 text-muted-foreground hover:text-error"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
             </div>
           </div>
           

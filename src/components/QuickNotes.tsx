@@ -47,7 +47,7 @@ export function QuickNotes() {
             placeholder="Jot down a quick note..."
             value={newNote}
             onChange={(e) => setNewNote(e.target.value)}
-            className="resize-none h-20 text-sm"
+            className="resize-none h-16 text-sm"
           />
           <Button 
             onClick={addNote} 
@@ -61,7 +61,7 @@ export function QuickNotes() {
         </div>
 
         {/* Notes List */}
-        <div className="space-y-2 max-h-32 overflow-y-auto">
+        <div className="space-y-2 max-h-24 overflow-y-auto">
           {notes.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-2">
               No notes yet. Add your first note above!

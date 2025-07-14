@@ -121,6 +121,10 @@ const Index = () => {
     );
   };
 
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  };
+
   const activeTasks = tasks.filter(task => !task.completed);
   const overdueTasks = tasks.filter(task => task.status === 'overdue');
   const todayTasks = tasks.filter(task => {
@@ -204,9 +208,10 @@ const Index = () => {
                     <TaskCard
                       key={task.id}
                       task={task}
-                      onToggle={handleToggleTask}
-                      onUpdateDueDate={handleUpdateDueDate}
-                      onUpdateStatus={handleUpdateStatus}
+                    onToggle={handleToggleTask}
+                    onUpdateDueDate={handleUpdateDueDate}
+                    onUpdateStatus={handleUpdateStatus}
+                    onDelete={handleDeleteTask}
                     />
                   ))
               )}
