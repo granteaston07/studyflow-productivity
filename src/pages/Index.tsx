@@ -6,6 +6,7 @@ import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { FocusTimer } from "@/components/FocusTimer";
 import { StudyLinks } from "@/components/StudyLinks";
+import { AIStudySuggestions } from "@/components/AIStudySuggestions";
 import { FloatingStatus } from "@/components/FloatingStatus";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +15,7 @@ const INITIAL_TASKS: Task[] = [
   {
     id: '1',
     title: 'Complete Math Homework - Chapter 5 Exercises',
-    subject: 'Mathematics',
+    subject: 'Math',
     dueDate: new Date(2024, 11, 16), // Tomorrow
     completed: false,
     priority: 'high',
@@ -63,6 +64,19 @@ const Index = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  
+  // Update timer state from FocusTimer component
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof window !== 'undefined' && (window as any).timerState) {
+        const { isActive, timeLeft } = (window as any).timerState;
+        setTimerActive(isActive);
+        setTimeRemaining(timeLeft);
+      }
+    }, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   const handleToggleTask = (taskId: string) => {
     setTasks(prevTasks =>
@@ -193,15 +207,22 @@ const Index = () => {
                   <p>No tasks yet. Add your first task to get started!</p>
                 </div>
               ) : (
-                tasks.map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onToggle={handleToggleTask}
-                    onUpdateDueDate={handleUpdateDueDate}
-                    onUpdateStatus={handleUpdateStatus}
-                  />
-                ))
+                [...tasks]
+                  .sort((a, b) => {
+                    // Sort completed tasks to bottom
+                    if (a.completed && !b.completed) return 1;
+                    if (!a.completed && b.completed) return -1;
+                    return 0;
+                  })
+                  .map(task => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onToggle={handleToggleTask}
+                      onUpdateDueDate={handleUpdateDueDate}
+                      onUpdateStatus={handleUpdateStatus}
+                    />
+                  ))
               )}
             </div>
           </section>
@@ -219,8 +240,11 @@ const Index = () => {
               <ProgressTracker tasks={tasks} />
             </div>
             
-            {/* Study Links */}
-            <StudyLinks />
+            {/* Study Links and AI Suggestions Column */}
+            <div className="space-y-8">
+              <StudyLinks />
+              <AIStudySuggestions tasks={tasks} />
+            </div>
           </div>
 
           {/* Focus Timer */}

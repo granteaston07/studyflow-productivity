@@ -48,16 +48,12 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   };
 
   const subjects = [
-    'Mathematics',
+    'Math',
     'Science',
     'English',
+    'Spanish',
     'History',
-    'Art',
-    'Physical Education',
-    'Music',
-    'Computer Science',
-    'Foreign Language',
-    'Other'
+    'Personal'
   ];
 
   return (

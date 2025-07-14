@@ -31,6 +31,16 @@ export function FocusTimer() {
     setIsPaused(false);
   }, [selectedSession]);
 
+  // Expose timer state to parent component
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).timerState = {
+        isActive: isActive && !isPaused,
+        timeLeft
+      };
+    }
+  }, [isActive, isPaused, timeLeft]);
+
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null;
 

@@ -19,6 +19,7 @@ interface AIRecommendation {
 
 export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  
   // AI-powered task analysis
   const analyzeTaskPriority = (task: Task): AIRecommendation => {
     let score = 0;
@@ -58,7 +59,7 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     }
     
     // Subject-based complexity estimation
-    const complexSubjects = ['Mathematics', 'Science', 'Computer Science'];
+    const complexSubjects = ['Math', 'Science'];
     const mediumSubjects = ['English', 'History'];
     
     let estimatedDuration = "30-45 min";
@@ -129,29 +130,44 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
   };
 
   return (
-    <Card className="bg-card/50 border-ai-accent/20">
+    <Card className="bg-gradient-to-br from-ai-primary/5 via-primary/5 to-ai-secondary/5 border-ai-primary/30 backdrop-blur-sm">
       <CardHeader className="pb-3">
         <Button
           variant="ghost"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center justify-between w-full p-0 h-auto hover:bg-transparent"
+          className="flex items-center justify-between w-full p-0 h-auto hover:bg-ai-primary/10 rounded-lg transition-all duration-200"
         >
-          <div className="flex items-center gap-2">
-            <Brain className="h-4 w-4 text-ai-primary" />
-            <span className="font-medium">AI Recommendations</span>
-            <Badge variant="secondary" className="text-xs bg-ai-primary/20 text-ai-primary">
-              {recommendations.length}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Brain className="h-5 w-5 text-ai-primary" />
+              <Sparkles className="h-3 w-3 text-ai-secondary absolute -top-1 -right-1 animate-pulse" />
+            </div>
+            <div className="flex flex-col items-start">
+              <span className="font-semibold text-foreground">AI Task Intelligence</span>
+              <span className="text-xs text-muted-foreground">Smart prioritization powered by AI</span>
+            </div>
+            <Badge variant="secondary" className="text-xs bg-gradient-to-r from-ai-primary/20 to-ai-secondary/20 text-ai-primary border-ai-primary/30">
+              {recommendations.length} insights
             </Badge>
           </div>
-          <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 text-ai-primary transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
         </Button>
       </CardHeader>
       
       {isExpanded && (
         <CardContent className="pt-0">
+          <div className="mb-4 p-3 rounded-lg bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 border border-ai-primary/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Brain className="h-4 w-4 text-ai-primary" />
+              <span className="text-sm font-medium text-foreground">AI Analysis Complete</span>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Based on deadlines, complexity, and your work patterns, here are the optimal tasks to focus on:
+            </p>
+          </div>
           <div className="space-y-3">
             {recommendations.slice(0, 3).map((rec, index) => (
-              <div key={rec.task.id} className="flex items-start gap-3 p-3 rounded-lg bg-background/50 border border-border/50">
+              <div key={rec.task.id} className="group flex items-start gap-3 p-4 rounded-lg bg-gradient-to-r from-card/80 to-card/60 border border-ai-primary/20 hover:border-ai-primary/40 transition-all duration-200 hover:shadow-md">
                 <div className="flex-shrink-0">
                   <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
                     rec.urgencyLevel === 'critical' || rec.urgencyLevel === 'high' ? 'bg-error text-error-foreground' :
