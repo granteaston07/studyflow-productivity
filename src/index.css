@@ -7,6 +7,73 @@ All colors MUST be HSL for consistency */
 
 @layer base {
   :root {
+    /* Light mode core backgrounds - WHITE */
+    --background: 0 0% 100%;
+    --foreground: 222 84% 5%;
+    --surface: 0 0% 98%;
+
+    /* Card components */
+    --card: 0 0% 100%;
+    --card-foreground: 222 84% 5%;
+
+    /* Interactive elements */
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 84% 5%;
+
+    /* Primary brand - Electric Blue */
+    --primary: 217 91% 55%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 217 91% 85%;
+    --primary-dark: 217 91% 35%;
+
+    /* Task status colors - Light mode optimized */
+    --success: 142 69% 45%;
+    --success-foreground: 0 0% 100%;
+    --success-light: 142 69% 90%;
+    
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%; 
+    --warning-light: 38 92% 90%;
+    
+    --error: 0 84% 55%;
+    --error-foreground: 0 0% 100%;
+    --error-light: 0 84% 95%;
+
+    /* Secondary elements */
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 15%;
+
+    /* Muted elements */
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Accent for highlights */
+    --accent: 210 40% 96%;
+    --accent-foreground: 222 47% 15%;
+
+    /* Borders and inputs */
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 91% 55%;
+
+    /* AI Theme colors */
+    --ai-primary: 280 100% 70%;
+    --ai-secondary: 260 100% 80%;
+    --ai-accent: 300 100% 75%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
     /* Dark mode core backgrounds */
     --background: 222 47% 8%;
     --foreground: 210 40% 95%;
@@ -20,13 +87,13 @@ All colors MUST be HSL for consistency */
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 95%;
 
-    /* Primary brand - Electric Blue */
+    /* Primary brand - Electric Blue for dark */
     --primary: 217 91% 65%;
     --primary-foreground: 222 47% 8%;
     --primary-light: 217 91% 25%;
     --primary-dark: 217 91% 45%;
 
-    /* Task status colors - Enhanced for dark mode */
+    /* Task status colors - Dark mode optimized */
     --success: 142 69% 58%;
     --success-foreground: 222 47% 8%;
     --success-light: 142 69% 15%;
@@ -56,58 +123,6 @@ All colors MUST be HSL for consistency */
     --input: 217 32% 17%;
     --ring: 217 91% 65%;
 
-    /* AI Theme colors */
-    --ai-primary: 280 100% 70%;
-    --ai-secondary: 260 100% 80%;
-    --ai-accent: 300 100% 75%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
