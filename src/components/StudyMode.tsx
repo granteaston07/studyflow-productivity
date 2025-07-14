@@ -23,42 +23,18 @@ const encouragingMessages = [
   "You're building something incredible today 🏗️",
   "Stay curious, stay focused, stay brilliant 🧠",
   "Every expert was once a beginner 🌱",
-  "Your dedication is your superpower 💫",
-  "Consistency is the key to mastery 🔑",
-  "You're closer to your goal than you think 🎯",
-  "Small daily improvements lead to stunning results 📊",
-  "Your mind is your most powerful tool 🧠",
-  "Excellence is not a skill, it's an attitude 🏆",
-  "The only way to do great work is to love what you do ❤️",
-  "Believe in yourself and all that you are 💪",
-  "Success is the sum of small efforts repeated day in day out 🔄",
-  "You're not just studying, you're investing in yourself 💎",
-  "Dream big, work hard, stay focused 🌟",
-  "Every moment of struggle is a moment of growth 🌱",
-  "You have unlimited potential within you ♾️",
-  "Knowledge is power, and you're getting stronger 💪",
-  "The best time to plant a tree was 20 years ago. The second best time is now 🌳",
-  "You're writing your success story one page at a time 📖",
-  "Challenges are opportunities in disguise 🎭",
-  "Your effort today shapes your tomorrow 🌅",
-  "Stay hungry, stay foolish, stay focused 🔥",
-  "You're not behind, you're on your own timeline ⏰",
-  "Every subject you master opens new doors 🚪",
-  "Learning never exhausts the mind 🧠",
-  "You're becoming the person you were meant to be ✨",
-  "Hard work beats talent when talent doesn't work hard 💯",
-  "Your potential is endless, your possibilities are limitless 🌌"
+  "Your dedication is your superpower 💫"
 ];
 
 export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyModeProps) => {
   const [currentMessage, setCurrentMessage] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Rotate messages every 1 minute
+  // Rotate messages every 10 seconds
   useEffect(() => {
     const messageInterval = setInterval(() => {
       setCurrentMessage((prev) => (prev + 1) % encouragingMessages.length);
-    }, 60000);
+    }, 10000);
 
     return () => clearInterval(messageInterval);
   }, []);
