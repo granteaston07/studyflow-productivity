@@ -51,13 +51,13 @@ const encouragingMessages = [
 ];
 
 export const StudyMode = ({ tasks, timerActive, timeRemaining, onExit }: StudyModeProps) => {
-  const [currentMessage, setCurrentMessage] = useState(0);
+  const [currentMessage, setCurrentMessage] = useState(Math.floor(Math.random() * encouragingMessages.length));
   const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Rotate messages every 1 minute
+  // Rotate messages every 1 minute - pick random message
   useEffect(() => {
     const messageInterval = setInterval(() => {
-      setCurrentMessage((prev) => (prev + 1) % encouragingMessages.length);
+      setCurrentMessage(Math.floor(Math.random() * encouragingMessages.length));
     }, 60000);
 
     return () => clearInterval(messageInterval);

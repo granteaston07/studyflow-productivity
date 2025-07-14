@@ -125,12 +125,18 @@ const Index = () => {
   // If study mode is active, show the StudyMode component
   if (studyMode) {
     return (
-      <StudyMode
-        tasks={tasks}
-        timerActive={timerActive}
-        timeRemaining={timeRemaining}
-        onExit={handleExitStudyMode}
-      />
+      <>
+        <StudyMode
+          tasks={tasks}
+          timerActive={timerActive}
+          timeRemaining={timeRemaining}
+          onExit={handleExitStudyMode}
+        />
+        {/* Keep FocusTimer running in background for timer state */}
+        <div style={{ display: 'none' }}>
+          <FocusTimer />
+        </div>
+      </>
     );
   }
 
