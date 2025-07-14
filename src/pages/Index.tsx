@@ -8,6 +8,7 @@ import { FocusTimer } from "@/components/FocusTimer";
 import { StudyLinks } from "@/components/StudyLinks";
 import { QuickNotes } from "@/components/QuickNotes";
 import { FloatingStatus } from "@/components/FloatingStatus";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Badge } from "@/components/ui/badge";
 
 const INITIAL_TASKS: Task[] = [
@@ -146,7 +147,7 @@ const Index = () => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Taskly</h1>
-                <p className="text-sm text-muted-foreground">AI Todo List • Smart Task Management</p>
+                <p className="text-sm text-muted-foreground">AI-Powered Student Productivity</p>
               </div>
             </div>
             
@@ -161,6 +162,7 @@ const Index = () => {
                   {todayTasks.length} due today
                 </Badge>
               )}
+              <ThemeToggle />
             </div>
           </div>
         </div>
