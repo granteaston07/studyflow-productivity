@@ -6,25 +6,25 @@ const studyLinks = [
     name: "Google Classroom",
     url: "https://classroom.google.com",
     icon: "🎓",
-    description: "Access classes & assignments"
+    description: "Classes & assignments"
   },
   {
     name: "Quizlet",
     url: "https://quizlet.com",
     icon: "📚",
-    description: "Study with flashcards"
+    description: "Study flashcards"
   },
   {
-    name: "Khan Academy",
-    url: "https://khanacademy.org",
-    icon: "🧠",
-    description: "Free learning resources"
+    name: "Google Drive",
+    url: "https://drive.google.com",
+    icon: "📁",
+    description: "Files & documents"
   },
   {
-    name: "Wolfram Alpha",
-    url: "https://wolframalpha.com",
-    icon: "🔢",
-    description: "Math & science solver"
+    name: "Kahoot",
+    url: "https://kahoot.com",
+    icon: "🎮",
+    description: "Fun quizzes"
   }
 ];
 

@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { GraduationCap, CheckSquare, Timer, Brain, ExternalLink } from "lucide-react";
+import { Brain, CheckSquare, Timer, Plus } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
-import { AddTaskForm } from "@/components/AddTaskForm";
+import { AddTaskDialog } from "@/components/AddTaskDialog";
 import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { FocusTimer } from "@/components/FocusTimer";
 import { StudyLinks } from "@/components/StudyLinks";
-import { AIStudySuggestions } from "@/components/AIStudySuggestions";
+import { QuickNotes } from "@/components/QuickNotes";
 import { FloatingStatus } from "@/components/FloatingStatus";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const INITIAL_TASKS: Task[] = [
@@ -61,7 +60,6 @@ const INITIAL_TASKS: Task[] = [
 
 const Index = () => {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
-  const [showAddForm, setShowAddForm] = useState(false);
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   
@@ -113,7 +111,6 @@ const Index = () => {
       id: Date.now().toString()
     };
     setTasks(prevTasks => [newTask, ...prevTasks]);
-    setShowAddForm(false);
   };
 
   const handleUpdateStatus = (taskId: string, status: Task['status']) => {
@@ -141,11 +138,11 @@ const Index = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
               <div className="bg-gradient-to-br from-primary to-ai-primary text-primary-foreground p-2 rounded-lg">
-                <GraduationCap className="h-6 w-6" />
+                <Brain className="h-6 w-6" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Taskly</h1>
-                <p className="text-sm text-muted-foreground">AI-Powered Student Productivity</p>
+                <p className="text-sm text-muted-foreground">AI Todo List • Smart Task Management</p>
               </div>
             </div>
             
@@ -185,19 +182,8 @@ const Index = () => {
                 <CheckSquare className="h-5 w-5 text-primary" />
                 <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
-              <Button 
-                onClick={() => setShowAddForm(!showAddForm)}
-                className="flex items-center gap-2"
-              >
-                <CheckSquare className="h-4 w-4" />
-                Add Task
-              </Button>
+              <AddTaskDialog onAddTask={handleAddTask} />
             </div>
-
-            {/* Add Task Form */}
-            {showAddForm && (
-              <AddTaskForm onAddTask={handleAddTask} />
-            )}
 
             {/* Task List */}
             <div className="space-y-3">
@@ -240,10 +226,10 @@ const Index = () => {
               <ProgressTracker tasks={tasks} />
             </div>
             
-            {/* Study Links and AI Suggestions Column */}
+            {/* Study Links and Quick Notes Column */}
             <div className="space-y-8">
               <StudyLinks />
-              <AIStudySuggestions tasks={tasks} />
+              <QuickNotes />
             </div>
           </div>
 
@@ -279,7 +265,7 @@ const Index = () => {
             
             <div className="text-center mt-8 pt-6 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                Built with ❤️ for students • Taskly AI © 2024
+                Built with ❤️ for students • Made in 2025
               </p>
             </div>
           </footer>

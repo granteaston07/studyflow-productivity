@@ -135,14 +135,14 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
         <Button
           variant="ghost"
           onClick={() => setIsExpanded(!isExpanded)}
-          className="flex items-center justify-between w-full p-0 h-auto hover:bg-ai-primary/10 rounded-lg transition-all duration-200"
+          className="flex items-center justify-center w-full p-0 h-auto hover:bg-ai-primary/10 rounded-lg transition-all duration-200 relative"
         >
           <div className="flex items-center gap-3">
             <div className="relative">
               <Brain className="h-5 w-5 text-ai-primary" />
               <Sparkles className="h-3 w-3 text-ai-secondary absolute -top-1 -right-1 animate-pulse" />
             </div>
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-center">
               <span className="font-semibold text-foreground">AI Task Intelligence</span>
               <span className="text-xs text-muted-foreground">Smart prioritization powered by AI</span>
             </div>
@@ -150,7 +150,7 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
               {recommendations.length} insights
             </Badge>
           </div>
-          <ChevronDown className={`h-4 w-4 text-ai-primary transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+          <ChevronDown className={`h-4 w-4 text-ai-primary transition-transform duration-300 absolute right-2 ${isExpanded ? 'rotate-180' : ''}`} />
         </Button>
       </CardHeader>
       
