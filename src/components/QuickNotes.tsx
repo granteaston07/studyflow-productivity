@@ -32,7 +32,7 @@ export function QuickNotes() {
   };
 
   return (
-    <Card className="h-72">
+    <Card className="h-73">
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-sm">
           <NotebookPen className="h-4 w-4 text-primary" />
