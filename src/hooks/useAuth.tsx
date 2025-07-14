@@ -7,11 +7,9 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  themePreference: string | null;
   signUp: (email: string, password: string, displayName?: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  updateThemePreference: (theme: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,52 +18,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const [themePreference, setThemePreference] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          // Load user's theme preference
-          const { data } = await supabase
-            .from('profiles')
-            .select('theme_preference')
-            .eq('user_id', session.user.id)
-            .single();
-          
-          if (data?.theme_preference) {
-            setThemePreference(data.theme_preference);
-          }
-        } else {
-          setThemePreference(null);
-        }
-        
         setLoading(false);
       }
     );
 
     // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        // Load user's theme preference
-        const { data } = await supabase
-          .from('profiles')
-          .select('theme_preference')
-          .eq('user_id', session.user.id)
-          .single();
-        
-        if (data?.theme_preference) {
-          setThemePreference(data.theme_preference);
-        }
-      }
-      
       setLoading(false);
     });
 
@@ -110,32 +77,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error };
   };
 
-  const updateThemePreference = async (theme: string) => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .upsert({
-          user_id: user.id,
-          theme_preference: theme,
-          updated_at: new Date().toISOString()
-        });
-      
-      if (!error) {
-        setThemePreference(theme);
-      }
-    } catch (err) {
-      console.error('Error updating theme preference:', err);
-    }
-  };
-
   const signOut = async () => {
     try {
       // Always clear local state first to ensure UI updates immediately
       setSession(null);
       setUser(null);
-      setThemePreference(null);
       
       // Clear localStorage manually to ensure session is removed
       localStorage.removeItem('sb-kofbhggloaapndnuhmsc-auth-token');
@@ -168,11 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       session,
       loading,
-      themePreference,
       signUp,
       signIn,
-      signOut,
-      updateThemePreference
+      signOut
     }}>
       {children}
     </AuthContext.Provider>
