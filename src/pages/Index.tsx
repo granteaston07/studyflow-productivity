@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Brain, CheckSquare, Timer, Plus, LogOut } from "lucide-react";
+import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
 import { TaskPrioritization } from "@/components/TaskPrioritization";
@@ -10,6 +10,7 @@ import { QuickNotes } from "@/components/QuickNotes";
 import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TasklyLogo } from "@/components/TasklyLogo";
+import { StudyMode } from "@/components/StudyMode";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
@@ -20,6 +21,7 @@ const Index = () => {
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
+  const [studyMode, setStudyMode] = useState(false);
   
   // Update timer state from FocusTimer component
   useEffect(() => {
@@ -53,7 +55,7 @@ const Index = () => {
         newStatus = 'overdue';
       } else if (task.status === 'overdue' && dueDate >= now) {
         // Was overdue but now has future date = reset to pending or in-progress
-        newStatus = task.status === 'completed' ? 'completed' : 'pending';
+        newStatus = task.completed ? 'completed' : 'pending';
       }
     } else {
       // If removing due date and was overdue, reset to pending
@@ -116,6 +118,22 @@ const Index = () => {
     return taskDate.toDateString() === today.toDateString() && task.dueDate >= now;
   });
 
+  const handleExitStudyMode = () => {
+    setStudyMode(false);
+  };
+
+  // If study mode is active, show the StudyMode component
+  if (studyMode) {
+    return (
+      <StudyMode
+        tasks={tasks}
+        timerActive={timerActive}
+        timeRemaining={timeRemaining}
+        onExit={handleExitStudyMode}
+      />
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -143,6 +161,15 @@ const Index = () => {
                   {todayTasks.length} due today
                 </Badge>
               )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setStudyMode(true)}
+                className="hover:bg-ai-primary/10 hover:text-ai-primary hover:border-ai-primary/30"
+              >
+                <GraduationCap className="h-4 w-4 mr-2" />
+                Study Mode
+              </Button>
               <ThemeToggle />
               <Button 
                 variant="outline" 
