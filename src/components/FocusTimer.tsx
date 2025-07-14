@@ -153,7 +153,12 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
                   key={index}
                   variant={selectedSession === session ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setSelectedSession(session)}
+                  onClick={() => {
+                    if (!timerActive || timerPaused) {
+                      setSelectedSession(session);
+                    }
+                  }}
+                  disabled={timerActive && !timerPaused}
                   className="flex items-center gap-2"
                 >
                   <Icon className="h-4 w-4" />
