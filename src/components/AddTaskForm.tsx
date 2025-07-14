@@ -31,13 +31,15 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     
     if (!taskData.title.trim()) return;
 
-    const newTask: Omit<Task, 'id'> = {
+    const newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
       title: taskData.title.trim(),
-      subject: taskData.subject || undefined,
+      subject: taskData.subject || 'General',
+      description: undefined,
       dueDate: taskData.dueDate,
       completed: false,
       priority: taskData.priority,
-      status: taskData.dueDate && taskData.dueDate < new Date() ? 'overdue' : 'pending'
+      status: taskData.dueDate && taskData.dueDate < new Date() ? 'overdue' : 'pending',
+      completedAt: undefined
     };
 
     onAddTask(newTask);

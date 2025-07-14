@@ -11,9 +11,12 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { TasklyLogo } from "@/components/TasklyLogo";
 import { Badge } from "@/components/ui/badge";
+import { useTasks } from "@/hooks/useTasks";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const { user, loading: authLoading } = useAuth();
+  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   
@@ -30,54 +33,55 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const handleToggleTask = (taskId: string) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? { 
-              ...task, 
-              completed: !task.completed,
-              status: !task.completed ? 'completed' : 
-                     task.dueDate && task.dueDate < new Date() ? 'overdue' : 'pending'
-            }
-          : task
-      )
+  const handleToggleTask = async (taskId: string) => {
+    await toggleTask(taskId);
+  };
+
+  const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
+    await updateTask(taskId, { dueDate });
+  };
+
+  const handleAddTask = async (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+    await addTask(newTaskData);
+  };
+
+  const handleUpdateStatus = async (taskId: string, status: Task['status']) => {
+    await updateTask(taskId, { status });
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask(taskId);
+  };
+
+  // Show loading state while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
     );
-  };
+  }
 
-  const handleUpdateDueDate = (taskId: string, dueDate: Date | undefined) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId
-          ? { 
-              ...task, 
-              dueDate,
-              status: dueDate && dueDate < new Date() ? 'overdue' : 'pending'
-            }
-          : task
-      )
+  // Redirect to auth if not logged in
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-6">
+          <h2 className="text-2xl font-bold mb-4">Please sign in to continue</h2>
+          <p className="text-muted-foreground mb-6">You need to be logged in to access Taskly.</p>
+          <button 
+            onClick={() => window.location.href = '/auth'}
+            className="bg-primary text-primary-foreground px-6 py-2 rounded-md hover:bg-primary/90"
+          >
+            Sign In
+          </button>
+        </div>
+      </div>
     );
-  };
-
-  const handleAddTask = (newTaskData: Omit<Task, 'id'>) => {
-    const newTask: Task = {
-      ...newTaskData,
-      id: Date.now().toString()
-    };
-    setTasks(prevTasks => [newTask, ...prevTasks]);
-  };
-
-  const handleUpdateStatus = (taskId: string, status: Task['status']) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, status } : task
-      )
-    );
-  };
-
-  const handleDeleteTask = (taskId: string) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
-  };
+  }
 
   const activeTasks = tasks.filter(task => !task.completed);
   const overdueTasks = tasks.filter(task => task.status === 'overdue');

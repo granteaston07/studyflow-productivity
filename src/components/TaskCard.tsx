@@ -7,16 +7,9 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { Task } from "@/hooks/useTasks";
 
-export interface Task {
-  id: string;
-  title: string;
-  subject?: string;
-  dueDate?: Date;
-  completed: boolean;
-  priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in-progress' | 'completed' | 'overdue';
-}
+export type { Task } from "@/hooks/useTasks";
 
 interface TaskCardProps {
   task: Task;
