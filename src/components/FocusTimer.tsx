@@ -41,8 +41,10 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
 
   // Update parent timer when session changes (only if timer is not active)
   useEffect(() => {
-    onUpdateDuration(selectedSession.duration * 60);
-  }, [selectedSession, onUpdateDuration]);
+    if (!timerActive || timerPaused) {
+      onUpdateDuration(selectedSession.duration * 60);
+    }
+  }, [selectedSession, onUpdateDuration, timerActive, timerPaused]);
 
   const toggleTimer = () => {
     if (!timerActive) {
