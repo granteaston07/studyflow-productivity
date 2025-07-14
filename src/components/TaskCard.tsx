@@ -1,7 +1,11 @@
-import { Check, Clock, AlertTriangle } from "lucide-react";
+import { Check, Clock, AlertTriangle, Calendar, Edit } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export interface Task {
@@ -17,9 +21,10 @@ export interface Task {
 interface TaskCardProps {
   task: Task;
   onToggle: (id: string) => void;
+  onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
 }
 
-export function TaskCard({ task, onToggle }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate }: TaskCardProps) {
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
       case 'completed':
@@ -68,7 +73,7 @@ export function TaskCard({ task, onToggle }: TaskCardProps) {
   };
 
   return (
-    <Card className="p-4 transition-all duration-200 hover:shadow-md border-l-4 border-l-primary/20">
+    <Card className="p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm">
       <div className="flex items-start gap-3">
         <Checkbox
           checked={task.completed}
@@ -85,18 +90,55 @@ export function TaskCard({ task, onToggle }: TaskCardProps) {
               {task.title}
             </h3>
             
-            <Badge
-              variant="secondary"
-              className={cn(
-                "text-xs font-medium px-2 py-1 shrink-0",
-                getStatusColor(task.status)
-              )}
-            >
-              <span className="flex items-center gap-1">
-                {getStatusIcon(task.status)}
-                {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
-              </span>
-            </Badge>
+            <div className="flex items-center gap-2">
+              <Badge
+                variant="secondary"
+                className={cn(
+                  "text-xs font-medium px-2 py-1 shrink-0",
+                  getStatusColor(task.status)
+                )}
+              >
+                <span className="flex items-center gap-1">
+                  {getStatusIcon(task.status)}
+                  {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
+                </span>
+              </Badge>
+              
+              {/* Edit Due Date Button */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <div className="p-3 space-y-3">
+                    <div className="text-sm font-medium">Edit Due Date</div>
+                    <CalendarComponent
+                      mode="single"
+                      selected={task.dueDate}
+                      onSelect={(date) => onUpdateDueDate(task.id, date)}
+                      initialFocus
+                      className="rounded-md border-0"
+                    />
+                    {task.dueDate && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onUpdateDueDate(task.id, undefined)}
+                        className="w-full text-xs"
+                      >
+                        Remove Due Date
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
           
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -106,12 +148,15 @@ export function TaskCard({ task, onToggle }: TaskCardProps) {
               </span>
             )}
             {task.dueDate && (
-              <span className={cn(
-                "text-xs",
-                task.status === 'overdue' && "text-error font-medium"
-              )}>
-                {formatDueDate(task.dueDate)}
-              </span>
+              <div className="flex items-center gap-1">
+                <Calendar className="h-3 w-3" />
+                <span className={cn(
+                  "text-xs",
+                  task.status === 'overdue' && "text-error font-medium"
+                )}>
+                  {formatDueDate(task.dueDate)}
+                </span>
+              </div>
             )}
           </div>
         </div>

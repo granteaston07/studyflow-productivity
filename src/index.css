@@ -2,59 +2,64 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Taskly Design System - Clean, modern productivity app for students
+/* Taskly Design System - Dark Mode AI-Powered Student Productivity
 All colors MUST be HSL for consistency */
 
 @layer base {
   :root {
-    /* Core backgrounds */
-    --background: 210 20% 98%;
-    --foreground: 215 25% 15%;
-    --surface: 0 0% 100%;
+    /* Dark mode core backgrounds */
+    --background: 222 47% 8%;
+    --foreground: 210 40% 95%;
+    --surface: 222 47% 11%;
 
     /* Card components */
-    --card: 0 0% 100%;
-    --card-foreground: 215 25% 15%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 95%;
 
     /* Interactive elements */
-    --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 15%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 95%;
 
-    /* Primary brand - Soft Blue */
-    --primary: 217 85% 65%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 217 85% 85%;
-    --primary-dark: 217 85% 45%;
+    /* Primary brand - Electric Blue */
+    --primary: 217 91% 65%;
+    --primary-foreground: 222 47% 8%;
+    --primary-light: 217 91% 25%;
+    --primary-dark: 217 91% 45%;
 
-    /* Task status colors */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --success-light: 142 76% 90%;
+    /* Task status colors - Enhanced for dark mode */
+    --success: 142 69% 58%;
+    --success-foreground: 222 47% 8%;
+    --success-light: 142 69% 15%;
     
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%; 
-    --warning-light: 38 92% 90%;
+    --warning: 38 100% 67%;
+    --warning-foreground: 222 47% 8%; 
+    --warning-light: 38 100% 15%;
     
-    --error: 0 84% 60%;
-    --error-foreground: 0 0% 100%;
-    --error-light: 0 84% 95%;
+    --error: 0 91% 71%;
+    --error-foreground: 222 47% 8%;
+    --error-light: 0 91% 15%;
 
     /* Secondary elements */
-    --secondary: 210 20% 95%;
-    --secondary-foreground: 215 25% 15%;
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 95%;
 
     /* Muted elements */
-    --muted: 210 20% 92%;
-    --muted-foreground: 215 15% 45%;
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
 
     /* Accent for highlights */
-    --accent: 217 85% 85%;
-    --accent-foreground: 217 85% 25%;
+    --accent: 217 32% 17%;
+    --accent-foreground: 210 40% 95%;
 
     /* Borders and inputs */
-    --border: 214 15% 88%;
-    --input: 214 15% 88%;
-    --ring: 217 85% 65%;
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 217 91% 65%;
+
+    /* AI Theme colors */
+    --ai-primary: 280 100% 70%;
+    --ai-secondary: 260 100% 80%;
+    --ai-accent: 300 100% 75%;
 
     --radius: 0.5rem;
 

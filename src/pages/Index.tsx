@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { GraduationCap, CheckSquare, TrendingUp, Timer } from "lucide-react";
+import { GraduationCap, CheckSquare, Timer, Brain, ExternalLink } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskForm } from "@/components/AddTaskForm";
-import { GradeCalculator } from "@/components/GradeCalculator";
+import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { ProgressTracker } from "@/components/ProgressTracker";
 import { FocusTimer } from "@/components/FocusTimer";
+import { StudyLinks } from "@/components/StudyLinks";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -75,6 +76,20 @@ const Index = () => {
     );
   };
 
+  const handleUpdateDueDate = (taskId: string, dueDate: Date | undefined) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId
+          ? { 
+              ...task, 
+              dueDate,
+              status: dueDate && dueDate < new Date() ? 'overdue' : 'pending'
+            }
+          : task
+      )
+    );
+  };
+
   const handleAddTask = (newTaskData: Omit<Task, 'id'>) => {
     const newTask: Task = {
       ...newTaskData,
@@ -96,22 +111,22 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-surface border-b border-border sticky top-0 z-10">
+      <header className="bg-card/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
-              <div className="bg-primary text-primary-foreground p-2 rounded-lg">
+              <div className="bg-gradient-to-br from-primary to-ai-primary text-primary-foreground p-2 rounded-lg">
                 <GraduationCap className="h-6 w-6" />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">Taskly</h1>
-                <p className="text-sm text-muted-foreground">Smart Student Productivity</p>
+                <p className="text-sm text-muted-foreground">AI-Powered Student Productivity</p>
               </div>
             </div>
             
             <div className="flex items-center gap-4">
               {overdueTasks.length > 0 && (
-                <Badge variant="destructive" className="bg-error text-error-foreground">
+                <Badge variant="destructive" className="bg-error text-error-foreground animate-pulse">
                   {overdueTasks.length} overdue
                 </Badge>
               )}
@@ -130,13 +145,22 @@ const Index = () => {
         <div className="space-y-8">
           {/* Welcome Section */}
           <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-foreground">
+            <h2 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
               Welcome back! Let's stay productive.
             </h2>
             <p className="text-muted-foreground">
-              You have {activeTasks.length} active tasks to complete
+              You have {activeTasks.length} active tasks • AI recommendations ready
             </p>
           </div>
+
+          {/* AI Task Prioritization */}
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <Brain className="h-5 w-5 text-ai-primary" />
+              <h3 className="text-xl font-semibold text-foreground">AI Recommendations</h3>
+            </div>
+            <TaskPrioritization tasks={tasks} />
+          </section>
 
           {/* Tasks Section */}
           <section className="space-y-6">
@@ -172,19 +196,20 @@ const Index = () => {
                     key={task.id}
                     task={task}
                     onToggle={handleToggleTask}
+                    onUpdateDueDate={handleUpdateDueDate}
                   />
                 ))
               )}
             </div>
           </section>
 
-          {/* Two Column Layout for Calculator and Progress */}
+          {/* Two Column Layout for Progress and Study Links */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Grade Calculator */}
-            <GradeCalculator />
-            
             {/* Progress Tracker */}
             <ProgressTracker tasks={tasks} />
+            
+            {/* Study Links */}
+            <StudyLinks />
           </div>
 
           {/* Focus Timer */}
@@ -219,7 +244,7 @@ const Index = () => {
             
             <div className="text-center mt-8 pt-6 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                Built with ❤️ for students • Taskly © 2024
+                Built with ❤️ for students • Taskly AI © 2024
               </p>
             </div>
           </footer>
