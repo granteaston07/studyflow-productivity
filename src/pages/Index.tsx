@@ -39,7 +39,35 @@ const Index = () => {
   };
 
   const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
-    await updateTask(taskId, { dueDate });
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Determine the new status based on the due date
+    let newStatus = task.status;
+    const now = new Date();
+    
+    if (dueDate) {
+      // If setting a due date
+      if (dueDate < now && !task.completed) {
+        // Past due date and not completed = overdue
+        newStatus = 'overdue';
+      } else if (task.status === 'overdue' && dueDate >= now) {
+        // Was overdue but now has future date = reset to pending or in-progress
+        newStatus = task.status === 'completed' ? 'completed' : 'pending';
+      }
+    } else {
+      // If removing due date and was overdue, reset to pending
+      if (task.status === 'overdue') {
+        newStatus = task.completed ? 'completed' : 'pending';
+      }
+    }
+
+    // Update both due date and status if status changed
+    if (newStatus !== task.status) {
+      await updateTask(taskId, { dueDate, status: newStatus });
+    } else {
+      await updateTask(taskId, { dueDate });
+    }
   };
 
   const handleAddTask = async (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
