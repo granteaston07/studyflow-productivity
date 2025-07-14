@@ -230,6 +230,8 @@ const Index = () => {
                   <span>Built for Students</span>
                   <span>•</span>
                   <span>Made in 2025</span>
+                  <span>•</span>
+                  <span>No Distractions</span>
                 </div>
               </div>
             </div>
