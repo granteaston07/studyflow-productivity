@@ -154,11 +154,11 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
       )}
       
       <Card className="bg-gradient-to-br from-ai-primary/5 via-primary/5 to-ai-secondary/5 border-ai-primary/30 backdrop-blur-sm">
-        <CardHeader className="pb-3">
+        <CardHeader className="p-6 flex items-center justify-center">
           <Button
             variant="ghost"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="flex items-center justify-center w-full p-0 h-auto hover:bg-ai-primary/10 rounded-lg transition-all duration-200 relative"
+            className="flex items-center justify-center w-full p-0 h-auto hover:bg-ai-primary/10 rounded-lg transition-all duration-200 relative min-h-[80px]"
           >
             <div className="flex items-center gap-3">
               <div className="relative">

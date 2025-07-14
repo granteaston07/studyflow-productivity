@@ -224,7 +224,7 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="text-center mt-8 pt-6 border-t border-border">
+            <div className="text-center mt-8 pt-6 border-t border-border space-y-6">
               <div className="flex flex-col items-center gap-2">
                 <p className="text-sm font-medium text-foreground">Created by Grant Easton</p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -233,6 +233,39 @@ const Index = () => {
                   <span>Made in 2025</span>
                   <span>•</span>
                   <span>No Distractions</span>
+                </div>
+              </div>
+              
+              {/* Legal and Privacy Section */}
+              <div className="space-y-4 pt-4 border-t border-border/50">
+                <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
+                  <button className="hover:text-foreground transition-colors">Privacy Policy</button>
+                  <span>•</span>
+                  <button className="hover:text-foreground transition-colors">Terms of Service</button>
+                  <span>•</span>
+                  <button className="hover:text-foreground transition-colors">Cookie Policy</button>
+                  <span>•</span>
+                  <button className="hover:text-foreground transition-colors">Data Protection</button>
+                </div>
+                
+                <div className="text-xs text-muted-foreground leading-relaxed max-w-4xl mx-auto">
+                  <p className="mb-2">
+                    Taskly is committed to protecting your privacy and ensuring the security of your personal data. 
+                    We collect and process information in accordance with applicable data protection laws.
+                  </p>
+                  <p className="mb-2">
+                    Your tasks, notes, and study data are securely stored and encrypted. We do not share your personal 
+                    information with third parties without your explicit consent, except as required by law.
+                  </p>
+                  <p>
+                    By using Taskly, you agree to our Terms of Service and Privacy Policy. 
+                    If you have questions about data handling, please contact us.
+                  </p>
+                </div>
+                
+                <div className="text-xs text-muted-foreground/80">
+                  <p>© 2025 Taskly. All Rights Reserved.</p>
+                  <p className="mt-1">Educational use only. Not affiliated with any educational institution.</p>
                 </div>
               </div>
             </div>
