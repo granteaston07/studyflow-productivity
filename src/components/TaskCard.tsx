@@ -22,20 +22,15 @@ interface TaskCardProps {
 
 export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
-  const [showCheckAnimation, setShowCheckAnimation] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggle = () => {
     if (!task.completed) {
-      setShowCheckAnimation(true);
+      setIsCompleting(true);
       setTimeout(() => {
-        setIsCompleting(true);
-        setTimeout(() => {
-          onToggle(task.id);
-          setIsCompleting(false);
-          setShowCheckAnimation(false);
-        }, 400);
-      }, 400);
+        onToggle(task.id);
+        setIsCompleting(false);
+      }, 800);
     } else {
       onToggle(task.id);
     }
@@ -119,7 +114,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
           onCheckedChange={handleToggle}
           className={cn(
             "mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all duration-300",
-            showCheckAnimation && "animate-checkbox-check"
+            isCompleting && "animate-checkbox-check"
           )}
         />
         
