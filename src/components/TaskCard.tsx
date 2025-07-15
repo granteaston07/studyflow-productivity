@@ -8,6 +8,7 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Task } from "@/hooks/useTasks";
+import { useState, useEffect } from "react";
 
 export type { Task } from "@/hooks/useTasks";
 
@@ -20,6 +21,21 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete }: TaskCardProps) {
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [showCheckAnimation, setShowCheckAnimation] = useState(false);
+
+  const handleToggle = () => {
+    if (!task.completed) {
+      setIsCompleting(true);
+      setShowCheckAnimation(true);
+      setTimeout(() => {
+        onToggle(task.id);
+        setIsCompleting(false);
+      }, 600);
+    } else {
+      onToggle(task.id);
+    }
+  };
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
       case 'completed':
@@ -81,12 +97,18 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   };
 
   return (
-    <Card className="p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]">
+    <Card className={cn(
+      "p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]",
+      isCompleting && "animate-task-complete"
+    )}>
       <div className="flex items-start gap-3">
         <Checkbox
           checked={task.completed}
-          onCheckedChange={() => onToggle(task.id)}
-          className="mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success"
+          onCheckedChange={handleToggle}
+          className={cn(
+            "mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all duration-300",
+            showCheckAnimation && "animate-checkbox-check"
+          )}
         />
         
         <div className="flex-1 space-y-2">

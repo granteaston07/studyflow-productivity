@@ -202,6 +202,16 @@ All colors MUST be HSL for consistency */
   .stats-card-error {
     @apply stats-card from-error/20 to-error/10 text-error border border-error/20;
   }
+
+  /* Task completion animation */
+  .animate-task-complete {
+    animation: task-complete 0.6s ease-out forwards;
+  }
+
+  /* Checkbox check animation */
+  .animate-checkbox-check {
+    animation: checkbox-check 0.3s ease-out;
+  }
 }
 
 @keyframes bounce-gentle {
@@ -222,4 +232,24 @@ All colors MUST be HSL for consistency */
 @keyframes slide-up {
   0% { transform: translateY(20px); opacity: 0; }
   100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes task-complete {
+  0% { 
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  30% { 
+    transform: translateY(-5px) scale(1.02);
+  }
+  100% { 
+    transform: translateY(20px) scale(0.98);
+    opacity: 0.7;
+  }
+}
+
+@keyframes checkbox-check {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
 }
