@@ -143,3 +143,18 @@ All colors MUST be HSL for consistency */
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* AI Gradient Text Effects */
+  .ai-gradient-text {
+    @apply bg-gradient-to-r from-ai-primary via-ai-secondary to-ai-accent bg-clip-text text-transparent font-medium;
+  }
+  
+  .ai-gradient-text-subtle {
+    @apply bg-gradient-to-r from-ai-primary/80 via-ai-secondary/70 to-ai-accent/80 bg-clip-text text-transparent;
+  }
+  
+  .ai-gradient-text-accent {
+    @apply bg-gradient-to-r from-ai-accent via-ai-primary to-ai-secondary bg-clip-text text-transparent font-semibold;
+  }
+}

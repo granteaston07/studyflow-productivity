@@ -109,7 +109,7 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
         {/* AI Suggested Sessions */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">AI Suggested Sessions</p>
+            <p className="text-sm font-medium"><span className="ai-gradient-text-subtle">AI Suggested Sessions</span></p>
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="flex items-center gap-2">

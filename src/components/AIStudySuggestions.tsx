@@ -106,7 +106,7 @@ export function AIStudySuggestions({ tasks }: AIStudySuggestionsProps) {
             <Brain className="h-5 w-5 text-ai-primary" />
             <div className="absolute -top-1 -right-1 w-2 h-2 bg-ai-secondary rounded-full animate-pulse" />
           </div>
-          AI Study Suggestions
+          <span className="ai-gradient-text">AI Study Suggestions</span>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Personalized techniques based on your current workload
@@ -158,7 +158,7 @@ export function AIStudySuggestions({ tasks }: AIStudySuggestionsProps) {
         <div className="mt-4 p-3 rounded-lg bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 border border-ai-primary/20">
           <div className="flex items-center gap-2 text-sm">
             <Brain className="h-4 w-4 text-ai-primary" />
-            <span className="text-foreground font-medium">Pro Tip:</span>
+            <span className="ai-gradient-text-subtle font-medium">Pro Tip:</span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             Combine multiple techniques for maximum effectiveness. Start with easier methods and gradually adopt advanced ones.
