@@ -92,6 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Handle session not found errors gracefully - user is effectively logged out
       if (error && (error.message.includes('Session not found') || error.message.includes('session_not_found'))) {
         toast.success('Signed out successfully');
+        window.location.href = '/auth';
         return;
       }
       
@@ -102,10 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         toast.success('Signed out successfully');
       }
+      
+      // Redirect to auth page after sign out
+      window.location.href = '/auth';
     } catch (err) {
       // Catch any network or other errors
       console.warn('Sign out error:', err);
       toast.success('Signed out successfully');
+      window.location.href = '/auth';
     }
   };
 

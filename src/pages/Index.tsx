@@ -241,9 +241,9 @@ const Index = () => {
               You have <span className="text-lg font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent animate-pulse-glow">{activeTasks.length}</span> active {activeTasks.length === 1 ? 'task' : 'tasks'} • AI recommendations ready
             </p>
             {!user && (
-              <div className="mt-4 p-4 bg-warning/10 border border-warning/20 rounded-lg">
-                <p className="text-sm text-warning-foreground">
-                  ⚠️ Guest Mode: Your tasks and progress won't be saved. <a href="/auth" className="underline hover:text-primary">Sign in</a> to save your work.
+              <div className="mt-4 text-sm text-muted-foreground">
+                <p>
+                  📝 Guest Mode: Tasks are temporary. <button onClick={() => window.location.href = '/auth'} className="text-primary hover:underline">Sign in</button> to save your work.
                 </p>
               </div>
             )}
