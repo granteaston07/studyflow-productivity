@@ -259,6 +259,15 @@ const Index = () => {
                     // Sort completed tasks to bottom
                     if (a.completed && !b.completed) return 1;
                     if (!a.completed && b.completed) return -1;
+                    
+                    // For incomplete tasks, sort by priority (high -> medium -> low)
+                    if (!a.completed && !b.completed) {
+                      const priorityWeight = { high: 3, medium: 2, low: 1 };
+                      const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
+                      const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
+                      return bPriority - aPriority;
+                    }
+                    
                     return 0;
                   })
                   .map((task, index) => (
