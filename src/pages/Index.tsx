@@ -232,7 +232,7 @@ const Index = () => {
               Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! Let's stay productive.
             </h2>
             <p className="text-muted-foreground">
-              You have <span className="text-2xl font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent animate-pulse-glow">{activeTasks.length}</span> active tasks • AI recommendations ready
+              You have <span className="text-lg font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent animate-pulse-glow">{activeTasks.length}</span> active tasks • AI recommendations ready
             </p>
           </div>
 
