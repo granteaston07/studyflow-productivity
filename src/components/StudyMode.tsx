@@ -146,12 +146,8 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onEx
               <div className="text-primary text-xs font-medium uppercase tracking-wide">
                 Focus Session Active
               </div>
-              <div className="relative">
-                {/* Glow background */}
-                <div className="absolute inset-0 bg-primary/20 rounded-lg blur-xl animate-pulse-glow"></div>
-                <div className="relative text-5xl md:text-6xl font-bold text-primary px-8 py-4 rounded-lg bg-primary/5 border border-primary/20 shadow-[0_0_40px_rgba(var(--primary)/0.3)] animate-pulse-glow">
-                  {formatTimerTime(timeRemaining)}
-                </div>
+              <div className="text-5xl md:text-6xl font-bold text-primary">
+                {formatTimerTime(timeRemaining)}
               </div>
               <div className="flex justify-center gap-3">
                 <Button
