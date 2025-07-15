@@ -14,39 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      google_classroom_connections: {
-        Row: {
-          access_token: string
-          created_at: string
-          expires_at: string
-          id: string
-          refresh_token: string
-          scope: string
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          access_token: string
-          created_at?: string
-          expires_at: string
-          id?: string
-          refresh_token: string
-          scope: string
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          access_token?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          refresh_token?: string
-          scope?: string
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
       notes: {
         Row: {
           content: string
@@ -158,11 +125,8 @@ export type Database = {
           created_at: string
           description: string | null
           due_date: string | null
-          google_classroom_id: string | null
-          google_course_id: string | null
           id: string
           priority: string | null
-          source: string | null
           status: string | null
           subject: string | null
           title: string
@@ -175,11 +139,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
-          google_classroom_id?: string | null
-          google_course_id?: string | null
           id?: string
           priority?: string | null
-          source?: string | null
           status?: string | null
           subject?: string | null
           title: string
@@ -192,11 +153,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           due_date?: string | null
-          google_classroom_id?: string | null
-          google_course_id?: string | null
           id?: string
           priority?: string | null
-          source?: string | null
           status?: string | null
           subject?: string | null
           title?: string

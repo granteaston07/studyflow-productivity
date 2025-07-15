@@ -11,7 +11,6 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
-import { GoogleClassroomSync } from "@/components/GoogleClassroomSync";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
@@ -289,9 +288,8 @@ const Index = () => {
               <ProgressTracker tasks={tasks} />
             </div>
             
-            {/* Study Links, Google Classroom, and Quick Notes Column */}
+            {/* Study Links and Quick Notes Column */}
             <div className="space-y-8">
-              <GoogleClassroomSync />
               <StudyLinks />
               <QuickNotes />
             </div>

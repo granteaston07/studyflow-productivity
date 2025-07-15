@@ -10,14 +10,11 @@ export interface Task {
   description?: string;
   dueDate?: Date;
   completed: boolean;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
+  priority: 'low' | 'medium' | 'high';
   status: 'pending' | 'in-progress' | 'completed' | 'overdue';
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
-  source?: 'manual' | 'google_classroom';
-  google_classroom_id?: string;
-  google_course_id?: string;
 }
 
 export function useTasks() {
@@ -64,10 +61,7 @@ export function useTasks() {
           status,
           completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
           createdAt: new Date(task.created_at),
-          updatedAt: new Date(task.updated_at),
-          source: task.source as Task['source'],
-          google_classroom_id: task.google_classroom_id,
-          google_course_id: task.google_course_id
+          updatedAt: new Date(task.updated_at)
         };
       });
 
