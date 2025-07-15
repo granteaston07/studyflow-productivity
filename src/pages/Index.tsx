@@ -227,12 +227,17 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           {/* Welcome Section */}
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
-              Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! Let's stay productive.
-            </h2>
-            <p className="text-muted-foreground">
-              You have {activeTasks.length} active tasks • AI recommendations ready
+          <div className="text-center space-y-4 animate-fade-in">
+            <div className="flex items-center justify-center gap-3 mb-4">
+              <Brain className="h-8 w-8 text-ai-primary animate-pulse text-glow" />
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-primary via-ai-primary to-ai-accent bg-clip-text text-transparent">
+                Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}!
+              </h2>
+              <Brain className="h-8 w-8 text-ai-primary animate-pulse text-glow" />
+            </div>
+            <p className="text-muted-foreground text-lg">
+              You have <span className="font-semibold text-primary">{activeTasks.length}</span> active tasks • 
+              <span className="ai-gradient-text-subtle"> AI recommendations ready</span>
             </p>
           </div>
 
@@ -261,15 +266,20 @@ const Index = () => {
                     if (!a.completed && b.completed) return -1;
                     return 0;
                   })
-                  .map(task => (
-                    <TaskCard
+                  .map((task, index) => (
+                    <div 
                       key={task.id}
-                      task={task}
-                    onToggle={handleToggleTask}
-                    onUpdateDueDate={handleUpdateDueDate}
-                    onUpdateStatus={handleUpdateStatus}
-                    onDelete={handleDeleteTask}
-                    />
+                      className="animate-fade-in hover-lift"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                    >
+                      <TaskCard
+                        task={task}
+                        onToggle={handleToggleTask}
+                        onUpdateDueDate={handleUpdateDueDate}
+                        onUpdateStatus={handleUpdateStatus}
+                        onDelete={handleDeleteTask}
+                      />
+                    </div>
                   ))
               )}
             </div>
@@ -317,20 +327,20 @@ const Index = () => {
           {/* Quick Stats Footer */}
           <footer className="pt-8 border-t border-border">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-primary">{tasks.length}</p>
+              <div className="space-y-1 hover-lift">
+                <p className="text-3xl font-bold text-primary bounce-gentle">{tasks.length}</p>
                 <p className="text-sm text-muted-foreground">Total Tasks</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</p>
+              <div className="space-y-1 hover-lift">
+                <p className="text-3xl font-bold text-success bounce-gentle">{tasks.filter(t => t.completed).length}</p>
                 <p className="text-sm text-muted-foreground">Completed</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</p>
+              <div className="space-y-1 hover-lift">
+                <p className="text-3xl font-bold text-warning bounce-gentle">{tasks.filter(t => t.status === 'in-progress').length}</p>
                 <p className="text-sm text-muted-foreground">In Progress</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-error">{overdueTasks.length}</p>
+              <div className="space-y-1 hover-lift">
+                <p className="text-3xl font-bold text-error bounce-gentle pulse-gentle">{overdueTasks.length}</p>
                 <p className="text-sm text-muted-foreground">Overdue</p>
               </div>
             </div>
