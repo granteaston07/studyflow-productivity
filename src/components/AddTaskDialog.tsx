@@ -87,7 +87,7 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2 hover-scale bg-gradient-to-r from-primary to-ai-primary hover:from-primary-dark hover:to-ai-primary shadow-lg text-white border-0">
+        <Button className="flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Add Task
         </Button>

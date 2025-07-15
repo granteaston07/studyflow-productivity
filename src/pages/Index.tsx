@@ -174,9 +174,9 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background subtle-pattern">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="glass-card sticky top-0 z-10 animate-slide-up">
+      <header className="bg-card/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
@@ -227,169 +227,117 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           {/* Welcome Section */}
-          <div className="text-center space-y-4 animate-fade-in">
-            <div className="glass-card p-8 hover-lift">
-              <h2 className="text-4xl font-bold mb-3 bg-gradient-to-r from-primary via-ai-primary to-primary bg-clip-text text-transparent text-glow animate-gentle-bounce">
-                Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! 
-              </h2>
-              <p className="text-lg text-muted-foreground mb-4">
-                Let's achieve greatness together
-              </p>
-              <div className="flex items-center justify-center gap-6 text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                  <span className="text-muted-foreground">{activeTasks.length} active tasks</span>
-                </div>
-                <div className="w-1 h-4 bg-border"></div>
-                <div className="flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-ai-primary animate-float" />
-                  <span className="ai-gradient-text-subtle">AI recommendations ready</span>
-                </div>
-              </div>
-            </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
+              Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! Let's stay productive.
+            </h2>
+            <p className="text-muted-foreground">
+              You have {activeTasks.length} active tasks • AI recommendations ready
+            </p>
           </div>
 
           {/* Tasks Section */}
-          <section className="space-y-6 animate-slide-in-left">
-            <div className="glass-card p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-primary/10 rounded-lg">
-                    <CheckSquare className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
-                    <p className="text-sm text-muted-foreground">Stay organized and productive</p>
-                  </div>
-                </div>
-                <AddTaskDialog onAddTask={handleAddTask} />
+          <section className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckSquare className="h-5 w-5 text-primary" />
+                <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
+              <AddTaskDialog onAddTask={handleAddTask} />
+            </div>
 
-              {/* Task List */}
-              <div className="space-y-3">
-                {tasks.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <div className="glass-card-subtle p-8">
-                      <CheckSquare className="h-16 w-16 mx-auto mb-4 opacity-30 animate-gentle-bounce" />
-                      <p className="text-lg mb-2">No tasks yet</p>
-                      <p className="text-sm">Add your first task to get started on your journey!</p>
-                    </div>
-                  </div>
-                ) : (
-                  [...tasks]
-                    .sort((a, b) => {
-                      // Sort completed tasks to bottom
-                      if (a.completed && !b.completed) return 1;
-                      if (!a.completed && b.completed) return -1;
-                      return 0;
-                    })
-                    .map((task, index) => (
-                      <div 
-                        key={task.id} 
-                        className="animate-scale-in hover-lift"
-                        style={{ animationDelay: `${index * 50}ms` }}
-                      >
-                        <TaskCard
-                          task={task}
-                          onToggle={handleToggleTask}
-                          onUpdateDueDate={handleUpdateDueDate}
-                          onUpdateStatus={handleUpdateStatus}
-                          onDelete={handleDeleteTask}
-                        />
-                      </div>
-                    ))
-                )}
-              </div>
+            {/* Task List */}
+            <div className="space-y-3">
+              {tasks.length === 0 ? (
+                <div className="text-center py-12 text-muted-foreground">
+                  <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>No tasks yet. Add your first task to get started!</p>
+                </div>
+              ) : (
+                [...tasks]
+                  .sort((a, b) => {
+                    // Sort completed tasks to bottom
+                    if (a.completed && !b.completed) return 1;
+                    if (!a.completed && b.completed) return -1;
+                    return 0;
+                  })
+                  .map(task => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                    onToggle={handleToggleTask}
+                    onUpdateDueDate={handleUpdateDueDate}
+                    onUpdateStatus={handleUpdateStatus}
+                    onDelete={handleDeleteTask}
+                    />
+                  ))
+              )}
             </div>
           </section>
 
           {/* AI Task Prioritization */}
-          <section className="animate-slide-in-right">
-            <div className="glass-card p-6">
-              <TaskPrioritization tasks={tasks} />
-            </div>
+          <section>
+            <TaskPrioritization tasks={tasks} />
           </section>
 
 
           {/* Two Column Layout for Progress and Study Links */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Progress Tracker */}
-            <div id="progress-tracker" className="animate-slide-in-left">
-              <div className="glass-card p-6 hover-lift">
-                <ProgressTracker tasks={tasks} />
-              </div>
+            <div id="progress-tracker">
+              <ProgressTracker tasks={tasks} />
             </div>
             
             {/* Study Links and Quick Notes Column */}
-            <div className="space-y-8 animate-slide-in-right">
-              <div className="glass-card p-6 hover-lift">
-                <StudyLinks />
-              </div>
-              <div className="glass-card p-6 hover-lift">
-                <QuickNotes />
-              </div>
+            <div className="space-y-8">
+              <StudyLinks />
+              <QuickNotes />
             </div>
           </div>
 
           {/* Focus Timer */}
-          <section id="focus-timer" className="animate-fade-in">
-            <div className="glass-card p-8 hover-lift">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Timer className="h-5 w-5 text-primary animate-pulse" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-foreground">Focus Session</h3>
-                  <p className="text-sm text-muted-foreground">Deep work mode for maximum productivity</p>
-                </div>
-              </div>
-              <FocusTimer 
-                timerActive={timerActive}
-                timeRemaining={timeRemaining}
-                timerPaused={timerPaused}
-                onStartTimer={startTimer}
-                onUpdateDuration={updateTimerDuration}
-                onPauseTimer={pauseTimer}
-                onResetTimer={resetTimer}
-                selectedSession={selectedSession}
-                onSessionChange={setSelectedSession}
-              />
+          <section id="focus-timer">
+            <div className="flex items-center gap-2 mb-6">
+              <Timer className="h-5 w-5 text-primary" />
+              <h3 className="text-xl font-semibold text-foreground">Focus Session</h3>
             </div>
+            <FocusTimer 
+              timerActive={timerActive}
+              timeRemaining={timeRemaining}
+              timerPaused={timerPaused}
+              onStartTimer={startTimer}
+              onUpdateDuration={updateTimerDuration}
+              onPauseTimer={pauseTimer}
+              onResetTimer={resetTimer}
+              selectedSession={selectedSession}
+              onSessionChange={setSelectedSession}
+            />
           </section>
 
           {/* Quick Stats Footer */}
-          <footer className="pt-8">
-            <div className="glass-card p-8 animate-fade-in">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center mb-8">
-                <div className="space-y-2 hover-lift">
-                  <div className="p-4 bg-primary/10 rounded-lg">
-                    <p className="text-3xl font-bold text-primary animate-bounce-in">{tasks.length}</p>
-                    <p className="text-sm text-muted-foreground font-medium">Total Tasks</p>
-                  </div>
-                </div>
-                <div className="space-y-2 hover-lift">
-                  <div className="p-4 bg-success/10 rounded-lg">
-                    <p className="text-3xl font-bold text-success animate-bounce-in">{tasks.filter(t => t.completed).length}</p>
-                    <p className="text-sm text-muted-foreground font-medium">Completed</p>
-                  </div>
-                </div>
-                <div className="space-y-2 hover-lift">
-                  <div className="p-4 bg-warning/10 rounded-lg">
-                    <p className="text-3xl font-bold text-warning animate-bounce-in">{tasks.filter(t => t.status === 'in-progress').length}</p>
-                    <p className="text-sm text-muted-foreground font-medium">In Progress</p>
-                  </div>
-                </div>
-                <div className="space-y-2 hover-lift">
-                  <div className="p-4 bg-error/10 rounded-lg">
-                    <p className="text-3xl font-bold text-error animate-bounce-in">{overdueTasks.length}</p>
-                    <p className="text-sm text-muted-foreground font-medium">Overdue</p>
-                  </div>
-                </div>
+          <footer className="pt-8 border-t border-border">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-primary">{tasks.length}</p>
+                <p className="text-sm text-muted-foreground">Total Tasks</p>
               </div>
-              
-              <div className="text-center mt-8 pt-6 border-t border-border space-y-6">
-                <div className="flex flex-col items-center gap-2">
-                  <p className="text-sm font-medium text-foreground">Created by Grant Easton</p>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</p>
+                <p className="text-sm text-muted-foreground">Completed</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</p>
+                <p className="text-sm text-muted-foreground">In Progress</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-2xl font-bold text-error">{overdueTasks.length}</p>
+                <p className="text-sm text-muted-foreground">Overdue</p>
+              </div>
+            </div>
+            
+            <div className="text-center mt-8 pt-6 border-t border-border space-y-6">
+              <div className="flex flex-col items-center gap-2">
+                <p className="text-sm font-medium text-foreground">Created by Grant Easton</p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>Built for Students</span>
                   <span>•</span>
@@ -397,9 +345,9 @@ const Index = () => {
                   <span>•</span>
                   <span>No Distractions</span>
                 </div>
-                </div>
-                
-                {/* Legal and Privacy Section */}
+              </div>
+              
+              {/* Legal and Privacy Section */}
               <div className="space-y-4 pt-4 border-t border-border/50">
                 <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
                   <button className="hover:text-foreground transition-colors">Privacy Policy</button>
@@ -429,7 +377,6 @@ const Index = () => {
                 <div className="text-xs text-muted-foreground/80">
                   <p>© 2025 StudyFlow. All Rights Reserved.</p>
                   <p className="mt-1">Educational use only. Not affiliated with any educational institution.</p>
-                </div>
                 </div>
               </div>
             </div>

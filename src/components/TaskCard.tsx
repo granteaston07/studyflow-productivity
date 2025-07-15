@@ -81,12 +81,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   };
 
   return (
-    <Card className={cn(
-      "glass-card hover-lift p-5 border-l-4 transition-all duration-300 group",
-      task.completed ? "border-l-success opacity-75" : "border-l-primary",
-      task.status === 'overdue' && "border-l-error animate-pulse",
-      task.status === 'in-progress' && "border-l-warning"
-    )}>
+    <Card className="p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]">
       <div className="flex items-start gap-3">
         <Checkbox
           checked={task.completed}
