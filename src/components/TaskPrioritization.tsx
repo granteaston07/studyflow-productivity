@@ -170,7 +170,7 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
                 <span className="text-xs text-muted-foreground">Smart prioritization powered by AI</span>
               </div>
               <Badge variant="secondary" className="text-xs bg-gradient-to-r from-ai-primary/20 to-ai-secondary/20 text-ai-primary border-ai-primary/30">
-                {recommendations.length} insights
+                {recommendations.length} {recommendations.length === 1 ? 'insight' : 'insights'}
               </Badge>
             </div>
             <ChevronDown className={`h-4 w-4 text-ai-primary transition-transform duration-300 absolute right-2 ${isExpanded ? 'rotate-180' : ''}`} />
