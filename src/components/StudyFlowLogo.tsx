@@ -8,7 +8,7 @@ export function StudyFlowLogo({ size = 32 }: { size?: number }) {
     >
       {/* Clipboard Clip */}
       <div 
-        className="absolute bg-gradient-to-br from-primary to-primary-dark rounded-sm shadow-md"
+        className="absolute bg-gradient-to-br from-primary to-ai-primary rounded-sm shadow-md"
         style={{
           width: size * 0.35,
           height: size * 0.12,
@@ -22,7 +22,7 @@ export function StudyFlowLogo({ size = 32 }: { size?: number }) {
         {/* First checkmark */}
         <div className="flex items-center gap-1 mb-0.5">
           <div 
-            className="rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0"
+            className="rounded-sm bg-gradient-to-br from-primary to-ai-primary flex items-center justify-center flex-shrink-0"
             style={{ width: size * 0.15, height: size * 0.15 }}
           >
             <Check className="text-primary-foreground" style={{ width: size * 0.08, height: size * 0.08 }} strokeWidth={3} />
@@ -36,7 +36,7 @@ export function StudyFlowLogo({ size = 32 }: { size?: number }) {
         {/* Second checkmark */}
         <div className="flex items-center gap-1 mb-0.5">
           <div 
-            className="rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0"
+            className="rounded-sm bg-gradient-to-br from-primary to-ai-primary flex items-center justify-center flex-shrink-0"
             style={{ width: size * 0.15, height: size * 0.15 }}
           >
             <Check className="text-primary-foreground" style={{ width: size * 0.08, height: size * 0.08 }} strokeWidth={3} />
@@ -50,7 +50,7 @@ export function StudyFlowLogo({ size = 32 }: { size?: number }) {
         {/* Third checkmark */}
         <div className="flex items-center gap-1">
           <div 
-            className="rounded-sm bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center flex-shrink-0"
+            className="rounded-sm bg-gradient-to-br from-primary to-ai-primary flex items-center justify-center flex-shrink-0"
             style={{ width: size * 0.15, height: size * 0.15 }}
           >
             <Check className="text-primary-foreground" style={{ width: size * 0.08, height: size * 0.08 }} strokeWidth={3} />
