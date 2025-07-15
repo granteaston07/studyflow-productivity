@@ -47,7 +47,7 @@ export function StudyLinks() {
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 p-3 rounded-lg bg-background/50 border border-border/50 hover:bg-background/80 transition-colors group"
+                className="flex items-center gap-2 p-3 rounded-lg bg-background/50 border border-border/50 hover:bg-primary/10 hover:border-primary/30 hover:shadow-md transition-all duration-200 group hover:scale-105"
               >
                 <Icon className="h-5 w-5 text-primary" />
                 <div className="flex-1 min-w-0">

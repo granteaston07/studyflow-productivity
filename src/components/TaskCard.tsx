@@ -23,18 +23,29 @@ interface TaskCardProps {
 export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [showCheckAnimation, setShowCheckAnimation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleToggle = () => {
     if (!task.completed) {
-      setIsCompleting(true);
       setShowCheckAnimation(true);
       setTimeout(() => {
-        onToggle(task.id);
-        setIsCompleting(false);
-      }, 600);
+        setIsCompleting(true);
+        setTimeout(() => {
+          onToggle(task.id);
+          setIsCompleting(false);
+          setShowCheckAnimation(false);
+        }, 400);
+      }, 400);
     } else {
       onToggle(task.id);
     }
+  };
+
+  const handleDelete = () => {
+    setIsDeleting(true);
+    setTimeout(() => {
+      onDelete(task.id);
+    }, 500);
   };
   const getStatusColor = (status: Task['status']) => {
     switch (status) {
@@ -99,7 +110,8 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   return (
     <Card className={cn(
       "p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]",
-      isCompleting && "animate-task-complete"
+      isCompleting && "animate-task-complete",
+      isDeleting && "animate-task-poof"
     )}>
       <div className="flex items-start gap-3">
         <Checkbox
@@ -187,7 +199,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => onDelete(task.id)}
+                onClick={handleDelete}
                 className="h-6 w-6 p-0 text-muted-foreground hover:text-error"
               >
                 <Trash2 className="h-3 w-3" />
