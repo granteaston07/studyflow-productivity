@@ -80,30 +80,13 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     }
   };
 
-  const getStatusBorderColor = (status: Task['status']) => {
-    switch (status) {
-      case 'completed':
-        return 'border-l-success';
-      case 'in-progress':
-        return 'border-l-warning';
-      case 'overdue':
-        return 'border-l-error';
-      default:
-        return 'border-l-primary/50';
-    }
-  };
-
   return (
-    <Card className={cn(
-      "p-4 transition-all duration-300 hover:shadow-lg border border-border/50 hover:border-primary/30",
-      "bg-card/50 backdrop-blur-sm border-l-4 hover:translate-y-[-1px]",
-      getStatusBorderColor(task.status)
-    )}>
+    <Card className="p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]">
       <div className="flex items-start gap-3">
         <Checkbox
           checked={task.completed}
           onCheckedChange={() => onToggle(task.id)}
-          className="mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all duration-200"
+          className="mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success"
         />
         
         <div className="flex-1 space-y-2">

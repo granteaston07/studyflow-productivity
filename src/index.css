@@ -157,25 +157,4 @@ All colors MUST be HSL for consistency */
   .ai-gradient-text-accent {
     @apply bg-gradient-to-r from-ai-accent via-ai-primary to-ai-secondary bg-clip-text text-transparent font-semibold;
   }
-
-  /* Modern Effects */
-  .hover-lift {
-    @apply transition-all duration-200 hover:translate-y-[-2px] hover:shadow-lg;
-  }
-
-  .text-glow {
-    @apply drop-shadow-[0_0_8px_rgba(59,130,246,0.3)];
-  }
-
-  .pulse-gentle {
-    @apply animate-[pulse_3s_ease-in-out_infinite];
-  }
-
-  .bounce-gentle {
-    @apply animate-[bounce_2s_ease-in-out_infinite];
-  }
-
-  .gradient-button {
-    @apply bg-gradient-to-r from-primary via-ai-primary to-ai-accent hover:from-primary/90 hover:via-ai-primary/90 hover:to-ai-accent/90 transition-all duration-200;
-  }
 }
