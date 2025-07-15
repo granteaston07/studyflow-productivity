@@ -1,4 +1,4 @@
-import { Check, Clock, AlertTriangle, Calendar, Edit, Trash2 } from "lucide-react";
+import { Check, Clock, AlertTriangle, Calendar, Edit, Trash2, BookOpen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -174,6 +174,12 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
           </div>
           
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {task.source === 'google_classroom' && (
+              <div className="flex items-center gap-1">
+                <BookOpen className="h-3 w-3 text-blue-500" />
+                <span className="text-xs text-blue-500 font-medium">Google Classroom</span>
+              </div>
+            )}
             {task.subject && (
               <span className="bg-primary-light text-primary px-2 py-1 rounded-md text-xs font-medium">
                 {task.subject}
