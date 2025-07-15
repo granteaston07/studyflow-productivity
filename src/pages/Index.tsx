@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap } from "lucide-react";
+import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
 import { TaskPrioritization } from "@/components/TaskPrioritization";
@@ -132,12 +132,6 @@ const Index = () => {
     );
   }
 
-  // Redirect to auth if not logged in
-  if (!user) {
-    window.location.href = '/auth';
-    return null;
-  }
-
   const activeTasks = tasks.filter(task => !task.completed);
   
   // Check for overdue tasks by comparing due date to current time
@@ -210,14 +204,26 @@ const Index = () => {
                 Study Mode
               </Button>
               <ThemeToggle />
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => signOut()}
-                className="hover:bg-error/10 hover:text-error hover:border-error/30"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              {user ? (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => signOut()}
+                  className="hover:bg-error/10 hover:text-error hover:border-error/30"
+                >
+                  <LogOut className="h-4 w-4" />
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => window.location.href = '/auth'}
+                  className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -229,11 +235,18 @@ const Index = () => {
           {/* Welcome Section */}
           <div className="text-center space-y-2">
             <h2 className="text-3xl font-bold text-foreground bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
-              Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! Let's stay productive.
+              Welcome{user?.user_metadata?.display_name ? ` back ${user.user_metadata.display_name}` : ''}! Let's stay productive.
             </h2>
             <p className="text-muted-foreground">
               You have <span className="text-lg font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent animate-pulse-glow">{activeTasks.length}</span> active {activeTasks.length === 1 ? 'task' : 'tasks'} • AI recommendations ready
             </p>
+            {!user && (
+              <div className="mt-4 p-4 bg-warning/10 border border-warning/20 rounded-lg">
+                <p className="text-sm text-warning-foreground">
+                  ⚠️ Guest Mode: Your tasks and progress won't be saved. <a href="/auth" className="underline hover:text-primary">Sign in</a> to save your work.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Tasks Section */}

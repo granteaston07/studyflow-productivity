@@ -1,15 +1,16 @@
 import { useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Brain, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Brain, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
@@ -42,6 +43,10 @@ export default function Auth() {
     
     await signUp(email, password, displayName);
     setIsSubmitting(false);
+  };
+
+  const handleGuestMode = () => {
+    navigate('/');
   };
 
   if (loading) {
@@ -194,6 +199,27 @@ export default function Auth() {
               </form>
             </TabsContent>
           </Tabs>
+          
+          {/* Guest Mode Section */}
+          <div className="mt-6 pt-6 border-t border-border">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-warning">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">Continue without signing in</span>
+              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                You can use StudyFlow without creating an account, but your tasks, notes, and progress won't be saved. 
+                Everything will be lost when you close the browser or refresh the page.
+              </p>
+              <Button 
+                variant="outline" 
+                className="w-full hover:bg-muted/50"
+                onClick={handleGuestMode}
+              >
+                Continue as Guest
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
