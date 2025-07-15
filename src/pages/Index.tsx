@@ -243,7 +243,7 @@ const Index = () => {
             {!user && (
               <div className="mt-4 text-sm text-muted-foreground">
                 <p>
-                  📝 Guest Mode: Tasks are temporary. <button onClick={() => window.location.href = '/auth'} className="text-primary hover:underline">Sign in</button> to save your work.
+                  ⚠️ Guest Mode: Tasks are temporary. <button onClick={() => window.location.href = '/auth'} className="text-primary hover:underline">Sign in</button> to save your work.
                 </p>
               </div>
             )}
