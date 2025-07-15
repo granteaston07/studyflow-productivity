@@ -232,7 +232,7 @@ const Index = () => {
               Welcome back{user?.user_metadata?.display_name ? ` ${user.user_metadata.display_name}` : ''}! Let's stay productive.
             </h2>
             <p className="text-muted-foreground">
-              You have {activeTasks.length} active tasks • AI recommendations ready
+              You have <span className="text-2xl font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent animate-pulse-glow">{activeTasks.length}</span> active tasks • AI recommendations ready
             </p>
           </div>
 
@@ -249,7 +249,7 @@ const Index = () => {
             {/* Task List */}
             <div className="space-y-3">
               {tasks.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
+                <div className="text-center py-12 text-muted-foreground animate-slide-up">
                   <CheckSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>No tasks yet. Add your first task to get started!</p>
                 </div>
@@ -261,15 +261,20 @@ const Index = () => {
                     if (!a.completed && b.completed) return -1;
                     return 0;
                   })
-                  .map(task => (
-                    <TaskCard
+                  .map((task, index) => (
+                    <div 
                       key={task.id}
-                      task={task}
-                    onToggle={handleToggleTask}
-                    onUpdateDueDate={handleUpdateDueDate}
-                    onUpdateStatus={handleUpdateStatus}
-                    onDelete={handleDeleteTask}
-                    />
+                      className="animate-slide-up"
+                      style={{ animationDelay: `${index * 0.1}s` }}
+                    >
+                      <TaskCard
+                        task={task}
+                        onToggle={handleToggleTask}
+                        onUpdateDueDate={handleUpdateDueDate}
+                        onUpdateStatus={handleUpdateStatus}
+                        onDelete={handleDeleteTask}
+                      />
+                    </div>
                   ))
               )}
             </div>
@@ -316,22 +321,22 @@ const Index = () => {
 
           {/* Quick Stats Footer */}
           <footer className="pt-8 border-t border-border">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-primary">{tasks.length}</p>
-                <p className="text-sm text-muted-foreground">Total Tasks</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="stats-card-primary animate-scale-in">
+                <p className="text-2xl font-bold animate-bounce-gentle">{tasks.length}</p>
+                <p className="text-sm opacity-80">Total Tasks</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</p>
-                <p className="text-sm text-muted-foreground">Completed</p>
+              <div className="stats-card-success animate-scale-in" style={{ animationDelay: '0.1s' }}>
+                <p className="text-2xl font-bold animate-bounce-gentle">{tasks.filter(t => t.completed).length}</p>
+                <p className="text-sm opacity-80">Completed</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</p>
-                <p className="text-sm text-muted-foreground">In Progress</p>
+              <div className="stats-card-warning animate-scale-in" style={{ animationDelay: '0.2s' }}>
+                <p className="text-2xl font-bold animate-bounce-gentle">{tasks.filter(t => t.status === 'in-progress').length}</p>
+                <p className="text-sm opacity-80">In Progress</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-2xl font-bold text-error">{overdueTasks.length}</p>
-                <p className="text-sm text-muted-foreground">Overdue</p>
+              <div className="stats-card-error animate-scale-in" style={{ animationDelay: '0.3s' }}>
+                <p className="text-2xl font-bold animate-bounce-gentle">{overdueTasks.length}</p>
+                <p className="text-sm opacity-80">Overdue</p>
               </div>
             </div>
             
