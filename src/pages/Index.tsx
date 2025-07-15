@@ -171,39 +171,46 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="bg-card/80 backdrop-blur-md border-b border-border/50 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-3">
-              <div className="p-2">
-                <StudyFlowLogo size={48} />
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+          <div className="flex items-center justify-between min-h-16 py-2">
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <div className="p-1">
+                <StudyFlowLogo size={40} />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-foreground">StudyFlow</h1>
-                <p className="text-sm text-muted-foreground">AI-Powered Student Productivity</p>
+              <div className="min-w-0">
+                <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">StudyFlow</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">AI-Powered Student Productivity</p>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              {overdueTasks.length > 0 && (
-                <Badge variant="destructive" className="bg-error text-error-foreground animate-pulse">
-                  {overdueTasks.length} overdue
-                </Badge>
-              )}
-              {todayTasks.length > 0 && (
-                <Badge variant="secondary" className="bg-warning-light text-warning">
-                  {todayTasks.length} due today
-                </Badge>
-              )}
+            <div className="flex items-center gap-1 sm:gap-2 lg:gap-4 flex-shrink-0">
+              {/* Badges - Hide on very small screens */}
+              <div className="hidden sm:flex items-center gap-2">
+                {overdueTasks.length > 0 && (
+                  <Badge variant="destructive" className="bg-error text-error-foreground animate-pulse text-xs">
+                    {overdueTasks.length} overdue
+                  </Badge>
+                )}
+                {todayTasks.length > 0 && (
+                  <Badge variant="secondary" className="bg-warning-light text-warning text-xs">
+                    {todayTasks.length} due today
+                  </Badge>
+                )}
+              </div>
+              
+              {/* Study Mode Button */}
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => setStudyMode(true)}
-                className="hover:bg-ai-primary/10 hover:text-ai-primary hover:border-ai-primary/30"
+                className="hover:bg-ai-primary/10 hover:text-ai-primary hover:border-ai-primary/30 text-xs sm:text-sm"
               >
-                <GraduationCap className="h-4 w-4 mr-2" />
-                Study Mode
+                <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Study Mode</span>
               </Button>
+              
               <ThemeToggle />
+              
               {user ? (
                 <Button 
                   variant="outline" 
@@ -211,17 +218,17 @@ const Index = () => {
                   onClick={() => signOut()}
                   className="hover:bg-error/10 hover:text-error hover:border-error/30"
                 >
-                  <LogOut className="h-4 w-4" />
+                  <LogOut className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               ) : (
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => window.location.href = '/auth'}
-                  className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                  className="hover:bg-primary/10 hover:text-primary hover:border-primary/30 text-xs sm:text-sm"
                 >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Sign In
+                  <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Sign In</span>
                 </Button>
               )}
             </div>
