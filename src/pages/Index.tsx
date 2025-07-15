@@ -11,14 +11,17 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
+  const { t } = useLanguage();
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -178,8 +181,8 @@ const Index = () => {
                 <StudyFlowLogo size={40} />
               </div>
               <div className="min-w-0">
-                <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">StudyFlow</h1>
-                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">AI-Powered Student Productivity</p>
+                <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">{t('app.title')}</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">{t('app.subtitle')}</p>
               </div>
             </div>
             
@@ -188,12 +191,12 @@ const Index = () => {
               <div className="hidden sm:flex items-center gap-2">
                 {overdueTasks.length > 0 && (
                   <Badge variant="destructive" className="bg-error text-error-foreground animate-pulse text-xs">
-                    {overdueTasks.length} overdue
+                    {overdueTasks.length} {t('header.overdue')}
                   </Badge>
                 )}
                 {todayTasks.length > 0 && (
                   <Badge variant="secondary" className="bg-warning-light text-warning text-xs">
-                    {todayTasks.length} due today
+                    {todayTasks.length} {t('header.dueToday')}
                   </Badge>
                 )}
               </div>
@@ -206,9 +209,10 @@ const Index = () => {
                 className="hover:bg-ai-primary/10 hover:text-ai-primary hover:border-ai-primary/30 text-xs sm:text-sm"
               >
                 <GraduationCap className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Study Mode</span>
+                <span className="hidden sm:inline">{t('header.studyMode')}</span>
               </Button>
               
+              <LanguageSelector />
               <ThemeToggle />
               
               {user ? (
@@ -228,7 +232,7 @@ const Index = () => {
                   className="hover:bg-primary/10 hover:text-primary hover:border-primary/30 text-xs sm:text-sm"
                 >
                   <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Sign In</span>
+                  <span className="hidden sm:inline">{t('header.signIn')}</span>
                 </Button>
               )}
             </div>
