@@ -23,7 +23,12 @@ export function useTasks() {
   const [loading, setLoading] = useState(true);
 
   const fetchTasks = async () => {
-    if (!user) return;
+    if (!user) {
+      // Guest mode: Clear any existing tasks and set loading to false
+      setTasks([]);
+      setLoading(false);
+      return;
+    }
     
     try {
       const { data, error } = await supabase
@@ -79,7 +84,26 @@ export function useTasks() {
   }, [user]);
 
   const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!user) return;
+    if (!user) {
+      // Guest mode: Add to local state only, no database save
+      const guestTask: Task = {
+        id: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        title: taskData.title,
+        subject: taskData.subject,
+        description: taskData.description,
+        dueDate: taskData.dueDate,
+        completed: taskData.completed,
+        priority: taskData.priority,
+        status: taskData.status,
+        completedAt: taskData.completedAt,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      setTasks(prev => [guestTask, ...prev]);
+      toast.success('Task added (Guest Mode - Sign in to save permanently)');
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -123,7 +147,15 @@ export function useTasks() {
   };
 
   const updateTask = async (taskId: string, updates: Partial<Task>) => {
-    if (!user) return;
+    if (!user) {
+      // Guest mode: Update local state only
+      setTasks(prev => prev.map(task => 
+        task.id === taskId 
+          ? { ...task, ...updates, updatedAt: new Date() }
+          : task
+      ));
+      return;
+    }
 
     try {
       const updateData: any = {};
@@ -158,7 +190,12 @@ export function useTasks() {
   };
 
   const deleteTask = async (taskId: string) => {
-    if (!user) return;
+    if (!user) {
+      // Guest mode: Remove from local state only
+      setTasks(prev => prev.filter(task => task.id !== taskId));
+      toast.success('Task deleted (Guest Mode)');
+      return;
+    }
 
     try {
       const { error } = await supabase
