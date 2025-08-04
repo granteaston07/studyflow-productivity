@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
@@ -18,6 +19,7 @@ import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
@@ -130,6 +132,12 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    navigate('/auth');
+    return null;
   }
 
   const activeTasks = tasks.filter(task => !task.completed);
