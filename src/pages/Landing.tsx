@@ -225,8 +225,11 @@ export default function Landing() {
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Install StudyFlow as an App
             </h2>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground mb-4">
               Get quick access by installing StudyFlow directly on your device for the best experience.
+            </p>
+            <p className="text-lg text-primary font-medium">
+              Visit <span className="font-bold">studyflow.us</span> on your device and follow the steps below:
             </p>
           </div>
 
@@ -237,10 +240,11 @@ export default function Landing() {
                 <Monitor className="w-12 h-12 text-primary mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-3">Desktop (Chrome/Edge)</h3>
                 <ol className="text-sm text-muted-foreground text-left space-y-2">
-                  <li>1. Click the <Download className="inline w-3 h-3 mx-1" /> install icon in your browser's address bar</li>
-                  <li>2. Click "Install" in the popup</li>
-                  <li>3. StudyFlow will open as a desktop app</li>
-                  <li>4. Pin to taskbar for quick access</li>
+                  <li>1. Go to <span className="font-medium text-primary">studyflow.us</span> in your browser</li>
+                  <li>2. Click the <Download className="inline w-3 h-3 mx-1" /> install icon in the address bar</li>
+                  <li>3. Click "Install" in the popup</li>
+                  <li>4. StudyFlow will open as a desktop app</li>
+                  <li>5. Pin to taskbar for quick access</li>
                 </ol>
               </CardContent>
             </Card>
@@ -251,7 +255,7 @@ export default function Landing() {
                 <Monitor className="w-12 h-12 text-primary mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-3">Mac (Safari)</h3>
                 <ol className="text-sm text-muted-foreground text-left space-y-2">
-                  <li>1. Open Safari and visit StudyFlow</li>
+                  <li>1. Open Safari and visit <span className="font-medium text-primary">studyflow.us</span></li>
                   <li>2. Click "Share" button in the toolbar</li>
                   <li>3. Select "Add to Dock"</li>
                   <li>4. StudyFlow will appear in your Dock</li>
@@ -265,7 +269,7 @@ export default function Landing() {
                 <Smartphone className="w-12 h-12 text-primary mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-3">iPhone (Safari)</h3>
                 <ol className="text-sm text-muted-foreground text-left space-y-2">
-                  <li>1. Open Safari and visit StudyFlow</li>
+                  <li>1. Open Safari and visit <span className="font-medium text-primary">studyflow.us</span></li>
                   <li>2. Tap the "Share" button</li>
                   <li>3. Scroll and tap "Add to Home Screen"</li>
                   <li>4. Tap "Add" to confirm</li>
@@ -276,7 +280,7 @@ export default function Landing() {
 
           <div className="mt-8 p-4 bg-muted/50 rounded-lg">
             <p className="text-sm text-muted-foreground text-center">
-              <strong>Tip:</strong> Installing StudyFlow as an app gives you faster access, push notifications, and a distraction-free experience without browser tabs.
+              <strong>Tip:</strong> Installing StudyFlow from <span className="font-medium text-primary">studyflow.us</span> as an app gives you faster access, push notifications, and a distraction-free experience without browser tabs.
             </p>
           </div>
         </div>
