@@ -539,21 +539,18 @@ export const StudyCalendar = () => {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                           <AlertDialogContent className="max-w-lg">
-                             <AlertDialogHeader className="text-center pb-2">
-                               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
-                                 <Trash2 className="h-8 w-8 text-destructive" />
-                               </div>
-                               <AlertDialogTitle className="text-2xl font-semibold">Delete Goal</AlertDialogTitle>
-                               <AlertDialogDescription className="text-base text-muted-foreground">
-                                 Choose how you want to handle "<span className="font-medium text-foreground">{goal.title}</span>":
+                           <AlertDialogContent className="max-w-sm">
+                             <AlertDialogHeader className="text-center">
+                               <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                               <AlertDialogDescription>
+                                 How do you want to handle "{goal.title}"?
                                </AlertDialogDescription>
                              </AlertDialogHeader>
-                             <div className="space-y-3 p-6">
+                             <div className="space-y-2 pt-4">
                                <AlertDialogAction asChild>
                                  <Button 
                                    variant="outline" 
-                                   className="w-full justify-start text-left h-auto p-4 border-2 hover:border-primary/50 transition-colors"
+                                   className="w-full"
                                     onClick={async () => {
                                       if (goal.frequency === 'once') {
                                         await deleteGoal(goal.id);
@@ -564,19 +561,13 @@ export const StudyCalendar = () => {
                                       }
                                     }}
                                   >
-                                   <div className="flex items-start gap-3">
-                                     <div className="text-2xl">🚫</div>
-                                     <div>
-                                       <div className="font-semibold text-base">Stop from tomorrow onwards</div>
-                                       <div className="text-sm text-muted-foreground mt-1">Goal will stop appearing from tomorrow, but keeps all history</div>
-                                     </div>
-                                   </div>
+                                   Stop from tomorrow onwards
                                   </Button>
                                </AlertDialogAction>
                                <AlertDialogAction asChild>
                                  <Button 
                                    variant="secondary" 
-                                   className="w-full justify-start text-left h-auto p-4 border-2 hover:border-warning/50 transition-colors"
+                                   className="w-full"
                                     onClick={async () => {
                                       // For one-time goals, delete the entire goal
                                       if (goal.frequency === 'once') {
@@ -593,19 +584,11 @@ export const StudyCalendar = () => {
                                       }
                                     }}
                                   >
-                                   <div className="flex items-start gap-3">
-                                     <div className="text-2xl">⏭️</div>
-                                     <div>
-                                       <div className="font-semibold text-base">Skip this instance only</div>
-                                       <div className="text-sm text-muted-foreground mt-1">Mark this occurrence as skipped without affecting other dates</div>
-                                     </div>
-                                   </div>
+                                   Skip this instance only
                                   </Button>
                                </AlertDialogAction>
-                              </div>
-                             <AlertDialogFooter className="pt-0 pb-6">
                                <AlertDialogCancel className="w-full">Cancel</AlertDialogCancel>
-                              </AlertDialogFooter>
+                              </div>
                            </AlertDialogContent>
                          </AlertDialog>
                        </div>
