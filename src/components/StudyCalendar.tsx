@@ -33,6 +33,7 @@ export const StudyCalendar = () => {
     specific_date?: Date;
     week_day?: number;
     month_date?: number;
+    end_date?: Date;
   }>({
     title: '',
     description: '',
@@ -41,7 +42,8 @@ export const StudyCalendar = () => {
     unit: 'minutes',
     specific_date: undefined,
     week_day: undefined,
-    month_date: undefined
+    month_date: undefined,
+    end_date: undefined
   });
 
   const colors = [
@@ -102,7 +104,7 @@ export const StudyCalendar = () => {
         week_day: newGoal.frequency === 'weekly' ? newGoal.week_day : null,
         month_date: newGoal.frequency === 'monthly' ? newGoal.month_date : null,
         repeat_interval: 1,
-        repeat_end_date: null,
+        repeat_end_date: newGoal.end_date?.toISOString() || null,
         repeat_count: null
       });
       
@@ -114,7 +116,8 @@ export const StudyCalendar = () => {
         unit: 'minutes',
         specific_date: undefined,
         week_day: undefined,
-        month_date: undefined
+        month_date: undefined,
+        end_date: undefined
       });
       setShowAddGoal(false);
     } catch (error) {
@@ -140,6 +143,12 @@ export const StudyCalendar = () => {
     return goals.filter(goal => {
       const goalCreatedAt = new Date(goal.created_at);
       if (date < goalCreatedAt) return false;
+
+      // Check if goal has ended
+      if (goal.repeat_end_date) {
+        const endDate = new Date(goal.repeat_end_date);
+        if (date > endDate) return false;
+      }
 
       switch (goal.frequency) {
         case 'once':
@@ -285,13 +294,13 @@ export const StudyCalendar = () => {
                   <Select 
                     value={newGoal.frequency} 
                     onValueChange={(value: 'once' | 'daily' | 'weekly' | 'monthly') => {
-                      setNewGoal(prev => ({ 
-                        ...prev, 
-                        frequency: value,
-                        specific_date: undefined,
-                        week_day: undefined,
-                        month_date: undefined
-                      }));
+                       setNewGoal(prev => ({ 
+                         ...prev, 
+                         frequency: value,
+                         specific_date: undefined,
+                         week_day: undefined,
+                         month_date: undefined
+                       }));
                     }}
                   >
                     <SelectTrigger>
@@ -370,34 +379,64 @@ export const StudyCalendar = () => {
                   </div>
                 )}
 
-                <div>
-                  <Label htmlFor="target">Target</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="target"
-                      type="number"
-                      value={newGoal.target_value}
-                      onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
-                      min="1"
-                      className="flex-1"
-                    />
-                    <Select 
-                      value={newGoal.unit} 
-                      onValueChange={(value) => setNewGoal(prev => ({ ...prev, unit: value }))}
-                    >
-                      <SelectTrigger className="w-32">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="minutes">Minutes</SelectItem>
-                        <SelectItem value="hours">Hours</SelectItem>
-                        <SelectItem value="pages">Pages</SelectItem>
-                        <SelectItem value="problems">Problems</SelectItem>
-                        <SelectItem value="exercises">Exercises</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+                 {(newGoal.frequency === 'daily' || newGoal.frequency === 'weekly' || newGoal.frequency === 'monthly') && (
+                   <div>
+                     <Label>End Date (optional)</Label>
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <Button
+                           variant="outline"
+                           className={cn(
+                             "w-full justify-start text-left font-normal",
+                             !newGoal.end_date && "text-muted-foreground"
+                           )}
+                         >
+                           <CalendarIcon className="mr-2 h-4 w-4" />
+                           {newGoal.end_date ? format(newGoal.end_date, "PPP") : "No end date"}
+                         </Button>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0" align="start">
+                         <Calendar
+                           mode="single"
+                           selected={newGoal.end_date}
+                           onSelect={(date) => setNewGoal(prev => ({ ...prev, end_date: date }))}
+                           disabled={(date) => date < new Date()}
+                           initialFocus
+                           className="pointer-events-auto"
+                         />
+                       </PopoverContent>
+                     </Popover>
+                   </div>
+                 )}
+
+                 <div>
+                   <Label htmlFor="target">Target</Label>
+                   <div className="flex gap-2">
+                     <Input
+                       id="target"
+                       type="number"
+                       value={newGoal.target_value}
+                       onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
+                       min="1"
+                       className="flex-1"
+                     />
+                     <Select 
+                       value={newGoal.unit} 
+                       onValueChange={(value) => setNewGoal(prev => ({ ...prev, unit: value }))}
+                     >
+                       <SelectTrigger className="w-32">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="minutes">Minutes</SelectItem>
+                         <SelectItem value="hours">Hours</SelectItem>
+                         <SelectItem value="pages">Pages</SelectItem>
+                         <SelectItem value="problems">Problems</SelectItem>
+                         <SelectItem value="exercises">Exercises</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
 
                 <Button onClick={addStudyGoal} className="w-full" disabled={!newGoal.title}>
                   Add Goal
@@ -457,20 +496,48 @@ export const StudyCalendar = () => {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Delete Goal</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                This will permanently delete "{goal.title}" and all its completion history. This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => deleteGoal(goal.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                                Delete Goal
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
+                           <AlertDialogContent>
+                             <AlertDialogHeader>
+                               <AlertDialogTitle>Delete Goal</AlertDialogTitle>
+                               <AlertDialogDescription>
+                                 Choose how you want to delete "{goal.title}":
+                               </AlertDialogDescription>
+                             </AlertDialogHeader>
+                             <div className="space-y-3 my-4">
+                               <Button 
+                                 variant="outline" 
+                                 className="w-full justify-start text-left"
+                                 onClick={async () => {
+                                   if (goal.frequency === 'once') {
+                                     await deleteGoal(goal.id);
+                                   } else {
+                                     // For recurring goals, set end date to yesterday
+                                     const yesterday = new Date();
+                                     yesterday.setDate(yesterday.getDate() - 1);
+                                     await updateGoal(goal.id, { repeat_end_date: yesterday.toISOString() });
+                                   }
+                                 }}
+                               >
+                                 <div>
+                                   <div className="font-medium">Remove from this date forward</div>
+                                   <div className="text-sm text-muted-foreground">Goal will stop appearing from today onwards</div>
+                                 </div>
+                               </Button>
+                               <Button 
+                                 variant="destructive" 
+                                 className="w-full justify-start text-left"
+                                 onClick={() => deleteGoal(goal.id)}
+                               >
+                                 <div>
+                                   <div className="font-medium">Delete completely</div>
+                                   <div className="text-sm text-muted-foreground">Remove goal and all completion history permanently</div>
+                                 </div>
+                               </Button>
+                             </div>
+                             <AlertDialogFooter>
+                               <AlertDialogCancel>Cancel</AlertDialogCancel>
+                             </AlertDialogFooter>
+                           </AlertDialogContent>
                         </AlertDialog>
                       </div>
                     </div>

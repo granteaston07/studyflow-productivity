@@ -4,6 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 import { StudyGoal } from "@/hooks/useStudyGoals";
 
 interface EditStudyGoalDialogProps {
@@ -19,7 +24,8 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
     description: '',
     frequency: 'daily' as 'once' | 'daily' | 'weekly' | 'monthly',
     target_value: 30,
-    unit: 'minutes'
+    unit: 'minutes',
+    end_date: undefined as Date | undefined
   });
 
   useEffect(() => {
@@ -34,7 +40,8 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
         description: goal.description || '',
         frequency: simpleFreq,
         target_value: goal.target_value,
-        unit: goal.unit
+        unit: goal.unit,
+        end_date: goal.repeat_end_date ? new Date(goal.repeat_end_date) : undefined
       });
     }
   }, [goal]);
@@ -54,7 +61,8 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
       target_value: editData.target_value,
       unit: editData.unit,
       week_day: editData.frequency === 'weekly' ? currentDay : null,
-      month_date: editData.frequency === 'monthly' ? currentDate : null
+      month_date: editData.frequency === 'monthly' ? currentDate : null,
+      repeat_end_date: editData.end_date?.toISOString() || null
     };
 
     await onSave(goal.id, updates);
@@ -109,6 +117,36 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
               </SelectContent>
             </Select>
           </div>
+
+          {(editData.frequency === 'daily' || editData.frequency === 'weekly' || editData.frequency === 'monthly') && (
+            <div>
+              <Label>End Date (optional)</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !editData.end_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editData.end_date ? format(editData.end_date, "PPP") : "No end date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={editData.end_date}
+                    onSelect={(date) => setEditData(prev => ({ ...prev, end_date: date }))}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="edit-target">Target</Label>
