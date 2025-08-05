@@ -147,7 +147,7 @@ export const StudyCalendar = () => {
       // Check if goal has ended
       if (goal.repeat_end_date) {
         const endDate = new Date(goal.repeat_end_date);
-        if (date > endDate) return false;
+        if (date >= endDate) return false;
       }
 
       switch (goal.frequency) {
@@ -511,26 +511,30 @@ export const StudyCalendar = () => {
                                    if (goal.frequency === 'once') {
                                      await deleteGoal(goal.id);
                                    } else {
-                                     // For recurring goals, set end date to yesterday
-                                     const yesterday = new Date();
-                                     yesterday.setDate(yesterday.getDate() - 1);
-                                     await updateGoal(goal.id, { repeat_end_date: yesterday.toISOString() });
+                                     // Set end date to today so it stops appearing from tomorrow
+                                     const today = new Date();
+                                     await updateGoal(goal.id, { repeat_end_date: today.toISOString() });
                                    }
                                  }}
                                >
                                  <div>
-                                   <div className="font-medium">Remove from this date forward</div>
-                                   <div className="text-sm text-muted-foreground">Goal will stop appearing from today onwards</div>
+                                   <div className="font-medium">Stop from tomorrow onwards</div>
+                                   <div className="text-sm text-muted-foreground">Goal will stop appearing from tomorrow, but keeps history</div>
                                  </div>
                                </Button>
                                <Button 
                                  variant="destructive" 
                                  className="w-full justify-start text-left"
-                                 onClick={() => deleteGoal(goal.id)}
+                                 onClick={async () => {
+                                   // Remove completion for this specific date only
+                                   const dateString = format(selectedDate!, 'yyyy-MM-dd');
+                                   const updatedCompletedDates = goal.completed_dates.filter(d => d !== dateString);
+                                   await updateGoal(goal.id, { completed_dates: updatedCompletedDates });
+                                 }}
                                >
                                  <div>
-                                   <div className="font-medium">Delete completely</div>
-                                   <div className="text-sm text-muted-foreground">Remove goal and all completion history permanently</div>
+                                   <div className="font-medium">Delete this instance only</div>
+                                   <div className="text-sm text-muted-foreground">Remove completion for just this date</div>
                                  </div>
                                </Button>
                              </div>
