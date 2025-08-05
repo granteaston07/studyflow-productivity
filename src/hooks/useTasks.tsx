@@ -16,6 +16,11 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   sortOrder: number;
+  repeatType?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
+  repeatInterval?: number;
+  repeatEndDate?: Date;
+  repeatCount?: number;
+  parentTaskId?: string;
 }
 
 export function useTasks() {
@@ -69,7 +74,12 @@ export function useTasks() {
           completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
           createdAt: new Date(task.created_at),
           updatedAt: new Date(task.updated_at),
-          sortOrder: task.sort_order || 0
+          sortOrder: task.sort_order || 0,
+          repeatType: task.repeat_type as Task['repeatType'],
+          repeatInterval: task.repeat_interval,
+          repeatEndDate: task.repeat_end_date ? new Date(task.repeat_end_date) : undefined,
+          repeatCount: task.repeat_count,
+          parentTaskId: task.parent_task_id
         };
       });
 
@@ -143,7 +153,12 @@ export function useTasks() {
           status: taskData.status,
           completed: taskData.completed,
           completed_at: taskData.completedAt?.toISOString(),
-          sort_order: sortOrder
+          sort_order: sortOrder,
+          repeat_type: taskData.repeatType,
+          repeat_interval: taskData.repeatInterval,
+          repeat_end_date: taskData.repeatEndDate?.toISOString(),
+          repeat_count: taskData.repeatCount,
+          parent_task_id: taskData.parentTaskId
         })
         .select()
         .single();
@@ -162,7 +177,12 @@ export function useTasks() {
         completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
-        sortOrder: data.sort_order || 0
+        sortOrder: data.sort_order || 0,
+        repeatType: data.repeat_type as Task['repeatType'],
+        repeatInterval: data.repeat_interval,
+        repeatEndDate: data.repeat_end_date ? new Date(data.repeat_end_date) : undefined,
+        repeatCount: data.repeat_count,
+        parentTaskId: data.parent_task_id
       };
 
       // Refresh tasks to get updated sort order
@@ -193,6 +213,11 @@ export function useTasks() {
       if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate?.toISOString();
       if (updates.priority !== undefined) updateData.priority = updates.priority;
       if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.repeatType !== undefined) updateData.repeat_type = updates.repeatType;
+      if (updates.repeatInterval !== undefined) updateData.repeat_interval = updates.repeatInterval;
+      if (updates.repeatEndDate !== undefined) updateData.repeat_end_date = updates.repeatEndDate?.toISOString();
+      if (updates.repeatCount !== undefined) updateData.repeat_count = updates.repeatCount;
+      if (updates.parentTaskId !== undefined) updateData.parent_task_id = updates.parentTaskId;
       if (updates.completed !== undefined) {
         updateData.completed = updates.completed;
         updateData.completed_at = updates.completed ? new Date().toISOString() : null;

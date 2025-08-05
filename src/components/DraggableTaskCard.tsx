@@ -7,13 +7,13 @@ import { GripVertical } from 'lucide-react';
 interface DraggableTaskCardProps {
   task: Task;
   onToggle: (id: string) => void;
-  onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
+  onUpdate: (id: string, updates: Partial<Task>) => void;
   onUpdateStatus: (id: string, status: Task['status']) => void;
   onDelete: (id: string) => void;
   isReorderMode: boolean;
 }
 
-export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, isReorderMode }: DraggableTaskCardProps) {
+export function DraggableTaskCard({ task, onToggle, onUpdate, onUpdateStatus, onDelete, isReorderMode }: DraggableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -45,7 +45,7 @@ export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateSta
         <TaskCard
           task={task}
           onToggle={onToggle}
-          onUpdateDueDate={onUpdateDueDate}
+          onUpdate={onUpdate}
           onUpdateStatus={onUpdateStatus}
           onDelete={onDelete}
         />

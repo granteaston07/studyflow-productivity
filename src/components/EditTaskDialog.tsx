@@ -1,69 +1,40 @@
 import { useState, useEffect } from "react";
-import { Plus, Calendar, BookOpen } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar, BookOpen, Plus } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Task } from "./TaskCard";
+import { Task } from "@/hooks/useTasks";
 
-interface AddTaskFormProps {
-  onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => void;
+interface EditTaskDialogProps {
+  task: Task;
+  open: boolean;
   onClose: () => void;
+  onUpdate: (taskId: string, updates: Partial<Task>) => void;
 }
 
-export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
+export function EditTaskDialog({ task, open, onClose, onUpdate }: EditTaskDialogProps) {
   const [taskData, setTaskData] = useState({
-    title: '',
-    subject: '',
-    priority: 'medium' as Task['priority'],
-    dueDate: undefined as Date | undefined,
-    repeatType: 'none' as Task['repeatType'],
-    repeatInterval: 1,
-    repeatEndDate: undefined as Date | undefined,
-    repeatCount: undefined as number | undefined
+    title: task.title,
+    subject: task.subject,
+    description: task.description || '',
+    priority: task.priority,
+    dueDate: task.dueDate,
+    repeatType: task.repeatType || 'none',
+    repeatInterval: task.repeatInterval || 1,
+    repeatEndDate: task.repeatEndDate,
+    repeatCount: task.repeatCount
   });
   
   const [customSubjects, setCustomSubjects] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customSubjectInput, setCustomSubjectInput] = useState('');
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!taskData.title.trim()) return;
-
-    onAddTask({
-      title: taskData.title.trim(),
-      subject: taskData.subject || 'General',
-      description: undefined,
-      dueDate: taskData.dueDate,
-      completed: false,
-      priority: taskData.priority,
-      status: taskData.dueDate && taskData.dueDate < new Date() ? 'overdue' : 'pending',
-      completedAt: undefined,
-      repeatType: taskData.repeatType,
-      repeatInterval: taskData.repeatInterval,
-      repeatEndDate: taskData.repeatEndDate,
-      repeatCount: taskData.repeatCount
-    });
-    
-    // Reset form
-    setTaskData({
-      title: '',
-      subject: '',
-      priority: 'medium',
-      dueDate: undefined,
-      repeatType: 'none',
-      repeatInterval: 1,
-      repeatEndDate: undefined,
-      repeatCount: undefined
-    });
-  };
 
   useEffect(() => {
     const saved = localStorage.getItem('customSubjects');
@@ -72,9 +43,23 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     }
   }, []);
 
+  useEffect(() => {
+    setTaskData({
+      title: task.title,
+      subject: task.subject,
+      description: task.description || '',
+      priority: task.priority,
+      dueDate: task.dueDate,
+      repeatType: task.repeatType || 'none',
+      repeatInterval: task.repeatInterval || 1,
+      repeatEndDate: task.repeatEndDate,
+      repeatCount: task.repeatCount
+    });
+  }, [task]);
+
   const defaultSubjects = [
     'Math',
-    'Science',
+    'Science', 
     'English',
     'Spanish',
     'History',
@@ -94,21 +79,40 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!taskData.title.trim()) return;
+
+    const updates: Partial<Task> = {
+      title: taskData.title.trim(),
+      subject: taskData.subject || 'General',
+      description: taskData.description,
+      priority: taskData.priority,
+      dueDate: taskData.dueDate,
+      repeatType: taskData.repeatType,
+      repeatInterval: taskData.repeatInterval,
+      repeatEndDate: taskData.repeatEndDate,
+      repeatCount: taskData.repeatCount
+    };
+
+    onUpdate(task.id, updates);
+    onClose();
+  };
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Plus className="h-5 w-5 text-primary" />
-          Add New Task
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Edit Task</DialogTitle>
+        </DialogHeader>
+        
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Task Title */}
           <div className="space-y-2">
-            <Label htmlFor="task-title">Task Title *</Label>
+            <Label htmlFor="edit-task-title">Task Title *</Label>
             <Input
-              id="task-title"
+              id="edit-task-title"
               placeholder="Complete math homework, study for quiz..."
               value={taskData.title}
               onChange={(e) => setTaskData({ ...taskData, title: e.target.value })}
@@ -116,10 +120,22 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
             />
           </div>
 
+          {/* Description */}
+          <div className="space-y-2">
+            <Label htmlFor="edit-task-description">Description</Label>
+            <Textarea
+              id="edit-task-description"
+              placeholder="Add task details..."
+              value={taskData.description}
+              onChange={(e) => setTaskData({ ...taskData, description: e.target.value })}
+              rows={3}
+            />
+          </div>
+
           {/* Subject and Priority Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="task-subject">Subject</Label>
+              <Label htmlFor="edit-task-subject">Subject</Label>
               <Select
                 value={taskData.subject}
                 onValueChange={(value) => {
@@ -189,7 +205,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="task-priority">Priority</Label>
+              <Label htmlFor="edit-task-priority">Priority</Label>
               <Select
                 value={taskData.priority}
                 onValueChange={(value: Task['priority']) => setTaskData({ ...taskData, priority: value })}
@@ -200,7 +216,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                 <SelectContent>
                   <SelectItem value="low">
                     <span className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-muted-foreground"></div>
+                      <div className="w-2 h-2 rounded-full bg-success"></div>
                       Low Priority
                     </span>
                   </SelectItem>
@@ -254,7 +270,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => setTaskData({ ...taskData, dueDate: undefined })}
-                className="text-xs mt-2"
+                className="text-xs"
               >
                 Remove Due Date
               </Button>
@@ -267,7 +283,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="repeat-type">Frequency</Label>
+                <Label htmlFor="edit-repeat-type">Frequency</Label>
                 <Select
                   value={taskData.repeatType}
                   onValueChange={(value: Task['repeatType']) => setTaskData({ ...taskData, repeatType: value })}
@@ -287,7 +303,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
 
               {taskData.repeatType !== 'none' && (
                 <div className="space-y-2">
-                  <Label htmlFor="repeat-interval">Every</Label>
+                  <Label htmlFor="edit-repeat-interval">Every</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="number"
@@ -349,7 +365,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="repeat-count">Max Occurrences (Optional)</Label>
+                  <Label htmlFor="edit-repeat-count">Max Occurrences (Optional)</Label>
                   <Input
                     type="number"
                     min="1"
@@ -362,13 +378,17 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
             )}
           </div>
 
-          {/* Submit Button */}
-          <Button type="submit" className="w-full">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Task
-          </Button>
+          {/* Submit Buttons */}
+          <div className="flex gap-2 pt-4">
+            <Button type="submit" className="flex-1">
+              Update Task
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          </div>
         </form>
-      </CardContent>
-    </Card>
+      </DialogContent>
+    </Dialog>
   );
 }

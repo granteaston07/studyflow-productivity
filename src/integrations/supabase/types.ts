@@ -104,6 +104,54 @@ export type Database = {
         }
         Relationships: []
       }
+      study_goals: {
+        Row: {
+          completed: boolean
+          created_at: string
+          current_progress: number
+          description: string | null
+          end_date: string | null
+          id: string
+          start_date: string
+          target_period: string
+          target_type: string
+          target_value: number
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed?: boolean
+          created_at?: string
+          current_progress?: number
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          target_period?: string
+          target_type?: string
+          target_value: number
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed?: boolean
+          created_at?: string
+          current_progress?: number
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string
+          target_period?: string
+          target_type?: string
+          target_value?: number
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       study_sessions: {
         Row: {
           break_time: number
@@ -148,6 +196,39 @@ export type Database = {
           },
         ]
       }
+      study_streaks: {
+        Row: {
+          created_at: string
+          current_streak: number
+          id: string
+          last_activity_date: string | null
+          longest_streak: number
+          streak_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_streak?: number
+          id?: string
+          last_activity_date?: string | null
+          longest_streak?: number
+          streak_type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           completed: boolean | null
@@ -158,7 +239,12 @@ export type Database = {
           google_classroom_id: string | null
           google_course_id: string | null
           id: string
+          parent_task_id: string | null
           priority: string | null
+          repeat_count: number | null
+          repeat_end_date: string | null
+          repeat_interval: number | null
+          repeat_type: string | null
           sort_order: number | null
           source: string | null
           status: string | null
@@ -176,7 +262,12 @@ export type Database = {
           google_classroom_id?: string | null
           google_course_id?: string | null
           id?: string
+          parent_task_id?: string | null
           priority?: string | null
+          repeat_count?: number | null
+          repeat_end_date?: string | null
+          repeat_interval?: number | null
+          repeat_type?: string | null
           sort_order?: number | null
           source?: string | null
           status?: string | null
@@ -194,7 +285,12 @@ export type Database = {
           google_classroom_id?: string | null
           google_course_id?: string | null
           id?: string
+          parent_task_id?: string | null
           priority?: string | null
+          repeat_count?: number | null
+          repeat_end_date?: string | null
+          repeat_interval?: number | null
+          repeat_type?: string | null
           sort_order?: number | null
           source?: string | null
           status?: string | null
@@ -203,14 +299,29 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      update_goal_progress: {
+        Args: { p_user_id: string; p_goal_type: string; p_increment?: number }
+        Returns: undefined
+      }
+      update_study_streak: {
+        Args: { p_user_id: string; p_streak_type?: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
