@@ -18,6 +18,18 @@ export const useStudyGoals = () => {
 
   const fetchGoals = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        // If no user, load from localStorage as fallback
+        const localGoals = localStorage.getItem('study_goals');
+        if (localGoals) {
+          setGoals(JSON.parse(localGoals));
+        }
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('study_calendar_goals')
         .select('*')
@@ -33,10 +45,14 @@ export const useStudyGoals = () => {
       setGoals(goalsWithParsedDates);
     } catch (error) {
       console.error('Error fetching study goals:', error);
+      // Fallback to localStorage
+      const localGoals = localStorage.getItem('study_goals');
+      if (localGoals) {
+        setGoals(JSON.parse(localGoals));
+      }
       toast({
-        title: "Error",
-        description: "Failed to load study goals",
-        variant: "destructive",
+        title: "Info",
+        description: "Goals are stored locally. Sign in to sync across devices.",
       });
     } finally {
       setLoading(false);
@@ -46,7 +62,29 @@ export const useStudyGoals = () => {
   const addGoal = async (goalData: Omit<StudyGoal, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'completed_dates'>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      
+      if (!user) {
+        // Create local goal if no user
+        const localGoal: StudyGoal = {
+          ...goalData,
+          id: Date.now().toString(),
+          user_id: 'local',
+          completed_dates: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        const newGoals = [localGoal, ...goals];
+        setGoals(newGoals);
+        localStorage.setItem('study_goals', JSON.stringify(newGoals));
+        
+        toast({
+          title: "Success",
+          description: "Study goal added locally. Sign in to sync across devices.",
+        });
+        
+        return localGoal;
+      }
 
       const { data, error } = await supabase
         .from('study_calendar_goals')
@@ -70,7 +108,7 @@ export const useStudyGoals = () => {
         description: "Study goal added successfully",
       });
       
-      return data;
+      return goalWithParsedDates;
     } catch (error) {
       console.error('Error adding study goal:', error);
       toast({

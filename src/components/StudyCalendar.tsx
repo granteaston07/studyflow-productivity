@@ -8,11 +8,13 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus, Repeat, Trash2, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isSameDay, getDay, getDate } from "date-fns";
 import { useStudyGoals, StudyGoal } from "@/hooks/useStudyGoals";
 import { EditStudyGoalDialog } from "@/components/EditStudyGoalDialog";
+import { useToast } from "@/hooks/use-toast";
 
 export const StudyCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -20,6 +22,7 @@ export const StudyCalendar = () => {
   const [editingGoal, setEditingGoal] = useState<StudyGoal | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { goals, loading, addGoal, updateGoal, deleteGoal, toggleGoalCompletion } = useStudyGoals();
+  const { toast } = useToast();
   
   const [newGoal, setNewGoal] = useState<{
     title: string;
@@ -27,12 +30,18 @@ export const StudyCalendar = () => {
     frequency: 'once' | 'daily' | 'weekly' | 'monthly';
     target_value: number;
     unit: string;
+    specific_date?: Date;
+    week_day?: number;
+    month_date?: number;
   }>({
     title: '',
     description: '',
     frequency: 'daily',
     target_value: 30,
-    unit: 'minutes'
+    unit: 'minutes',
+    specific_date: undefined,
+    week_day: undefined,
+    month_date: undefined
   });
 
   const colors = [
@@ -52,12 +61,36 @@ export const StudyCalendar = () => {
 
   const addStudyGoal = async () => {
     if (!newGoal.title) return;
+    
+    // Validation for frequency-specific requirements
+    if (newGoal.frequency === 'once' && !newGoal.specific_date) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a date for the one-time goal",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (newGoal.frequency === 'weekly' && newGoal.week_day === undefined) {
+      toast({
+        title: "Missing Information", 
+        description: "Please select a day of the week",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (newGoal.frequency === 'monthly' && !newGoal.month_date) {
+      toast({
+        title: "Missing Information",
+        description: "Please select a date of the month", 
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      const today = new Date();
-      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
-      const currentDate = today.getDate();
-
       await addGoal({
         title: newGoal.title,
         description: newGoal.description,
@@ -66,8 +99,8 @@ export const StudyCalendar = () => {
         target_value: newGoal.target_value,
         unit: newGoal.unit,
         color: colors[Math.floor(Math.random() * colors.length)],
-        week_day: newGoal.frequency === 'weekly' ? currentDay : null,
-        month_date: newGoal.frequency === 'monthly' ? currentDate : null,
+        week_day: newGoal.frequency === 'weekly' ? newGoal.week_day : null,
+        month_date: newGoal.frequency === 'monthly' ? newGoal.month_date : null,
         repeat_interval: 1,
         repeat_end_date: null,
         repeat_count: null
@@ -78,7 +111,10 @@ export const StudyCalendar = () => {
         description: '',
         frequency: 'daily',
         target_value: 30,
-        unit: 'minutes'
+        unit: 'minutes',
+        specific_date: undefined,
+        week_day: undefined,
+        month_date: undefined
       });
       setShowAddGoal(false);
     } catch (error) {
@@ -249,7 +285,13 @@ export const StudyCalendar = () => {
                   <Select 
                     value={newGoal.frequency} 
                     onValueChange={(value: 'once' | 'daily' | 'weekly' | 'monthly') => {
-                      setNewGoal(prev => ({ ...prev, frequency: value }));
+                      setNewGoal(prev => ({ 
+                        ...prev, 
+                        frequency: value,
+                        specific_date: undefined,
+                        week_day: undefined,
+                        month_date: undefined
+                      }));
                     }}
                   >
                     <SelectTrigger>
@@ -263,6 +305,70 @@ export const StudyCalendar = () => {
                     </SelectContent>
                   </Select>
                 </div>
+
+                {newGoal.frequency === 'once' && (
+                  <div>
+                    <Label>When?</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !newGoal.specific_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {newGoal.specific_date ? format(newGoal.specific_date, "PPP") : "Select date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={newGoal.specific_date}
+                          onSelect={(date) => setNewGoal(prev => ({ ...prev, specific_date: date }))}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
+                {newGoal.frequency === 'weekly' && (
+                  <div>
+                    <Label htmlFor="weekDay">Which day of the week?</Label>
+                    <Select 
+                      value={newGoal.week_day?.toString() || ''} 
+                      onValueChange={(value) => setNewGoal(prev => ({ ...prev, week_day: parseInt(value) }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select day" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {weekDays.map((day, index) => (
+                          <SelectItem key={index} value={index.toString()}>{day}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {newGoal.frequency === 'monthly' && (
+                  <div>
+                    <Label htmlFor="monthDate">Which date of the month?</Label>
+                    <Input
+                      id="monthDate"
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={newGoal.month_date || ''}
+                      onChange={(e) => setNewGoal(prev => ({ ...prev, month_date: parseInt(e.target.value) || undefined }))}
+                      placeholder="e.g., 15"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="target">Target</Label>
