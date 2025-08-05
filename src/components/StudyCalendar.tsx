@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,10 @@ import { EditStudyGoalDialog } from "@/components/EditStudyGoalDialog";
 import { useToast } from "@/hooks/use-toast";
 
 export const StudyCalendar = () => {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+    const stored = localStorage.getItem('studyCalendar-selectedDate');
+    return stored ? new Date(stored) : new Date();
+  });
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<StudyGoal | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -209,6 +212,13 @@ export const StudyCalendar = () => {
 
   const selectedDateGoals = selectedDate ? getGoalsForDate(selectedDate) : [];
 
+  // Persist selected date
+  useEffect(() => {
+    if (selectedDate) {
+      localStorage.setItem('studyCalendar-selectedDate', selectedDate.toISOString());
+    }
+  }, [selectedDate]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -349,7 +359,13 @@ export const StudyCalendar = () => {
                           mode="single"
                           selected={newGoal.specific_date}
                           onSelect={(date) => setNewGoal(prev => ({ ...prev, specific_date: date }))}
-                          disabled={(date) => date < new Date()}
+                          disabled={(date) => {
+                            const today = new Date();
+                            today.setHours(0, 0, 0, 0);
+                            const compareDate = new Date(date);
+                            compareDate.setHours(0, 0, 0, 0);
+                            return compareDate < today;
+                          }}
                           initialFocus
                           className="pointer-events-auto"
                         />
@@ -523,63 +539,73 @@ export const StudyCalendar = () => {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="max-w-md">
-                            <AlertDialogHeader className="text-center pb-4">
-                              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
-                                <Trash2 className="h-6 w-6 text-destructive" />
+                           <AlertDialogContent className="max-w-lg">
+                             <AlertDialogHeader className="text-center pb-2">
+                               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-destructive/10 flex items-center justify-center">
+                                 <Trash2 className="h-8 w-8 text-destructive" />
+                               </div>
+                               <AlertDialogTitle className="text-2xl font-semibold">Delete Goal</AlertDialogTitle>
+                               <AlertDialogDescription className="text-base text-muted-foreground">
+                                 Choose how you want to handle "<span className="font-medium text-foreground">{goal.title}</span>":
+                               </AlertDialogDescription>
+                             </AlertDialogHeader>
+                             <div className="space-y-3 p-6">
+                               <AlertDialogAction asChild>
+                                 <Button 
+                                   variant="outline" 
+                                   className="w-full justify-start text-left h-auto p-4 border-2 hover:border-primary/50 transition-colors"
+                                    onClick={async () => {
+                                      if (goal.frequency === 'once') {
+                                        await deleteGoal(goal.id);
+                                      } else {
+                                        // Set end date to today so it stops appearing from tomorrow
+                                        const today = new Date();
+                                        await updateGoal(goal.id, { repeat_end_date: today.toISOString() });
+                                      }
+                                    }}
+                                  >
+                                   <div className="flex items-start gap-3">
+                                     <div className="text-2xl">🚫</div>
+                                     <div>
+                                       <div className="font-semibold text-base">Stop from tomorrow onwards</div>
+                                       <div className="text-sm text-muted-foreground mt-1">Goal will stop appearing from tomorrow, but keeps all history</div>
+                                     </div>
+                                   </div>
+                                  </Button>
+                               </AlertDialogAction>
+                               <AlertDialogAction asChild>
+                                 <Button 
+                                   variant="secondary" 
+                                   className="w-full justify-start text-left h-auto p-4 border-2 hover:border-warning/50 transition-colors"
+                                    onClick={async () => {
+                                      // For one-time goals, delete the entire goal
+                                      if (goal.frequency === 'once') {
+                                        await deleteGoal(goal.id);
+                                      } else {
+                                        // For recurring goals, mark as skipped
+                                        const dateString = format(selectedDate!, 'yyyy-MM-dd');
+                                        setSkippedGoals(prev => new Set([...prev, `${goal.id}-${dateString}`]));
+                                        // Also add to completed_dates to track the skip
+                                        if (!goal.completed_dates.includes(dateString)) {
+                                          const updatedCompletedDates = [...goal.completed_dates, dateString];
+                                          await updateGoal(goal.id, { completed_dates: updatedCompletedDates });
+                                        }
+                                      }
+                                    }}
+                                  >
+                                   <div className="flex items-start gap-3">
+                                     <div className="text-2xl">⏭️</div>
+                                     <div>
+                                       <div className="font-semibold text-base">Skip this instance only</div>
+                                       <div className="text-sm text-muted-foreground mt-1">Mark this occurrence as skipped without affecting other dates</div>
+                                     </div>
+                                   </div>
+                                  </Button>
+                               </AlertDialogAction>
                               </div>
-                              <AlertDialogTitle className="text-xl">Delete Goal</AlertDialogTitle>
-                              <AlertDialogDescription className="text-muted-foreground">
-                                Choose how you want to handle "{goal.title}":
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <div className="space-y-3 px-6 py-4">
-                              <Button 
-                                variant="outline" 
-                                className="w-full justify-start text-left h-auto p-4 border-2 hover:border-primary/50"
-                                 onClick={async () => {
-                                   if (goal.frequency === 'once') {
-                                     await deleteGoal(goal.id);
-                                   } else {
-                                     // Set end date to today so it stops appearing from tomorrow
-                                     const today = new Date();
-                                     await updateGoal(goal.id, { repeat_end_date: today.toISOString() });
-                                   }
-                                 }}
-                               >
-                                <div>
-                                  <div className="font-semibold text-base">🚫 Stop from tomorrow onwards</div>
-                                  <div className="text-sm text-muted-foreground mt-1">Goal will stop appearing from tomorrow, but keeps all history</div>
-                                </div>
-                               </Button>
-                              <Button 
-                                variant="secondary" 
-                                className="w-full justify-start text-left h-auto p-4 border-2 hover:border-orange-300"
-                                 onClick={async () => {
-                                   // For one-time goals, delete the entire goal
-                                   if (goal.frequency === 'once') {
-                                     await deleteGoal(goal.id);
-                                   } else {
-                                     // For recurring goals, mark as skipped
-                                     const dateString = format(selectedDate!, 'yyyy-MM-dd');
-                                     setSkippedGoals(prev => new Set([...prev, `${goal.id}-${dateString}`]));
-                                     // Also add to completed_dates to track the skip
-                                     if (!goal.completed_dates.includes(dateString)) {
-                                       const updatedCompletedDates = [...goal.completed_dates, dateString];
-                                       await updateGoal(goal.id, { completed_dates: updatedCompletedDates });
-                                     }
-                                   }
-                                 }}
-                               >
-                                <div>
-                                  <div className="font-semibold text-base">⏭️ Skip this instance only</div>
-                                  <div className="text-sm text-muted-foreground mt-1">Mark this occurrence as skipped without affecting other dates</div>
-                                </div>
-                               </Button>
-                             </div>
-                            <AlertDialogFooter className="pt-4">
-                              <AlertDialogCancel className="flex-1">Cancel</AlertDialogCancel>
-                             </AlertDialogFooter>
+                             <AlertDialogFooter className="pt-0 pb-6">
+                               <AlertDialogCancel className="w-full">Cancel</AlertDialogCancel>
+                              </AlertDialogFooter>
                            </AlertDialogContent>
                          </AlertDialog>
                        </div>
