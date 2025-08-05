@@ -17,10 +17,12 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
 import { StudyCalendar } from "@/components/StudyCalendar";
+import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
+import { useStudyGoals } from "@/hooks/useStudyGoals";
 
 const Index = () => {
   // Allow both authenticated users and guest mode (no redirect for guest users)
@@ -28,6 +30,7 @@ const Index = () => {
   const navigate = useNavigate();
   
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
+  const { goals: studyGoals } = useStudyGoals();
   const [isReorderMode, setIsReorderMode] = useState(false);
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
@@ -453,26 +456,13 @@ const Index = () => {
             <StudyCalendar />
           </section>
 
-          {/* Quick Stats Footer */}
+          {/* Enhanced Analytics Dashboard */}
+          <section id="analytics-dashboard">
+            <AnalyticsDashboard tasks={tasks} studyGoals={studyGoals} />
+          </section>
+
+          {/* Footer with Legal Info */}
           <footer className="pt-8 border-t border-border">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="stats-card-primary animate-scale-in">
-                <p className="text-2xl font-bold animate-bounce-gentle">{tasks.length}</p>
-                <p className="text-sm opacity-80">Total Tasks</p>
-              </div>
-              <div className="stats-card-success animate-scale-in" style={{ animationDelay: '0.1s' }}>
-                <p className="text-2xl font-bold animate-bounce-gentle">{tasks.filter(t => t.completed).length}</p>
-                <p className="text-sm opacity-80">Completed</p>
-              </div>
-              <div className="stats-card-warning animate-scale-in" style={{ animationDelay: '0.2s' }}>
-                <p className="text-2xl font-bold animate-bounce-gentle">{tasks.filter(t => t.status === 'in-progress').length}</p>
-                <p className="text-sm opacity-80">In Progress</p>
-              </div>
-              <div className="stats-card-error animate-scale-in" style={{ animationDelay: '0.3s' }}>
-                <p className="text-2xl font-bold animate-bounce-gentle">{overdueTasks.length}</p>
-                <p className="text-sm opacity-80">Overdue</p>
-              </div>
-            </div>
             
             <div className="text-center mt-8 pt-6 border-t border-border space-y-6">
               <div className="flex flex-col items-center gap-2">
