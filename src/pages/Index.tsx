@@ -16,14 +16,10 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
-import { StudyGoals } from "@/components/StudyGoals";
-import { StudyStreaks } from "@/components/StudyStreaks";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
-import { useGoals } from "@/hooks/useGoals";
-import { useStreaks } from "@/hooks/useStreaks";
 
 const Index = () => {
   // Allow both authenticated users and guest mode (no redirect for guest users)
@@ -31,8 +27,6 @@ const Index = () => {
   const navigate = useNavigate();
   
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
-  const { updateGoalProgress } = useGoals();
-  const { updateStreak } = useStreaks();
   const [isReorderMode, setIsReorderMode] = useState(false);
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
@@ -48,25 +42,17 @@ const Index = () => {
 
     if (timerActive && !timerPaused && timeRemaining > 0) {
       interval = setInterval(() => {
-        setTimeRemaining(prev => {
-          if (prev <= 1) {
-            // Timer completed! Update streaks and goals
-            setTimerActive(false);
-            if (user) {
-              updateStreak('focus_sessions');
-              updateGoalProgress('sessions');
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
+        setTimeRemaining(prev => prev - 1);
       }, 1000);
+    } else if (timeRemaining === 0 && timerActive) {
+      setTimerActive(false);
+      // Timer completed - could trigger notification here
     }
 
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [timerActive, timerPaused, timeRemaining, user, updateStreak, updateGoalProgress]);
+  }, [timerActive, timerPaused, timeRemaining]);
 
   // Timer control functions
   const startTimer = (duration?: number) => {
@@ -89,13 +75,7 @@ const Index = () => {
     setTimerPaused(!timerPaused);
   };
 
-  const resetTimer = async () => {
-    // If timer was active and completed (timeRemaining was 0), update streaks
-    if (timerActive && timeRemaining === 0 && user) {
-      await updateStreak('focus_sessions');
-      await updateGoalProgress('sessions');
-    }
-    
+  const resetTimer = () => {
     setTimerActive(false);
     setTimerPaused(false);
     setTimeRemaining(selectedSessionDuration);
@@ -120,16 +100,7 @@ const Index = () => {
   };
 
   const handleToggleTask = async (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
-
     await toggleTask(taskId);
-    
-    // Update streak and goals when task is completed
-    if (!task.completed && user) {
-      await updateStreak('task_completion');
-      await updateGoalProgress('tasks');
-    }
   };
 
   const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
@@ -442,14 +413,9 @@ const Index = () => {
             <TaskPrioritization tasks={tasks} />
           </section>
 
-          {/* Three Column Layout for Goals, Progress, and Study Links */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Study Goals and Streaks */}
-            <div className="space-y-8">
-              <StudyGoals />
-              <StudyStreaks />
-            </div>
-            
+
+          {/* Two Column Layout for Progress and Study Links */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Progress Tracker */}
             <div id="progress-tracker">
               <ProgressTracker tasks={tasks} />
