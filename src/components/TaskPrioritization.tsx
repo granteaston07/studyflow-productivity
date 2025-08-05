@@ -208,24 +208,83 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
 
   return (
     <>
-      {/* Blur overlay when expanded */}
+      {/* AI Recommendations Display */}
       {isExpanded && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 flex items-center justify-center">
-          <div className="bg-card border border-border rounded-lg p-8 max-w-md mx-4 text-center shadow-lg">
-            <div className="flex items-center justify-center gap-2 mb-4">
-              <Settings className="h-6 w-6 text-primary" />
-              <Brain className="h-6 w-6 text-primary" />
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-40 flex items-center justify-center p-4">
+          <div className="bg-card border border-border rounded-lg max-w-2xl max-h-[80vh] overflow-auto shadow-lg">
+            <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Brain className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-semibold">AI Task Intelligence</h3>
+              </div>
+              <Button 
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsExpanded(false)}
+              >
+                ×
+              </Button>
             </div>
-            <h3 className="text-lg font-semibold mb-2"><span className="ai-gradient-text">AI Task Intelligence</span></h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              This feature is still in development. We're working hard to bring you advanced AI-powered task prioritization and insights.
-            </p>
-            <Button 
-              onClick={() => setIsExpanded(false)}
-              className="w-full"
-            >
-              Close
-            </Button>
+            
+            <CardContent className="p-4">
+              {recommendations.length === 0 ? (
+                <div className="text-center py-8">
+                  <Brain className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+                  <p className="text-muted-foreground">No incomplete tasks to analyze</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    AI has analyzed {incompleteTasks.length} tasks and ranked them by priority, urgency, and optimal timing.
+                  </p>
+                  
+                  {recommendations.map((rec, index) => (
+                    <div key={rec.task.id} className="border border-border rounded-lg p-4 space-y-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-sm font-medium text-muted-foreground">#{index + 1}</span>
+                            <Badge variant="outline" className={`text-xs ${getUrgencyColor(rec.urgencyLevel)}`}>
+                              {getUrgencyIcon(rec.urgencyLevel)}
+                              <span className="ml-1 capitalize">{rec.urgencyLevel}</span>
+                            </Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              Score: {rec.score}
+                            </Badge>
+                          </div>
+                          
+                          <h4 className="font-medium text-foreground mb-1">
+                            {rec.task.title}
+                          </h4>
+                          
+                          {rec.task.subject && (
+                            <p className="text-xs text-muted-foreground mb-2">
+                              {rec.task.subject} • Est. {rec.estimatedDuration}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-muted-foreground">AI Insights:</p>
+                        {rec.reasons.map((reason, i) => (
+                          <p key={i} className="text-xs text-muted-foreground flex items-center gap-1">
+                            <span className="w-1 h-1 bg-primary rounded-full"></span>
+                            {reason}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="border-t border-border pt-4 mt-6">
+                    <p className="text-xs text-muted-foreground text-center">
+                      Recommendations update automatically based on due dates, priority, subject complexity, and optimal timing.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
           </div>
         </div>
       )}
