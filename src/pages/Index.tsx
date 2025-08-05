@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn, ArrowUpDown } from "lucide-react";
+import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn, ArrowUpDown, Check } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { DraggableTaskCard } from "@/components/DraggableTaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
@@ -291,16 +291,15 @@ const Index = () => {
                 <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
               <div className="flex items-center gap-2">
-                <AddTaskDialog onAddTask={handleAddTask} />
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
                   onClick={() => setIsReorderMode(!isReorderMode)}
-                  className="flex items-center gap-2"
+                  className="h-9 w-9 p-0"
                 >
-                  <ArrowUpDown className="h-4 w-4" />
-                  {isReorderMode ? "Done" : "Reorder"}
+                  {isReorderMode ? <Check className="h-4 w-4" /> : <ArrowUpDown className="h-4 w-4" />}
                 </Button>
+                <AddTaskDialog onAddTask={handleAddTask} />
               </div>
             </div>
 
