@@ -462,8 +462,8 @@ const Index = () => {
           </section>
 
           {/* Footer with Legal Info */}
-          <footer className="pt-8">
-            <div className="text-center mt-8 pt-6 border-t border-border space-y-6">
+          <footer className="pt-8 border-t border-border">
+            <div className="text-center space-y-6">
               <div className="flex flex-col items-center gap-2">
                 <p className="text-sm font-medium text-foreground">Created by Grant Easton</p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
