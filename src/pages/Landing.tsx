@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Brain, Timer, CheckSquare, GraduationCap, Download, Smartphone, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,12 +10,13 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function Landing() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     // Redirect if already authenticated
     if (user) {
-      window.location.href = '/';
+      navigate('/app');
       return;
     }
     
@@ -50,13 +52,13 @@ export default function Landing() {
               <ThemeToggle />
               <Button 
                 variant="outline" 
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
                 className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
               >
                 Sign In
               </Button>
               <Button 
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
                 className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg"
               >
                 Get Started
@@ -91,7 +93,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 size="lg"
-                onClick={() => window.location.href = '/auth'}
+                onClick={() => navigate('/auth')}
                 className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg text-lg px-8 py-3"
               >
                 Start Studying Smarter
@@ -100,7 +102,7 @@ export default function Landing() {
               <Button 
                 variant="outline" 
                 size="lg"
-                onClick={() => window.location.href = '/auth?guest=true'}
+                onClick={() => navigate('/app')}
                 className="text-lg px-8 py-3 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
               >
                 Try Guest Mode
@@ -293,7 +295,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => navigate('/auth')}
               className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg text-lg px-8 py-3"
             >
               Create Free Account
@@ -302,7 +304,7 @@ export default function Landing() {
             <Button 
               variant="outline" 
               size="lg"
-              onClick={() => window.location.href = '/auth?guest=true'}
+              onClick={() => navigate('/app')}
               className="text-lg px-8 py-3 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
             >
               Try Without Signing Up
@@ -327,7 +329,7 @@ export default function Landing() {
             <button className="hover:text-foreground transition-colors">Terms of Service</button>
             <span>•</span>
             <button 
-              onClick={() => window.location.href = '/auth'}
+              onClick={() => navigate('/auth')}
               className="hover:text-foreground transition-colors"
             >
               Sign In to StudyFlow
