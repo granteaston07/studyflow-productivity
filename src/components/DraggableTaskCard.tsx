@@ -30,13 +30,14 @@ export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateSta
   };
 
   return (
-    <div ref={setNodeRef} style={style} className={`relative ${isReorderMode ? 'cursor-grab active:cursor-grabbing' : ''}`}>
+    <div 
+      ref={setNodeRef} 
+      style={style} 
+      className={`relative ${isReorderMode ? 'cursor-grab active:cursor-grabbing' : ''}`}
+      {...(isReorderMode ? { ...attributes, ...listeners } : {})}
+    >
       {isReorderMode && (
-        <div
-          {...attributes}
-          {...listeners}
-          className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded hover:bg-muted/50 cursor-grab active:cursor-grabbing"
-        >
+        <div className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 p-1 rounded hover:bg-muted/50 pointer-events-none">
           <GripVertical className="h-4 w-4 text-muted-foreground" />
         </div>
       )}
