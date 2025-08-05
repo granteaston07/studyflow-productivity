@@ -86,7 +86,7 @@ export default function Landing() {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
-              The ultimate productivity app for students. Organize tasks, track progress, focus with AI-powered timers, 
+              The ultimate productivity app for students. Organize tasks, track progress, set study goals, focus with AI-powered timers, 
               and get intelligent study recommendations. Built specifically for academic success.
             </p>
             
@@ -165,7 +165,7 @@ export default function Landing() {
                   <h3 className="text-xl font-semibold text-foreground">Smart Task Management</h3>
                 </div>
                 <p className="text-muted-foreground">
-                  Organize assignments by subject, priority, and due date. Never miss a deadline again.
+                  Organize assignments by subject, priority, and due date. Never miss a deadline again. Set goals and keep track of activities with study calender.
                 </p>
               </CardContent>
             </Card>
