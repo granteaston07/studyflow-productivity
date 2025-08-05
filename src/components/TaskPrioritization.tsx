@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Brain, Sparkles, Clock, AlertTriangle, TrendingUp, ChevronDown, Settings } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,20 @@ interface AIRecommendation {
 
 export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  // Prevent background scrolling when modal is open
+  useEffect(() => {
+    if (isExpanded) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    // Cleanup function to restore scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isExpanded]);
   
   // Enhanced AI-powered task analysis with sophisticated algorithms
   const analyzeTaskPriority = (task: Task): AIRecommendation => {
@@ -421,7 +435,10 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
             <div className="sticky top-0 bg-card border-b border-border p-4 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Brain className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">AI Task Intelligence</h3>
+                <h3 className="text-lg font-semibold">
+                  <span className="bg-gradient-to-r from-ai-primary to-ai-secondary bg-clip-text text-transparent">AI</span>
+                  {" "}Task Intelligence
+                </h3>
               </div>
               <Button 
                 variant="ghost"
