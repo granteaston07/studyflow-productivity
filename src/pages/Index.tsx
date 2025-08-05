@@ -104,34 +104,36 @@ const Index = () => {
     await toggleTask(taskId);
   };
 
-  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
+  const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Handle due date status logic
-    if (updates.dueDate !== undefined) {
-      const now = new Date();
-      let newStatus = task.status;
-      
-      if (updates.dueDate) {
-        // If setting a due date
-        if (updates.dueDate < now && !task.completed) {
-          newStatus = 'overdue';
-        } else if (task.status === 'overdue' && updates.dueDate >= now) {
-          // Reset from overdue if the new due date is in the future
-          newStatus = 'pending';
-        }
-      } else {
-        // If removing the due date
-        if (task.status === 'overdue') {
-          newStatus = 'pending';
-        }
-      }
-      
-      updates.status = newStatus;
-    }
+    // Determine the new status based on the due date
+    let newStatus = task.status;
+    const now = new Date();
     
-    await updateTask(taskId, updates);
+    if (dueDate) {
+      // If setting a due date
+      if (dueDate < now && !task.completed) {
+        // Past due date and not completed = overdue
+        newStatus = 'overdue';
+      } else if (task.status === 'overdue' && dueDate >= now) {
+        // Was overdue but now has future date = reset to pending or in-progress
+        newStatus = task.completed ? 'completed' : 'pending';
+      }
+    } else {
+      // If removing due date and was overdue, reset to pending
+      if (task.status === 'overdue') {
+        newStatus = task.completed ? 'completed' : 'pending';
+      }
+    }
+
+    // Update both due date and status if status changed
+    if (newStatus !== task.status) {
+      await updateTask(taskId, { dueDate, status: newStatus });
+    } else {
+      await updateTask(taskId, { dueDate });
+    }
   };
 
   const handleAddTask = async (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
@@ -328,11 +330,11 @@ const Index = () => {
                             .filter(t => !t.completed)
                             .sort((a, b) => a.sortOrder - b.sortOrder)
                             .map((task) => (
-                               <DraggableTaskCard
+                              <DraggableTaskCard
                                 key={task.id}
                                 task={task}
                                 onToggle={handleToggleTask}
-                                onUpdate={handleUpdateTask}
+                                onUpdateDueDate={handleUpdateDueDate}
                                 onUpdateStatus={handleUpdateStatus}
                                 onDelete={handleDeleteTask}
                                 isReorderMode={isReorderMode}
@@ -362,7 +364,7 @@ const Index = () => {
                             <TaskCard
                               task={task}
                               onToggle={handleToggleTask}
-                              onUpdate={handleUpdateTask}
+                              onUpdateDueDate={handleUpdateDueDate}
                               onUpdateStatus={handleUpdateStatus}
                               onDelete={handleDeleteTask}
                             />
@@ -393,7 +395,7 @@ const Index = () => {
                               <TaskCard
                                 task={task}
                                 onToggle={handleToggleTask}
-                                onUpdate={handleUpdateTask}
+                                onUpdateDueDate={handleUpdateDueDate}
                                 onUpdateStatus={handleUpdateStatus}
                                 onDelete={handleDeleteTask}
                               />

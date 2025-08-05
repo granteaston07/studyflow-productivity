@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 import { Task } from "./TaskCard";
 
 interface AddTaskFormProps {
@@ -21,11 +20,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     title: '',
     subject: '',
     priority: 'medium' as Task['priority'],
-    dueDate: undefined as Date | undefined,
-    repeatType: 'none' as Task['repeatType'],
-    repeatInterval: 1,
-    repeatEndDate: undefined as Date | undefined,
-    repeatCount: undefined as number | undefined
+    dueDate: undefined as Date | undefined
   });
   
   const [customSubjects, setCustomSubjects] = useState<string[]>([]);
@@ -45,11 +40,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       completed: false,
       priority: taskData.priority,
       status: taskData.dueDate && taskData.dueDate < new Date() ? 'overdue' : 'pending',
-      completedAt: undefined,
-      repeatType: taskData.repeatType,
-      repeatInterval: taskData.repeatInterval,
-      repeatEndDate: taskData.repeatEndDate,
-      repeatCount: taskData.repeatCount
+      completedAt: undefined
     });
     
     // Reset form
@@ -57,11 +48,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       title: '',
       subject: '',
       priority: 'medium',
-      dueDate: undefined,
-      repeatType: 'none',
-      repeatInterval: 1,
-      repeatEndDate: undefined,
-      repeatCount: undefined
+      dueDate: undefined
     });
   };
 
@@ -244,122 +231,9 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                   selected={taskData.dueDate}
                   onSelect={(date) => setTaskData({ ...taskData, dueDate: date })}
                   initialFocus
-                  className={cn("p-3 pointer-events-auto")}
                 />
               </PopoverContent>
             </Popover>
-            {taskData.dueDate && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setTaskData({ ...taskData, dueDate: undefined })}
-                className="text-xs mt-2"
-              >
-                Remove Due Date
-              </Button>
-            )}
-          </div>
-
-          {/* Repeat Options */}
-          <div className="space-y-4 border-t pt-4">
-            <Label className="text-base font-medium">Repeat Options</Label>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="repeat-type">Frequency</Label>
-                <Select
-                  value={taskData.repeatType}
-                  onValueChange={(value: Task['repeatType']) => setTaskData({ ...taskData, repeatType: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">Only Once</SelectItem>
-                    <SelectItem value="daily">Daily</SelectItem>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {taskData.repeatType !== 'none' && (
-                <div className="space-y-2">
-                  <Label htmlFor="repeat-interval">Every</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="number"
-                      min="1"
-                      value={taskData.repeatInterval}
-                      onChange={(e) => setTaskData({ ...taskData, repeatInterval: parseInt(e.target.value) || 1 })}
-                      className="w-20"
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {taskData.repeatType === 'daily' ? 'day(s)' :
-                       taskData.repeatType === 'weekly' ? 'week(s)' :
-                       taskData.repeatType === 'monthly' ? 'month(s)' :
-                       taskData.repeatType === 'yearly' ? 'year(s)' : ''}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {taskData.repeatType !== 'none' && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>End Date (Optional)</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className="w-full justify-start text-left font-normal"
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        {taskData.repeatEndDate ? (
-                          format(taskData.repeatEndDate, "PPP")
-                        ) : (
-                          <span>Select end date</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <CalendarComponent
-                        mode="single"
-                        selected={taskData.repeatEndDate}
-                        onSelect={(date) => setTaskData({ ...taskData, repeatEndDate: date })}
-                        initialFocus
-                        className={cn("p-3 pointer-events-auto")}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {taskData.repeatEndDate && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setTaskData({ ...taskData, repeatEndDate: undefined })}
-                      className="text-xs"
-                    >
-                      Remove End Date
-                    </Button>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="repeat-count">Max Occurrences (Optional)</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="Leave empty for unlimited"
-                    value={taskData.repeatCount || ''}
-                    onChange={(e) => setTaskData({ ...taskData, repeatCount: e.target.value ? parseInt(e.target.value) : undefined })}
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Submit Button */}
