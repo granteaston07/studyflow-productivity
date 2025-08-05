@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Brain, Timer, CheckSquare, GraduationCap, Download, Smartphone, Monitor } from 'lucide-react';
+import { ArrowRight, Brain, Timer, CheckSquare, GraduationCap, Download, Smartphone, Monitor, TrendingUp, StickyNote } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -190,7 +190,7 @@ export default function Landing() {
               <CardContent className="p-6">
                 <div className="mb-4">
                   <div className="w-12 h-12 bg-info/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-info/20 transition-colors">
-                    <CheckSquare className="h-6 w-6 text-info" />
+                    <TrendingUp className="h-6 w-6 text-info" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">Progress Analytics</h3>
                 </div>
@@ -205,7 +205,7 @@ export default function Landing() {
               <CardContent className="p-6">
                 <div className="mb-4">
                   <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-secondary/20 transition-colors">
-                    <CheckSquare className="h-6 w-6 text-secondary-foreground" />
+                    <StickyNote className="h-6 w-6 text-secondary-foreground" />
                   </div>
                   <h3 className="text-xl font-semibold text-foreground">Quick Notes & Links</h3>
                 </div>
