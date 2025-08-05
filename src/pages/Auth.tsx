@@ -73,7 +73,11 @@ export default function Auth() {
       <Card className="w-full max-w-md bg-card border-border shadow-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Brain className="h-8 w-8 text-primary" />
+            <img 
+              src="/lovable-uploads/7ebcf151-96f2-47f3-aa6f-e7400c8e6f3b.png"
+              alt="StudyFlow Logo"
+              className="h-8 w-8 object-contain"
+            />
             <span className="text-2xl font-bold bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
               StudyFlow
             </span>
