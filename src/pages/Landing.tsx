@@ -58,7 +58,7 @@ export default function Landing() {
                 Sign In
               </Button>
               <Button 
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth?tab=signup')}
                 className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg"
               >
                 Get Started
@@ -93,7 +93,7 @@ export default function Landing() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Button 
                 size="lg"
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/auth?tab=signup')}
                 className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg text-lg px-8 py-3"
               >
                 Start Studying Smarter
@@ -295,7 +295,7 @@ export default function Landing() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 
               size="lg"
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/auth?tab=signup')}
               className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg text-lg px-8 py-3"
             >
               Create Free Account

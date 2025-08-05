@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +11,11 @@ import { Loader2, Brain, Eye, EyeOff, AlertCircle } from 'lucide-react';
 export default function Auth() {
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSignInPassword, setShowSignInPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') === 'signup' ? 'signup' : 'signin');
 
   // Redirect if already authenticated
   if (user && !loading) {
@@ -80,7 +82,7 @@ export default function Auth() {
           <CardDescription className="text-muted-foreground">AI-Powered Student Productivity</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="signin" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-muted">
               <TabsTrigger value="signin" className="text-foreground data-[state=active]:bg-background">Sign In</TabsTrigger>
               <TabsTrigger value="signup" className="text-foreground data-[state=active]:bg-background">Sign Up</TabsTrigger>
