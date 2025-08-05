@@ -1,6 +1,8 @@
 import { TrendingUp, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { ProgressCircle } from "@/components/ProgressCircle";
 import { Task } from "./TaskCard";
 
 interface ProgressTrackerProps {
@@ -49,43 +51,79 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Overall Progress Circle */}
-        <div className="text-center">
-          <div className="relative inline-flex items-center justify-center w-32 h-32 mb-4">
-            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
-              {/* Background circle */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="hsl(var(--muted))"
-                strokeWidth="8"
-                fill="transparent"
-              />
-              {/* Progress circle */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="hsl(var(--primary))"
-                strokeWidth="8"
-                fill="transparent"
-                strokeDasharray={`${2 * Math.PI * 40}`}
-                strokeDashoffset={`${2 * Math.PI * 40 * (1 - completionPercentage / 100)}`}
-                strokeLinecap="round"
-                className="transition-all duration-1000 ease-out"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-primary">
-                {Math.round(completionPercentage)}%
-              </span>
-              <span className="text-xs text-muted-foreground">Complete</span>
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <div className="text-center group cursor-pointer transition-transform duration-200 hover:scale-[1.02]">
+              <div className="relative inline-flex items-center justify-center w-32 h-32 mb-4">
+                <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
+                  {/* Background circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="hsl(var(--muted))"
+                    strokeWidth="8"
+                    fill="transparent"
+                  />
+                  {/* Progress circle */}
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="40"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth="8"
+                    fill="transparent"
+                    strokeDasharray={`${2 * Math.PI * 40}`}
+                    strokeDashoffset={`${2 * Math.PI * 40 * (1 - completionPercentage / 100)}`}
+                    strokeLinecap="round"
+                    className="transition-all duration-1000 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <span className="text-2xl font-bold text-primary">
+                    {Math.round(completionPercentage)}%
+                  </span>
+                  <span className="text-xs text-muted-foreground">Complete</span>
+                </div>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {completedTasks} of {totalTasks} tasks completed
+              </p>
             </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {completedTasks} of {totalTasks} tasks completed
-          </p>
-        </div>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80 p-6">
+            <div className="flex flex-col items-center space-y-4">
+              <ProgressCircle
+                percentage={completionPercentage}
+                size={180}
+                strokeWidth={14}
+                label="Overall Progress"
+                color="hsl(var(--primary))"
+                animationDelay={200}
+              />
+              <div className="text-center space-y-2">
+                <h4 className="font-semibold text-foreground">Task Overview</h4>
+                <p className="text-sm text-muted-foreground">
+                  Your productivity analytics
+                </p>
+                <div className="grid grid-cols-3 gap-4 mt-4">
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-success">{completedTasks}</p>
+                    <p className="text-xs text-muted-foreground">Completed</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-warning">{inProgressTasks}</p>
+                    <p className="text-xs text-muted-foreground">In Progress</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-error">{overdueTasks}</p>
+                    <p className="text-xs text-muted-foreground">Overdue</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
 
         {/* Progress Bar */}
         <div className="space-y-2">

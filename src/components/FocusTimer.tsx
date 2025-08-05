@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { ProgressCircle } from "@/components/ProgressCircle";
 
 interface TimerSession {
   type: 'work' | 'break';
@@ -187,27 +189,55 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
         </div>
 
         {/* Timer Display */}
-        <div className="text-center space-y-3 sm:space-y-4">
-          <div className="space-y-2">
-            <Badge 
-              variant="secondary" 
-              className={`${getSessionColor(selectedSession.type)} px-2 sm:px-3 py-1 text-xs sm:text-sm`}
-            >
-              {selectedSession.label}
-            </Badge>
-            <div className="text-4xl sm:text-6xl font-bold text-primary tabular-nums">
-              {formatTime(timeRemaining)}
+        <HoverCard>
+          <HoverCardTrigger asChild>
+            <div className="text-center space-y-3 sm:space-y-4 group cursor-pointer transition-transform duration-200 hover:scale-[1.02]">
+              <div className="space-y-2">
+                <Badge 
+                  variant="secondary" 
+                  className={`${getSessionColor(selectedSession.type)} px-2 sm:px-3 py-1 text-xs sm:text-sm`}
+                >
+                  {selectedSession.label}
+                </Badge>
+                <div className="text-4xl sm:text-6xl font-bold text-primary tabular-nums">
+                  {formatTime(timeRemaining)}
+                </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="space-y-1 sm:space-y-2">
+                <Progress value={getProgress()} className="h-1.5 sm:h-2" />
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {Math.round(getProgress())}% complete
+                </p>
+              </div>
             </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="space-y-1 sm:space-y-2">
-            <Progress value={getProgress()} className="h-1.5 sm:h-2" />
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {Math.round(getProgress())}% complete
-            </p>
-          </div>
-        </div>
+          </HoverCardTrigger>
+          <HoverCardContent className="w-80 p-6">
+            <div className="flex flex-col items-center space-y-4">
+              <ProgressCircle
+                percentage={getProgress()}
+                size={160}
+                strokeWidth={12}
+                label="Session Progress"
+                value={formatTime(timeRemaining)}
+                color={selectedSession.type === 'work' ? 'hsl(var(--primary))' : 'hsl(var(--success))'}
+                animationDelay={200}
+              />
+              <div className="text-center space-y-2">
+                <h4 className="font-semibold text-foreground">{selectedSession.label}</h4>
+                <p className="text-sm text-muted-foreground">
+                  {selectedSession.type === 'work' ? 'Focus Session Active' : 'Break Time Active'}
+                </p>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span>Duration: {selectedSession.duration}m</span>
+                  <span>•</span>
+                  <span>Remaining: {formatTime(timeRemaining)}</span>
+                </div>
+              </div>
+            </div>
+          </HoverCardContent>
+        </HoverCard>
 
         {/* Controls */}
         <div className="flex justify-center gap-2 sm:gap-3">
