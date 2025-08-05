@@ -111,24 +111,23 @@ export function useTasks() {
 
     try {
       // Calculate sort order: high priority goes to top (0), others go to bottom
-      const maxSortOrder = Math.max(...tasks.map(t => t.sortOrder), 0);
+      const incompleteTasks = tasks.filter(t => !t.completed);
+      const maxSortOrder = Math.max(...incompleteTasks.map(t => t.sortOrder), -1);
       const sortOrder = taskData.priority === 'high' ? 0 : maxSortOrder + 1;
       
-      // If high priority, shift other tasks down
+      // If high priority, shift other incomplete tasks down
       if (taskData.priority === 'high') {
-        const { data: existingTasks } = await supabase
-          .from('tasks')
-          .select('id, sort_order')
-          .eq('user_id', user.id)
-          .gte('sort_order', 0);
+        const updates = incompleteTasks.map((task, index) => ({
+          id: task.id,
+          sort_order: index + 1
+        }));
         
-        if (existingTasks) {
-          for (const task of existingTasks) {
-            await supabase
-              .from('tasks')
-              .update({ sort_order: task.sort_order + 1 })
-              .eq('id', task.id);
-          }
+        for (const update of updates) {
+          await supabase
+            .from('tasks')
+            .update({ sort_order: update.sort_order })
+            .eq('id', update.id)
+            .eq('user_id', user.id);
         }
       }
 
@@ -259,7 +258,19 @@ export function useTasks() {
 
   const reorderTasks = async (newOrder: Task[]) => {
     // Update local state immediately for responsive UI
-    setTasks(newOrder);
+    const updatedTasks = [...tasks];
+    const incompleteTasks = newOrder.filter(t => !t.completed);
+    const completedTasks = tasks.filter(t => t.completed);
+    
+    // Update sort order for incomplete tasks
+    incompleteTasks.forEach((task, index) => {
+      const taskIndex = updatedTasks.findIndex(t => t.id === task.id);
+      if (taskIndex !== -1) {
+        updatedTasks[taskIndex] = { ...task, sortOrder: index };
+      }
+    });
+    
+    setTasks([...incompleteTasks.map((task, index) => ({ ...task, sortOrder: index })), ...completedTasks]);
     
     if (!user) {
       // Guest mode: only update local state
@@ -267,18 +278,12 @@ export function useTasks() {
     }
 
     try {
-      // Update sort_order for each task in the database
-      const updates = newOrder.map((task, index) => ({
-        id: task.id,
-        sort_order: index
-      }));
-
-      // Batch update all tasks with new sort order
-      for (const update of updates) {
+      // Batch update all incomplete tasks with new sort order
+      for (let i = 0; i < incompleteTasks.length; i++) {
         await supabase
           .from('tasks')
-          .update({ sort_order: update.sort_order })
-          .eq('id', update.id)
+          .update({ sort_order: i })
+          .eq('id', incompleteTasks[i].id)
           .eq('user_id', user.id);
       }
     } catch (error: any) {
