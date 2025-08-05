@@ -155,7 +155,7 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
               </DialogContent>
             </Dialog>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             {AI_SUGGESTED_SESSIONS.map((session, index) => {
               const Icon = getSessionIcon(session.type);
               return (
@@ -170,13 +170,13 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
                     }
                   }}
                   disabled={timerActive && !timerPaused}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3"
                 >
-                  <Icon className="h-4 w-4" />
-                  {session.label}
+                  <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <span className="truncate">{session.label}</span>
                   <Badge 
                     variant="secondary" 
-                    className={`text-xs ${getSessionColor(session.type)}`}
+                    className={`text-xs ${getSessionColor(session.type)} px-1 sm:px-2`}
                   >
                     {session.duration}m
                   </Badge>
@@ -187,43 +187,43 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
         </div>
 
         {/* Timer Display */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-3 sm:space-y-4">
           <div className="space-y-2">
             <Badge 
               variant="secondary" 
-              className={`${getSessionColor(selectedSession.type)} px-3 py-1`}
+              className={`${getSessionColor(selectedSession.type)} px-2 sm:px-3 py-1 text-xs sm:text-sm`}
             >
               {selectedSession.label}
             </Badge>
-            <div className="text-6xl font-bold text-primary tabular-nums">
+            <div className="text-4xl sm:text-6xl font-bold text-primary tabular-nums">
               {formatTime(timeRemaining)}
             </div>
           </div>
           
           {/* Progress Bar */}
-          <div className="space-y-2">
-            <Progress value={getProgress()} className="h-2" />
-            <p className="text-sm text-muted-foreground">
+          <div className="space-y-1 sm:space-y-2">
+            <Progress value={getProgress()} className="h-1.5 sm:h-2" />
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {Math.round(getProgress())}% complete
             </p>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="flex justify-center gap-3">
+        <div className="flex justify-center gap-2 sm:gap-3">
           <Button
             onClick={toggleTimer}
             size="lg"
-            className="flex items-center gap-2 px-8"
+            className="flex items-center gap-1 sm:gap-2 px-4 sm:px-8 text-sm sm:text-base"
           >
             {!timerActive || timerPaused ? (
               <>
-                <Play className="h-5 w-5" />
+                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                 Start
               </>
             ) : (
               <>
-                <Pause className="h-5 w-5" />
+                <Pause className="h-4 w-4 sm:h-5 sm:w-5" />
                 Pause
               </>
             )}
@@ -233,19 +233,19 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
             onClick={resetTimer}
             variant="outline"
             size="lg"
-            className="flex items-center gap-2"
+            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 text-sm sm:text-base"
           >
-            <RotateCcw className="h-4 w-4" />
+            <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
             Reset
           </Button>
         </div>
 
         {/* Session Info */}
-        <div className="p-4 bg-muted/50 rounded-lg text-center">
-          <p className="text-sm text-muted-foreground mb-1">
+        <div className="p-3 sm:p-4 bg-muted/50 rounded-lg text-center">
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">
             {selectedSession.type === 'work' ? 'Focus Session' : 'Break Time'}
           </p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-muted-foreground hidden sm:block">
             {selectedSession.type === 'work' 
               ? 'Stay focused and minimize distractions'
               : 'Take a break and recharge your mind'

@@ -17,7 +17,7 @@ export default function Auth() {
 
   // Redirect if already authenticated
   if (user && !loading) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/app" replace />;
   }
 
   const handleSignIn = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -46,7 +46,7 @@ export default function Auth() {
   };
 
   const handleGuestMode = () => {
-    navigate('/');
+    navigate('/app');
   };
 
   if (loading) {
@@ -59,6 +59,15 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="absolute top-4 left-4">
+        <Button 
+          variant="ghost" 
+          onClick={() => navigate('/')}
+          className="text-muted-foreground hover:text-foreground"
+        >
+          ← Back to Home
+        </Button>
+      </div>
       <Card className="w-full max-w-md bg-card border-border shadow-lg">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
