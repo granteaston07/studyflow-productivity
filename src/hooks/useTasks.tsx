@@ -16,11 +16,6 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   sortOrder: number;
-  repeatType?: 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly';
-  repeatInterval?: number;
-  repeatEndDate?: Date;
-  repeatCount?: number;
-  parentTaskId?: string;
 }
 
 export function useTasks() {
@@ -74,12 +69,7 @@ export function useTasks() {
           completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
           createdAt: new Date(task.created_at),
           updatedAt: new Date(task.updated_at),
-          sortOrder: task.sort_order || 0,
-          repeatType: task.repeat_type as Task['repeatType'] || 'none',
-          repeatInterval: task.repeat_interval || 1,
-          repeatEndDate: task.repeat_end_date ? new Date(task.repeat_end_date) : undefined,
-          repeatCount: task.repeat_count,
-          parentTaskId: task.parent_task_id
+          sortOrder: task.sort_order || 0
         };
       });
 
@@ -153,12 +143,7 @@ export function useTasks() {
           status: taskData.status,
           completed: taskData.completed,
           completed_at: taskData.completedAt?.toISOString(),
-          sort_order: sortOrder,
-          repeat_type: taskData.repeatType || 'none',
-          repeat_interval: taskData.repeatInterval || 1,
-          repeat_end_date: taskData.repeatEndDate?.toISOString(),
-          repeat_count: taskData.repeatCount,
-          parent_task_id: taskData.parentTaskId
+          sort_order: sortOrder
         })
         .select()
         .single();
@@ -212,10 +197,6 @@ export function useTasks() {
         updateData.completed = updates.completed;
         updateData.completed_at = updates.completed ? new Date().toISOString() : null;
       }
-      if (updates.repeatType !== undefined) updateData.repeat_type = updates.repeatType;
-      if (updates.repeatInterval !== undefined) updateData.repeat_interval = updates.repeatInterval;
-      if (updates.repeatEndDate !== undefined) updateData.repeat_end_date = updates.repeatEndDate?.toISOString();
-      if (updates.repeatCount !== undefined) updateData.repeat_count = updates.repeatCount;
 
       const { error } = await supabase
         .from('tasks')

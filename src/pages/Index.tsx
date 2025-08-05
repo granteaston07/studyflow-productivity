@@ -104,12 +104,44 @@ const Index = () => {
     await toggleTask(taskId);
   };
 
-  const handleUpdateTask = async (taskId: string, updates: Partial<Task>) => {
-    await updateTask(taskId, updates);
+  const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    // Determine the new status based on the due date
+    let newStatus = task.status;
+    const now = new Date();
+    
+    if (dueDate) {
+      // If setting a due date
+      if (dueDate < now && !task.completed) {
+        // Past due date and not completed = overdue
+        newStatus = 'overdue';
+      } else if (task.status === 'overdue' && dueDate >= now) {
+        // Was overdue but now has future date = reset to pending or in-progress
+        newStatus = task.completed ? 'completed' : 'pending';
+      }
+    } else {
+      // If removing due date and was overdue, reset to pending
+      if (task.status === 'overdue') {
+        newStatus = task.completed ? 'completed' : 'pending';
+      }
+    }
+
+    // Update both due date and status if status changed
+    if (newStatus !== task.status) {
+      await updateTask(taskId, { dueDate, status: newStatus });
+    } else {
+      await updateTask(taskId, { dueDate });
+    }
   };
 
-  const handleAddTask = async (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => {
+  const handleAddTask = async (newTaskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
     await addTask(newTaskData);
+  };
+
+  const handleUpdateStatus = async (taskId: string, status: Task['status']) => {
+    await updateTask(taskId, { status });
   };
 
   const handleDeleteTask = async (taskId: string) => {
@@ -302,7 +334,8 @@ const Index = () => {
                                 key={task.id}
                                 task={task}
                                 onToggle={handleToggleTask}
-                                onUpdate={handleUpdateTask}
+                                onUpdateDueDate={handleUpdateDueDate}
+                                onUpdateStatus={handleUpdateStatus}
                                 onDelete={handleDeleteTask}
                                 isReorderMode={isReorderMode}
                               />
@@ -331,7 +364,8 @@ const Index = () => {
                             <TaskCard
                               task={task}
                               onToggle={handleToggleTask}
-                              onUpdate={handleUpdateTask}
+                              onUpdateDueDate={handleUpdateDueDate}
+                              onUpdateStatus={handleUpdateStatus}
                               onDelete={handleDeleteTask}
                             />
                           </div>
@@ -361,7 +395,8 @@ const Index = () => {
                               <TaskCard
                                 task={task}
                                 onToggle={handleToggleTask}
-                                onUpdate={handleUpdateTask}
+                                onUpdateDueDate={handleUpdateDueDate}
+                                onUpdateStatus={handleUpdateStatus}
                                 onDelete={handleDeleteTask}
                               />
                             </div>
