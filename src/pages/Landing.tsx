@@ -70,22 +70,22 @@ export default function Landing() {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-16 pb-20 px-4 sm:px-6 lg:px-8">
+      <section className="pt-12 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="animate-slide-up">
-            <Badge variant="secondary" className="mb-6 bg-ai-primary/10 text-ai-primary border-ai-primary/20">
+            <Badge variant="secondary" className="mb-4 bg-ai-primary/10 text-ai-primary border-ai-primary/20">
               <Brain className="w-3 h-3 mr-1" />
               AI-Powered Study Assistant
             </Badge>
             
-            <h1 className="text-4xl sm:text-6xl font-bold text-foreground mb-6">
+            <h1 className="text-4xl sm:text-6xl font-bold text-foreground mb-4">
               Master Your{' '}
               <span className="bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent">
                 Study Flow
               </span>
             </h1>
             
-            <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground mb-6 max-w-3xl mx-auto leading-relaxed">
               The ultimate productivity app for students. Organize tasks, track progress, focus with AI-powered timers, 
               and get intelligent study recommendations. Built specifically for academic success.
             </p>
@@ -113,9 +113,9 @@ export default function Landing() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Everything You Need to Excel
             </h2>
@@ -219,9 +219,9 @@ export default function Landing() {
       </section>
 
       {/* Installation Guide Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
               Install StudyFlow as an App
             </h2>
@@ -287,12 +287,12 @@ export default function Landing() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/5 to-ai-primary/5">
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/5 to-ai-primary/5">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
             Ready to Transform Your Study Habits?
           </h2>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-xl text-muted-foreground mb-6">
             Join thousands of students who have improved their productivity with StudyFlow.
           </p>
           
@@ -318,7 +318,7 @@ export default function Landing() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border/50 py-8 px-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-border/50 py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center">
           <div className="flex items-center justify-center gap-2 mb-4">
             <StudyFlowLogo size={24} />
