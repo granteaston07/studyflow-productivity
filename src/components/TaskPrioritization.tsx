@@ -20,77 +20,154 @@ interface AIRecommendation {
 export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // AI-powered task analysis
+  // Enhanced AI-powered task analysis with sophisticated algorithms
   const analyzeTaskPriority = (task: Task): AIRecommendation => {
     let score = 0;
     const reasons: string[] = [];
+    const now = new Date();
     
-    // Due date analysis
+    // Advanced due date analysis with exponential urgency curve
     if (task.dueDate) {
-      const now = new Date();
       const dueDate = new Date(task.dueDate);
       const hoursUntilDue = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      const daysUntilDue = hoursUntilDue / 24;
       
       if (hoursUntilDue < 0) {
-        score += 100; // Overdue gets highest priority
-        reasons.push("⚠️ Task is overdue");
+        const hoursOverdue = Math.abs(hoursUntilDue);
+        score += 100 + Math.min(hoursOverdue * 2, 50); // Escalating penalty for overdue
+        reasons.push(`⚠️ Overdue by ${hoursOverdue < 24 ? Math.round(hoursOverdue) + 'h' : Math.round(hoursOverdue / 24) + 'd'}`);
+      } else if (hoursUntilDue < 6) {
+        score += 95;
+        reasons.push("🚨 Due in next 6 hours");
       } else if (hoursUntilDue < 24) {
-        score += 80;
-        reasons.push("🔥 Due within 24 hours");
-      } else if (hoursUntilDue < 72) {
-        score += 60;
-        reasons.push("⏰ Due within 3 days");
+        score += 85;
+        reasons.push("🔥 Due today");
+      } else if (daysUntilDue < 2) {
+        score += 70;
+        reasons.push("⏰ Due tomorrow");
+      } else if (daysUntilDue < 7) {
+        score += Math.max(50 - (daysUntilDue - 2) * 8, 20); // Gradual decrease
+        reasons.push(`📅 Due in ${Math.ceil(daysUntilDue)} days`);
       }
     }
     
-    // Priority level analysis
+    // Enhanced priority analysis with workload consideration
+    const allIncompleteTasks = incompleteTasks.length;
+    const priorityMultiplier = allIncompleteTasks > 10 ? 1.2 : allIncompleteTasks > 5 ? 1.1 : 1.0;
+    
     switch (task.priority) {
       case 'high':
-        score += 40;
+        score += 45 * priorityMultiplier;
         reasons.push("🎯 High priority task");
         break;
       case 'medium':
-        score += 20;
+        score += 25 * priorityMultiplier;
         reasons.push("📊 Medium priority");
         break;
       case 'low':
-        score += 10;
+        score += 10 * priorityMultiplier;
         break;
     }
     
-    // Subject-based complexity estimation
-    const complexSubjects = ['Math', 'Science'];
-    const mediumSubjects = ['English', 'History'];
+    // Intelligent subject complexity and optimal timing analysis
+    const getSubjectComplexity = (subject: string) => {
+      const complexityMap: Record<string, { score: number; duration: string; timePreference: 'morning' | 'afternoon' | 'evening' | 'any' }> = {
+        'Math': { score: 25, duration: "75-120 min", timePreference: 'morning' },
+        'Physics': { score: 25, duration: "75-120 min", timePreference: 'morning' },
+        'Chemistry': { score: 23, duration: "70-100 min", timePreference: 'morning' },
+        'Science': { score: 20, duration: "60-90 min", timePreference: 'morning' },
+        'Computer Science': { score: 22, duration: "60-120 min", timePreference: 'any' },
+        'Programming': { score: 22, duration: "60-120 min", timePreference: 'any' },
+        'Engineering': { score: 24, duration: "75-120 min", timePreference: 'morning' },
+        'Philosophy': { score: 18, duration: "45-75 min", timePreference: 'afternoon' },
+        'Literature': { score: 15, duration: "45-75 min", timePreference: 'afternoon' },
+        'English': { score: 12, duration: "30-60 min", timePreference: 'afternoon' },
+        'History': { score: 12, duration: "30-60 min", timePreference: 'afternoon' },
+        'Art': { score: 8, duration: "30-90 min", timePreference: 'afternoon' },
+        'Music': { score: 8, duration: "30-90 min", timePreference: 'evening' },
+        'Language': { score: 10, duration: "30-45 min", timePreference: 'morning' },
+        'Biology': { score: 16, duration: "45-75 min", timePreference: 'morning' },
+        'Economics': { score: 14, duration: "45-75 min", timePreference: 'afternoon' },
+        'Psychology': { score: 13, duration: "40-70 min", timePreference: 'afternoon' }
+      };
+      
+      return complexityMap[subject] || { score: 10, duration: "30-45 min", timePreference: 'any' as const };
+    };
     
-    let estimatedDuration = "30-45 min";
-    if (complexSubjects.includes(task.subject || '')) {
-      score += 15;
-      estimatedDuration = "60-90 min";
-      reasons.push("🧮 Complex subject requiring focus");
-    } else if (mediumSubjects.includes(task.subject || '')) {
-      score += 10;
-      estimatedDuration = "45-60 min";
-      reasons.push("📚 Moderate complexity");
-    } else {
-      estimatedDuration = "20-30 min";
+    const subjectInfo = getSubjectComplexity(task.subject || '');
+    score += subjectInfo.score;
+    let estimatedDuration = subjectInfo.duration;
+    
+    // Optimal timing bonus (simple heuristic based on current time)
+    const currentHour = now.getHours();
+    if (subjectInfo.timePreference === 'morning' && currentHour >= 6 && currentHour < 12) {
+      score += 8;
+      reasons.push("🌅 Optimal morning timing for " + (task.subject || 'this subject'));
+    } else if (subjectInfo.timePreference === 'afternoon' && currentHour >= 12 && currentHour < 18) {
+      score += 8;
+      reasons.push("☀️ Peak afternoon focus time");
+    } else if (subjectInfo.timePreference === 'evening' && currentHour >= 18 && currentHour < 22) {
+      score += 8;
+      reasons.push("🌙 Creative evening hours");
     }
     
-    // Status analysis
+    // Task momentum and context switching analysis
     if (task.status === 'in-progress') {
-      score += 25;
-      reasons.push("🚀 Continue momentum on started task");
+      score += 30;
+      reasons.push("🚀 Continue momentum - avoid context switching");
     }
     
-    // Determine urgency level
+    // Workload distribution intelligence
+    const tasksWithSameSubject = incompleteTasks.filter(t => t.subject === task.subject).length;
+    if (tasksWithSameSubject > 1 && task.subject) {
+      score += 5;
+      reasons.push(`📚 Batch with ${tasksWithSameSubject - 1} other ${task.subject} tasks`);
+    }
+    
+    // Task age consideration (older tasks get slight priority boost)
+    if (task.createdAt) {
+      const taskAge = (now.getTime() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24);
+      if (taskAge > 7) {
+        score += Math.min(taskAge * 2, 15);
+        reasons.push("⏳ Task has been pending for a while");
+      }
+    }
+    
+    // Smart deadline conflict detection
+    const conflictingTasks = incompleteTasks.filter(t => {
+      if (!t.dueDate || !task.dueDate) return false;
+      const taskDue = new Date(task.dueDate);
+      const otherDue = new Date(t.dueDate);
+      const timeDiff = Math.abs(taskDue.getTime() - otherDue.getTime()) / (1000 * 60 * 60);
+      return timeDiff < 24 && t.id !== task.id;
+    });
+    
+    if (conflictingTasks.length > 0) {
+      score += 12;
+      reasons.push(`⚡ ${conflictingTasks.length} other task(s) due same day`);
+    }
+    
+    // Energy requirement matching (heuristic based on task complexity and current time)
+    const isHighEnergyTime = (currentHour >= 9 && currentHour < 12) || (currentHour >= 14 && currentHour < 17);
+    const taskRequiresHighEnergy = subjectInfo.score > 18;
+    
+    if (taskRequiresHighEnergy && isHighEnergyTime) {
+      score += 10;
+      reasons.push("⚡ High-energy task during peak focus hours");
+    } else if (taskRequiresHighEnergy && !isHighEnergyTime) {
+      score -= 5; // Slight penalty for complex tasks during low-energy times
+    }
+    
+    // Determine urgency level with more nuanced thresholds
     let urgencyLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    if (score >= 90) urgencyLevel = 'critical';
-    else if (score >= 70) urgencyLevel = 'high';
-    else if (score >= 40) urgencyLevel = 'medium';
+    if (score >= 100) urgencyLevel = 'critical';
+    else if (score >= 75) urgencyLevel = 'high';
+    else if (score >= 45) urgencyLevel = 'medium';
     
     return {
       task,
-      score,
-      reasons: reasons.slice(0, 3), // Limit to top 3 reasons
+      score: Math.round(score),
+      reasons: reasons.slice(0, 3), // Top 3 most important reasons
       estimatedDuration,
       urgencyLevel
     };
