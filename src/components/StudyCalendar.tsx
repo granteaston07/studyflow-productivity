@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus, Repeat, Trash2, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, isSameDay, getDay, getDate } from "date-fns";
+import { format, isSameDay, getDay, getDate, isToday, isTomorrow, isYesterday } from "date-fns";
 import { useStudyGoals, StudyGoal } from "@/hooks/useStudyGoals";
 import { EditStudyGoalDialog } from "@/components/EditStudyGoalDialog";
 import { useToast } from "@/hooks/use-toast";
@@ -194,6 +194,13 @@ export const StudyCalendar = () => {
     return 'th';
   };
 
+  const getDateTitle = (date: Date) => {
+    if (isToday(date)) return "Today";
+    if (isTomorrow(date)) return "Tomorrow";
+    if (isYesterday(date)) return "Yesterday";
+    return format(date, 'MMM d, yyyy');
+  };
+
   const selectedDateGoals = selectedDate ? getGoalsForDate(selectedDate) : [];
 
   if (loading) {
@@ -255,7 +262,7 @@ export const StudyCalendar = () => {
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Repeat className="h-5 w-5 text-primary" />
-            {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
+            {selectedDate ? getDateTitle(selectedDate) : 'Select a date'}
           </CardTitle>
           <Dialog open={showAddGoal} onOpenChange={setShowAddGoal}>
             <DialogTrigger asChild>
@@ -526,15 +533,22 @@ export const StudyCalendar = () => {
                                  variant="destructive" 
                                  className="w-full justify-start text-left"
                                  onClick={async () => {
-                                   // Remove completion for this specific date only
-                                   const dateString = format(selectedDate!, 'yyyy-MM-dd');
-                                   const updatedCompletedDates = goal.completed_dates.filter(d => d !== dateString);
-                                   await updateGoal(goal.id, { completed_dates: updatedCompletedDates });
+                                   // For one-time goals, delete the entire goal
+                                   if (goal.frequency === 'once') {
+                                     await deleteGoal(goal.id);
+                                   } else {
+                                     // For recurring goals, add current date to completed_dates to "skip" this instance
+                                     const dateString = format(selectedDate!, 'yyyy-MM-dd');
+                                     if (!goal.completed_dates.includes(dateString)) {
+                                       const updatedCompletedDates = [...goal.completed_dates, dateString];
+                                       await updateGoal(goal.id, { completed_dates: updatedCompletedDates });
+                                     }
+                                   }
                                  }}
                                >
                                  <div>
                                    <div className="font-medium">Delete this instance only</div>
-                                   <div className="text-sm text-muted-foreground">Remove completion for just this date</div>
+                                   <div className="text-sm text-muted-foreground">Skip this occurrence without affecting other dates</div>
                                  </div>
                                </Button>
                              </div>
