@@ -16,6 +16,7 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
+import { StudyCalendar } from "@/components/StudyCalendar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
@@ -445,6 +446,11 @@ const Index = () => {
               selectedSession={selectedSession}
               onSessionChange={setSelectedSession}
             />
+          </section>
+
+          {/* Study Calendar & Recurring Goals */}
+          <section id="study-calendar">
+            <StudyCalendar />
           </section>
 
           {/* Quick Stats Footer */}
