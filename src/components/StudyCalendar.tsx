@@ -8,7 +8,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { CalendarIcon, Plus, Repeat, Trash2, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isSameDay, getDay, getDate } from "date-fns";
@@ -20,30 +19,20 @@ export const StudyCalendar = () => {
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<StudyGoal | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const { goals, loading, addGoal, updateGoal, deleteGoal, toggleGoalCompletion, clearAllGoals } = useStudyGoals();
+  const { goals, loading, addGoal, updateGoal, deleteGoal, toggleGoalCompletion } = useStudyGoals();
   
   const [newGoal, setNewGoal] = useState<{
     title: string;
     description: string;
-    frequency: 'once' | 'daily' | 'weekly_same_day' | 'monthly_same_date';
+    frequency: 'once' | 'daily' | 'weekly' | 'monthly';
     target_value: number;
     unit: string;
-    week_day?: number;
-    month_date?: number;
-    repeat_interval: number;
-    repeat_end_date?: Date;
-    repeat_count?: number;
   }>({
     title: '',
     description: '',
     frequency: 'daily',
-    target_value: 1,
-    unit: 'minutes',
-    week_day: undefined,
-    month_date: undefined,
-    repeat_interval: 1,
-    repeat_end_date: undefined,
-    repeat_count: undefined
+    target_value: 30,
+    unit: 'minutes'
   });
 
   const colors = [
@@ -65,31 +54,31 @@ export const StudyCalendar = () => {
     if (!newGoal.title) return;
 
     try {
+      const today = new Date();
+      const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      const currentDate = today.getDate();
+
       await addGoal({
         title: newGoal.title,
         description: newGoal.description,
-        frequency: newGoal.frequency,
+        frequency: newGoal.frequency === 'weekly' ? 'weekly_same_day' : 
+                   newGoal.frequency === 'monthly' ? 'monthly_same_date' : newGoal.frequency,
         target_value: newGoal.target_value,
         unit: newGoal.unit,
         color: colors[Math.floor(Math.random() * colors.length)],
-        week_day: newGoal.frequency === 'weekly_same_day' ? newGoal.week_day : null,
-        month_date: newGoal.frequency === 'monthly_same_date' ? newGoal.month_date : null,
-        repeat_interval: newGoal.repeat_interval,
-        repeat_end_date: newGoal.repeat_end_date?.toISOString(),
-        repeat_count: newGoal.repeat_count
+        week_day: newGoal.frequency === 'weekly' ? currentDay : null,
+        month_date: newGoal.frequency === 'monthly' ? currentDate : null,
+        repeat_interval: 1,
+        repeat_end_date: null,
+        repeat_count: null
       });
       
       setNewGoal({
         title: '',
         description: '',
         frequency: 'daily',
-        target_value: 1,
-        unit: 'minutes',
-        week_day: undefined,
-        month_date: undefined,
-        repeat_interval: 1,
-        repeat_end_date: undefined,
-        repeat_count: undefined
+        target_value: 30,
+        unit: 'minutes'
       });
       setShowAddGoal(false);
     } catch (error) {
@@ -141,14 +130,11 @@ export const StudyCalendar = () => {
       case 'once':
         return 'Once';
       case 'daily':
-        return goal.repeat_interval === 1 ? 'Daily' : `Every ${goal.repeat_interval} days`;
+        return 'Daily';
       case 'weekly_same_day':
-        const dayName = weekDays[goal.week_day || 0];
-        return goal.repeat_interval === 1 ? `Every ${dayName}` : `Every ${goal.repeat_interval} weeks on ${dayName}`;
+        return `Weekly (${weekDays[goal.week_day || 0]})`;
       case 'monthly_same_date':
-        return goal.repeat_interval === 1 
-          ? `${goal.month_date}${getOrdinalSuffix(goal.month_date || 1)} of month` 
-          : `Every ${goal.repeat_interval} months on ${goal.month_date}${getOrdinalSuffix(goal.month_date || 1)}`;
+        return `Monthly (${goal.month_date}${getOrdinalSuffix(goal.month_date || 1)})`;
       default:
         return goal.frequency;
     }
@@ -182,30 +168,6 @@ export const StudyCalendar = () => {
             <CalendarIcon className="h-5 w-5 text-primary" />
             Study Calendar
           </CardTitle>
-          {goals.length > 0 && (
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button size="sm" variant="outline" className="text-destructive hover:text-destructive">
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Clear All
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Clear All Goals</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete all recurring study goals and their completion history. This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={clearAllGoals} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                    Clear All Goals
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          )}
         </CardHeader>
         <CardContent>
           <Calendar
@@ -257,138 +219,59 @@ export const StudyCalendar = () => {
                 Add Goal
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add Study Goal</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="title">Title</Label>
+                  <Label htmlFor="title">Goal Title</Label>
                   <Input
                     id="title"
                     value={newGoal.title}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="e.g., Daily Reading"
+                    placeholder="e.g., Practice Math"
                   />
                 </div>
+                
                 <div>
                   <Label htmlFor="description">Description (optional)</Label>
                   <Input
                     id="description"
                     value={newGoal.description}
                     onChange={(e) => setNewGoal(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="e.g., Read academic materials"
+                    placeholder="e.g., Solve algebra problems"
                   />
                 </div>
+                
                 <div>
-                  <Label htmlFor="frequency">Frequency</Label>
+                  <Label htmlFor="frequency">How often?</Label>
                   <Select 
                     value={newGoal.frequency} 
-                    onValueChange={(value: 'once' | 'daily' | 'weekly_same_day' | 'monthly_same_date') => {
-                      setNewGoal(prev => ({ 
-                        ...prev, 
-                        frequency: value,
-                        week_day: value === 'weekly_same_day' ? 0 : undefined,
-                        month_date: value === 'monthly_same_date' ? 1 : undefined
-                      }));
+                    onValueChange={(value: 'once' | 'daily' | 'weekly' | 'monthly') => {
+                      setNewGoal(prev => ({ ...prev, frequency: value }));
                     }}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="once">Once</SelectItem>
-                      <SelectItem value="daily">Daily</SelectItem>
-                      <SelectItem value="weekly_same_day">Same day of week</SelectItem>
-                      <SelectItem value="monthly_same_date">Same date of month</SelectItem>
+                      <SelectItem value="once">Just once</SelectItem>
+                      <SelectItem value="daily">Every day</SelectItem>
+                      <SelectItem value="weekly">Every week (same day)</SelectItem>
+                      <SelectItem value="monthly">Every month (same date)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                
-                {newGoal.frequency === 'weekly_same_day' && (
-                  <div>
-                    <Label htmlFor="weekDay">Day of Week</Label>
-                    <Select 
-                      value={newGoal.week_day?.toString() || '0'} 
-                      onValueChange={(value) => setNewGoal(prev => ({ ...prev, week_day: parseInt(value) }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {weekDays.map((day, index) => (
-                          <SelectItem key={index} value={index.toString()}>{day}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {newGoal.frequency === 'monthly_same_date' && (
-                  <div>
-                    <Label htmlFor="monthDate">Date of Month</Label>
-                    <Input
-                      id="monthDate"
-                      type="number"
-                      min="1"
-                      max="31"
-                      value={newGoal.month_date || 1}
-                      onChange={(e) => setNewGoal(prev => ({ ...prev, month_date: parseInt(e.target.value) || 1 }))}
-                    />
-                  </div>
-                )}
-
-                {newGoal.frequency !== 'once' && (
-                  <div>
-                    <Label>End Date (optional)</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !newGoal.repeat_end_date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {newGoal.repeat_end_date ? format(newGoal.repeat_end_date, "PPP") : "Select end date"}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={newGoal.repeat_end_date}
-                          onSelect={(date) => setNewGoal(prev => ({ 
-                            ...prev, 
-                            repeat_end_date: date
-                          }))}
-                          disabled={(date) => date < new Date()}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    {newGoal.repeat_end_date && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setNewGoal(prev => ({ ...prev, repeat_end_date: undefined }))}
-                        className="mt-2"
-                      >
-                        Clear End Date
-                      </Button>
-                    )}
-                  </div>
-                )}
 
                 <div>
-                  <Label htmlFor="targetValue">Target</Label>
+                  <Label htmlFor="target">Target</Label>
                   <div className="flex gap-2">
                     <Input
-                      id="targetValue"
+                      id="target"
                       type="number"
                       value={newGoal.target_value}
-                      onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 1 }))}
+                      onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
                       min="1"
                       className="flex-1"
                     />
@@ -403,12 +286,13 @@ export const StudyCalendar = () => {
                         <SelectItem value="minutes">Minutes</SelectItem>
                         <SelectItem value="hours">Hours</SelectItem>
                         <SelectItem value="pages">Pages</SelectItem>
+                        <SelectItem value="problems">Problems</SelectItem>
                         <SelectItem value="exercises">Exercises</SelectItem>
-                        <SelectItem value="sessions">Sessions</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
+
                 <Button onClick={addStudyGoal} className="w-full" disabled={!newGoal.title}>
                   Add Goal
                 </Button>
