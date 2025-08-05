@@ -53,7 +53,7 @@ export default function Landing() {
               <Button 
                 variant="outline" 
                 onClick={() => navigate('/auth')}
-                className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
+                className="hover:bg-primary/10 hover:text-primary hover:border-primary/30 hidden sm:inline-flex"
               >
                 Sign In
               </Button>

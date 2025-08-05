@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
@@ -17,20 +18,10 @@ import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
-  // Redirect unauthenticated users to landing page
+  // Allow both authenticated users and guest mode (no redirect for guest users)
   const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
   
-  if (!user && !authLoading) {
-    window.location.href = '/';
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Redirecting...</p>
-        </div>
-      </div>
-    );
-  }
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
@@ -237,7 +228,7 @@ const Index = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => window.location.href = '/auth'}
+                  onClick={() => navigate('/auth')}
                   className="hover:bg-primary/10 hover:text-primary hover:border-primary/30 text-xs sm:text-sm"
                 >
                   <LogIn className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
@@ -263,7 +254,7 @@ const Index = () => {
             {!user && (
               <div className="mt-4 text-sm text-muted-foreground">
                 <p>
-                  ⚠️ Guest Mode: Tasks are temporary. <button onClick={() => window.location.href = '/auth'} className="text-primary hover:underline">Sign in</button> to save your work.
+                  ⚠️ Guest Mode: Tasks are temporary. <button onClick={() => navigate('/auth')} className="text-primary hover:underline">Sign in</button> to save your work.
                 </p>
               </div>
             )}
