@@ -340,107 +340,63 @@ export const StudyCalendar = () => {
 
                 {newGoal.frequency !== 'once' && (
                   <div>
-                    <Label htmlFor="interval">Repeat every</Label>
-                    <div className="flex gap-2 items-center">
-                      <Input
-                        id="interval"
-                        type="number"
-                        min="1"
-                        value={newGoal.repeat_interval}
-                        onChange={(e) => setNewGoal(prev => ({ ...prev, repeat_interval: parseInt(e.target.value) || 1 }))}
-                        className="w-20"
-                      />
-                      <span className="text-sm text-muted-foreground">
-                        {newGoal.frequency === 'daily' && 'day(s)'}
-                        {newGoal.frequency === 'weekly_same_day' && 'week(s)'}
-                        {newGoal.frequency === 'monthly_same_date' && 'month(s)'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {newGoal.frequency !== 'once' && (
-                  <div>
-                    <Label>End Condition (optional)</Label>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              variant="outline"
-                              className={cn(
-                                "w-full justify-start text-left font-normal",
-                                !newGoal.repeat_end_date && "text-muted-foreground"
-                              )}
-                            >
-                              <CalendarIcon className="mr-2 h-4 w-4" />
-                              {newGoal.repeat_end_date ? format(newGoal.repeat_end_date, "PPP") : "End date (optional)"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
-                              mode="single"
-                              selected={newGoal.repeat_end_date}
-                              onSelect={(date) => setNewGoal(prev => ({ 
-                                ...prev, 
-                                repeat_end_date: date,
-                                repeat_count: date ? undefined : prev.repeat_count
-                              }))}
-                              disabled={(date) => date < new Date()}
-                              initialFocus
-                              className="pointer-events-auto"
-                            />
-                          </PopoverContent>
-                        </Popover>
-                        {newGoal.repeat_end_date && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setNewGoal(prev => ({ ...prev, repeat_end_date: undefined }))}
-                          >
-                            Clear
-                          </Button>
-                        )}
-                      </div>
-                      
-                      <div className="text-sm text-muted-foreground text-center">or</div>
-                      
-                      <div className="flex items-center gap-2">
-                        <Input
-                          type="number"
-                          min="1"
-                          placeholder="Number of times"
-                          value={newGoal.repeat_count || ''}
-                          onChange={(e) => setNewGoal(prev => ({ 
+                    <Label>End Date (optional)</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !newGoal.repeat_end_date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {newGoal.repeat_end_date ? format(newGoal.repeat_end_date, "PPP") : "Select end date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={newGoal.repeat_end_date}
+                          onSelect={(date) => setNewGoal(prev => ({ 
                             ...prev, 
-                            repeat_count: e.target.value ? parseInt(e.target.value) : undefined,
-                            repeat_end_date: e.target.value ? undefined : prev.repeat_end_date
+                            repeat_end_date: date
                           }))}
+                          disabled={(date) => date < new Date()}
+                          initialFocus
+                          className="pointer-events-auto"
                         />
-                        <span className="text-sm text-muted-foreground">times</span>
-                      </div>
-                    </div>
+                      </PopoverContent>
+                    </Popover>
+                    {newGoal.repeat_end_date && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setNewGoal(prev => ({ ...prev, repeat_end_date: undefined }))}
+                        className="mt-2"
+                      >
+                        Clear End Date
+                      </Button>
+                    )}
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="targetValue">Target Value</Label>
+                <div>
+                  <Label htmlFor="targetValue">Target</Label>
+                  <div className="flex gap-2">
                     <Input
                       id="targetValue"
                       type="number"
                       value={newGoal.target_value}
                       onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 1 }))}
                       min="1"
+                      className="flex-1"
                     />
-                  </div>
-                  <div>
-                    <Label htmlFor="unit">Unit</Label>
                     <Select 
                       value={newGoal.unit} 
                       onValueChange={(value) => setNewGoal(prev => ({ ...prev, unit: value }))}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-32">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>

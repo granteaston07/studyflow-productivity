@@ -162,119 +162,75 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
 
           {editData.frequency !== 'once' && (
             <div>
-              <Label htmlFor="edit-interval">Repeat every</Label>
-              <div className="flex gap-2 items-center">
-                <Input
-                  id="edit-interval"
-                  type="number"
-                  min="1"
-                  value={editData.repeat_interval}
-                  onChange={(e) => setEditData(prev => ({ ...prev, repeat_interval: parseInt(e.target.value) || 1 }))}
-                  className="w-20"
-                />
-                <span className="text-sm text-muted-foreground">
-                  {editData.frequency === 'daily' && 'day(s)'}
-                  {editData.frequency === 'weekly_same_day' && 'week(s)'}
-                  {editData.frequency === 'monthly_same_date' && 'month(s)'}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {editData.frequency !== 'once' && (
-            <div>
-              <Label>End Condition (optional)</Label>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !editData.repeat_end_date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {editData.repeat_end_date ? format(editData.repeat_end_date, "PPP") : "End date (optional)"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={editData.repeat_end_date || undefined}
-                        onSelect={(date) => setEditData(prev => ({ 
-                          ...prev, 
-                          repeat_end_date: date || null,
-                          repeat_count: date ? null : prev.repeat_count
-                        }))}
-                        disabled={(date) => date < new Date()}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  {editData.repeat_end_date && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setEditData(prev => ({ ...prev, repeat_end_date: null }))}
-                    >
-                      Clear
-                    </Button>
-                  )}
-                </div>
-                
-                <div className="text-sm text-muted-foreground text-center">or</div>
-                
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    min="1"
-                    placeholder="Number of times"
-                    value={editData.repeat_count || ''}
-                    onChange={(e) => setEditData(prev => ({ 
+              <Label>End Date (optional)</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !editData.repeat_end_date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {editData.repeat_end_date ? format(editData.repeat_end_date, "PPP") : "Select end date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={editData.repeat_end_date || undefined}
+                    onSelect={(date) => setEditData(prev => ({ 
                       ...prev, 
-                      repeat_count: e.target.value ? parseInt(e.target.value) : null,
-                      repeat_end_date: e.target.value ? null : prev.repeat_end_date
+                      repeat_end_date: date || null
                     }))}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                    className="pointer-events-auto"
                   />
-                  <span className="text-sm text-muted-foreground">times</span>
-                </div>
-              </div>
+                </PopoverContent>
+              </Popover>
+              {editData.repeat_end_date && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditData(prev => ({ ...prev, repeat_end_date: null }))}
+                  className="mt-2"
+                >
+                  Clear End Date
+                </Button>
+              )}
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="edit-targetValue">Target Value</Label>
-              <Input
-                id="edit-targetValue"
-                type="number"
-                value={editData.target_value}
-                onChange={(e) => setEditData(prev => ({ ...prev, target_value: parseInt(e.target.value) || 1 }))}
-                min="1"
-              />
+              <Label htmlFor="edit-targetValue">Target</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="edit-targetValue"
+                  type="number"
+                  value={editData.target_value}
+                  onChange={(e) => setEditData(prev => ({ ...prev, target_value: parseInt(e.target.value) || 1 }))}
+                  min="1"
+                  className="flex-1"
+                />
+                <Select 
+                  value={editData.unit} 
+                  onValueChange={(value) => setEditData(prev => ({ ...prev, unit: value }))}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="minutes">Minutes</SelectItem>
+                    <SelectItem value="hours">Hours</SelectItem>
+                    <SelectItem value="pages">Pages</SelectItem>
+                    <SelectItem value="exercises">Exercises</SelectItem>
+                    <SelectItem value="sessions">Sessions</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="edit-unit">Unit</Label>
-              <Select 
-                value={editData.unit} 
-                onValueChange={(value) => setEditData(prev => ({ ...prev, unit: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="minutes">Minutes</SelectItem>
-                  <SelectItem value="hours">Hours</SelectItem>
-                  <SelectItem value="pages">Pages</SelectItem>
-                  <SelectItem value="exercises">Exercises</SelectItem>
-                  <SelectItem value="sessions">Sessions</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
           
           <div className="flex gap-2">
             <Button onClick={handleSave} className="flex-1" disabled={!editData.title}>
