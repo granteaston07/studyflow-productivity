@@ -233,7 +233,24 @@ export default function Landing() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Mobile: iPhone only */}
+          <div className="block md:hidden">
+            <Card className="border-border/50 hover:border-primary/30 transition-colors max-w-md mx-auto">
+              <CardContent className="p-6 text-center">
+                <Smartphone className="w-12 h-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-3">iPhone (Safari)</h3>
+                <ol className="text-sm text-muted-foreground text-left space-y-2">
+                  <li>1. Open Safari and visit <span className="font-medium text-primary">studyflow.us</span></li>
+                  <li>2. Tap the "Share" button</li>
+                  <li>3. Scroll and tap "Add to Home Screen"</li>
+                  <li>4. Tap "Add" to confirm</li>
+                </ol>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Desktop: All options */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Desktop Installation */}
             <Card className="border-border/50 hover:border-primary/30 transition-colors">
               <CardContent className="p-6 text-center">
