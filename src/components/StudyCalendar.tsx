@@ -169,9 +169,9 @@ export const StudyCalendar = () => {
   const selectedDateGoals = selectedDate ? getGoalsForDate(selectedDate) : [];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="flex flex-col lg:flex-row gap-6">
       {/* Calendar */}
-      <Card>
+      <Card className="lg:w-fit lg:flex-shrink-0">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
@@ -239,7 +239,7 @@ export const StudyCalendar = () => {
       </Card>
 
       {/* Goals for Selected Date */}
-      <Card>
+      <Card className="flex-1">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Repeat className="h-5 w-5 text-primary" />
