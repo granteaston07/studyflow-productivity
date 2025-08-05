@@ -159,6 +159,7 @@ export type Database = {
           google_course_id: string | null
           id: string
           priority: string | null
+          sort_order: number | null
           source: string | null
           status: string | null
           subject: string | null
@@ -176,6 +177,7 @@ export type Database = {
           google_course_id?: string | null
           id?: string
           priority?: string | null
+          sort_order?: number | null
           source?: string | null
           status?: string | null
           subject?: string | null
@@ -193,6 +195,7 @@ export type Database = {
           google_course_id?: string | null
           id?: string
           priority?: string | null
+          sort_order?: number | null
           source?: string | null
           status?: string | null
           subject?: string | null

@@ -11,7 +11,8 @@ import { format } from "date-fns";
 import { Task } from "./TaskCard";
 
 interface AddTaskFormProps {
-  onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => void;
+  onClose: () => void;
 }
 
 export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
@@ -31,7 +32,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
     
     if (!taskData.title.trim()) return;
 
-    const newTask: Omit<Task, 'id' | 'createdAt' | 'updatedAt'> = {
+    onAddTask({
       title: taskData.title.trim(),
       subject: taskData.subject || 'General',
       description: undefined,
@@ -40,9 +41,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       priority: taskData.priority,
       status: taskData.dueDate && taskData.dueDate < new Date() ? 'overdue' : 'pending',
       completedAt: undefined
-    };
-
-    onAddTask(newTask);
+    });
     
     // Reset form
     setTaskData({

@@ -15,6 +15,7 @@ export interface Task {
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  sortOrder: number;
 }
 
 export function useTasks() {
@@ -35,6 +36,7 @@ export function useTasks() {
         .from('tasks')
         .select('*')
         .eq('user_id', user.id)
+        .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -66,7 +68,8 @@ export function useTasks() {
           status,
           completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
           createdAt: new Date(task.created_at),
-          updatedAt: new Date(task.updated_at)
+          updatedAt: new Date(task.updated_at),
+          sortOrder: task.sort_order || 0
         };
       });
 
@@ -83,7 +86,7 @@ export function useTasks() {
     fetchTasks();
   }, [user]);
 
-  const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => {
     if (!user) {
       // Guest mode: Add to local state only, no database save
       const guestTask: Task = {
@@ -97,7 +100,8 @@ export function useTasks() {
         status: taskData.status,
         completedAt: taskData.completedAt,
         createdAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
+        sortOrder: 0
       };
 
       setTasks(prev => [guestTask, ...prev]);
@@ -106,6 +110,28 @@ export function useTasks() {
     }
 
     try {
+      // Calculate sort order: high priority goes to top (0), others go to bottom
+      const maxSortOrder = Math.max(...tasks.map(t => t.sortOrder), 0);
+      const sortOrder = taskData.priority === 'high' ? 0 : maxSortOrder + 1;
+      
+      // If high priority, shift other tasks down
+      if (taskData.priority === 'high') {
+        const { data: existingTasks } = await supabase
+          .from('tasks')
+          .select('id, sort_order')
+          .eq('user_id', user.id)
+          .gte('sort_order', 0);
+        
+        if (existingTasks) {
+          for (const task of existingTasks) {
+            await supabase
+              .from('tasks')
+              .update({ sort_order: task.sort_order + 1 })
+              .eq('id', task.id);
+          }
+        }
+      }
+
       const { data, error } = await supabase
         .from('tasks')
         .insert({
@@ -117,7 +143,8 @@ export function useTasks() {
           priority: taskData.priority,
           status: taskData.status,
           completed: taskData.completed,
-          completed_at: taskData.completedAt?.toISOString()
+          completed_at: taskData.completedAt?.toISOString(),
+          sort_order: sortOrder
         })
         .select()
         .single();
@@ -135,10 +162,12 @@ export function useTasks() {
         status: data.status as Task['status'],
         completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
         createdAt: new Date(data.created_at),
-        updatedAt: new Date(data.updated_at)
+        updatedAt: new Date(data.updated_at),
+        sortOrder: data.sort_order || 0
       };
 
-      setTasks(prev => [newTask, ...prev]);
+      // Refresh tasks to get updated sort order
+      await fetchTasks();
       toast.success('Task created successfully');
     } catch (error: any) {
       toast.error('Failed to create task');
@@ -228,8 +257,36 @@ export function useTasks() {
     });
   };
 
-  const reorderTasks = (newOrder: Task[]) => {
+  const reorderTasks = async (newOrder: Task[]) => {
+    // Update local state immediately for responsive UI
     setTasks(newOrder);
+    
+    if (!user) {
+      // Guest mode: only update local state
+      return;
+    }
+
+    try {
+      // Update sort_order for each task in the database
+      const updates = newOrder.map((task, index) => ({
+        id: task.id,
+        sort_order: index
+      }));
+
+      // Batch update all tasks with new sort order
+      for (const update of updates) {
+        await supabase
+          .from('tasks')
+          .update({ sort_order: update.sort_order })
+          .eq('id', update.id)
+          .eq('user_id', user.id);
+      }
+    } catch (error: any) {
+      toast.error('Failed to save task order');
+      console.error('Error updating task order:', error);
+      // Revert to original order on error
+      await fetchTasks();
+    }
   };
 
   return {
