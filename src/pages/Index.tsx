@@ -434,10 +434,6 @@ const Index = () => {
 
           {/* Focus Timer */}
           <section id="focus-timer">
-            <div className="flex items-center gap-2 mb-6">
-              <Timer className="h-5 w-5 text-primary" />
-              <h3 className="text-xl font-semibold text-foreground">Focus Session</h3>
-            </div>
             <FocusTimer 
               timerActive={timerActive}
               timeRemaining={timeRemaining}
