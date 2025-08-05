@@ -51,13 +51,6 @@ export default function Landing() {
             <div className="flex items-center gap-2">
               <ThemeToggle />
               <Button 
-                variant="outline" 
-                onClick={() => navigate('/auth')}
-                className="hover:bg-primary/10 hover:text-primary hover:border-primary/30 hidden sm:inline-flex"
-              >
-                Sign In
-              </Button>
-              <Button 
                 onClick={() => navigate('/auth?tab=signup')}
                 className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg"
               >

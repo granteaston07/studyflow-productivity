@@ -228,6 +228,10 @@ export function useTasks() {
     });
   };
 
+  const reorderTasks = (newOrder: Task[]) => {
+    setTasks(newOrder);
+  };
+
   return {
     tasks,
     loading,
@@ -235,6 +239,7 @@ export function useTasks() {
     updateTask,
     deleteTask,
     toggleTask,
+    reorderTasks,
     refreshTasks: fetchTasks
   };
 }

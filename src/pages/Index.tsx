@@ -1,7 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn } from "lucide-react";
+import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
+import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn, ArrowUpDown } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
+import { DraggableTaskCard } from "@/components/DraggableTaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
 import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { ProgressTracker } from "@/components/ProgressTracker";
@@ -22,7 +26,8 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   
-  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask } = useTasks();
+  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
+  const [isReorderMode, setIsReorderMode] = useState(false);
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -74,6 +79,24 @@ const Index = () => {
     setTimerActive(false);
     setTimerPaused(false);
     setTimeRemaining(selectedSessionDuration);
+  };
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      const oldIndex = tasks.findIndex((task) => task.id === active.id);
+      const newIndex = tasks.findIndex((task) => task.id === over.id);
+      const newOrder = arrayMove(tasks, oldIndex, newIndex);
+      reorderTasks(newOrder);
+    }
   };
 
   const handleToggleTask = async (taskId: string) => {
@@ -267,7 +290,18 @@ const Index = () => {
                 <CheckSquare className="h-5 w-5 text-primary" />
                 <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
-              <AddTaskDialog onAddTask={handleAddTask} />
+              <div className="flex items-center gap-2">
+                <AddTaskDialog onAddTask={handleAddTask} />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsReorderMode(!isReorderMode)}
+                  className="flex items-center gap-2"
+                >
+                  <ArrowUpDown className="h-4 w-4" />
+                  {isReorderMode ? "Done" : "Reorder"}
+                </Button>
+              </div>
             </div>
 
             {/* Task List */}
@@ -278,83 +312,118 @@ const Index = () => {
                   <p>No tasks yet. Add your first task to get started!</p>
                 </div>
               ) : (
-                [...tasks]
-                  .sort((a, b) => {
-                    // Sort completed tasks to bottom
-                    if (a.completed && !b.completed) return 1;
-                    if (!a.completed && b.completed) return -1;
-                    
-                    // For incomplete tasks, implement the new sorting logic
-                    if (!a.completed && !b.completed) {
-                      const now = new Date();
-                      const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-                      
-                      // Tasks with due dates
-                      const aHasDueDate = a.dueDate !== undefined;
-                      const bHasDueDate = b.dueDate !== undefined;
-                      
-                      if (aHasDueDate && bHasDueDate) {
-                        // Both have due dates - sort by due date first, then priority
-                        const dueDateDiff = a.dueDate!.getTime() - b.dueDate!.getTime();
-                        if (dueDateDiff !== 0) return dueDateDiff;
-                        
-                        // Same due date - sort by priority
-                        const priorityWeight = { high: 3, medium: 2, low: 1 };
-                        const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
-                        const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
-                        return bPriority - aPriority;
-                      }
-                      
-                      if (aHasDueDate && !bHasDueDate) {
-                        // A has due date, B doesn't
-                        const aDueWithinWeek = a.dueDate! <= oneWeekFromNow;
-                        if (aDueWithinWeek) {
-                          // A is due within a week - comes first regardless of B's priority
-                          return -1;
-                        } else {
-                          // A is due after a week - compare with B's priority
-                          if (b.priority === 'high') return 1; // High priority B comes first
-                          return -1; // A comes first for medium/low priority B
-                        }
-                      }
-                      
-                      if (!aHasDueDate && bHasDueDate) {
-                        // B has due date, A doesn't
-                        const bDueWithinWeek = b.dueDate! <= oneWeekFromNow;
-                        if (bDueWithinWeek) {
-                          // B is due within a week - comes first regardless of A's priority
-                          return 1;
-                        } else {
-                          // B is due after a week - compare with A's priority
-                          if (a.priority === 'high') return -1; // High priority A comes first
-                          return 1; // B comes first for medium/low priority A
-                        }
-                      }
-                      
-                      // Neither has due dates - sort by priority hierarchy
-                      const priorityWeight = { high: 3, medium: 2, low: 1 };
-                      const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
-                      const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
-                      return bPriority - aPriority;
-                    }
-                    
-                    return 0;
-                  })
-                  .map((task, index) => (
-                    <div 
-                      key={task.id}
-                      className="animate-slide-up"
-                      style={{ animationDelay: `${index * 0.1}s` }}
+                <>
+                  {/* Incomplete Tasks */}
+                  {isReorderMode ? (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                      modifiers={[restrictToVerticalAxis]}
                     >
-                      <TaskCard
-                        task={task}
-                        onToggle={handleToggleTask}
-                        onUpdateDueDate={handleUpdateDueDate}
-                        onUpdateStatus={handleUpdateStatus}
-                        onDelete={handleDeleteTask}
-                      />
+                      <SortableContext 
+                        items={tasks.filter(t => !t.completed).map(task => task.id)} 
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-3">
+                          {tasks
+                            .filter(t => !t.completed)
+                            .map((task) => (
+                              <DraggableTaskCard
+                                key={task.id}
+                                task={task}
+                                onToggle={handleToggleTask}
+                                onUpdateDueDate={handleUpdateDueDate}
+                                onUpdateStatus={handleUpdateStatus}
+                                onDelete={handleDeleteTask}
+                                isReorderMode={isReorderMode}
+                              />
+                            ))}
+                        </div>
+                      </SortableContext>
+                    </DndContext>
+                  ) : (
+                    <div className="space-y-3">
+                      {[...tasks]
+                        .sort((a, b) => {
+                          // Sort completed tasks to bottom
+                          if (a.completed && !b.completed) return 1;
+                          if (!a.completed && b.completed) return -1;
+                          
+                          // For incomplete tasks, implement the new sorting logic
+                          if (!a.completed && !b.completed) {
+                            const now = new Date();
+                            const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                            
+                            // Tasks with due dates
+                            const aHasDueDate = a.dueDate !== undefined;
+                            const bHasDueDate = b.dueDate !== undefined;
+                            
+                            if (aHasDueDate && bHasDueDate) {
+                              // Both have due dates - sort by due date first, then priority
+                              const dueDateDiff = a.dueDate!.getTime() - b.dueDate!.getTime();
+                              if (dueDateDiff !== 0) return dueDateDiff;
+                              
+                              // Same due date - sort by priority
+                              const priorityWeight = { high: 3, medium: 2, low: 1 };
+                              const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
+                              const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
+                              return bPriority - aPriority;
+                            }
+                            
+                            if (aHasDueDate && !bHasDueDate) {
+                              // A has due date, B doesn't
+                              const aDueWithinWeek = a.dueDate! <= oneWeekFromNow;
+                              if (aDueWithinWeek) {
+                                // A is due within a week - comes first regardless of B's priority
+                                return -1;
+                              } else {
+                                // A is due after a week - compare with B's priority
+                                if (b.priority === 'high') return 1; // High priority B comes first
+                                return -1; // A comes first for medium/low priority B
+                              }
+                            }
+                            
+                            if (!aHasDueDate && bHasDueDate) {
+                              // B has due date, A doesn't
+                              const bDueWithinWeek = b.dueDate! <= oneWeekFromNow;
+                              if (bDueWithinWeek) {
+                                // B is due within a week - comes first regardless of A's priority
+                                return 1;
+                              } else {
+                                // B is due after a week - compare with A's priority
+                                if (a.priority === 'high') return -1; // High priority A comes first
+                                return 1; // B comes first for medium/low priority A
+                              }
+                            }
+                            
+                            // Neither has due dates - sort by priority hierarchy
+                            const priorityWeight = { high: 3, medium: 2, low: 1 };
+                            const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
+                            const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
+                            return bPriority - aPriority;
+                          }
+                          
+                          return 0;
+                        })
+                        .map((task, index) => (
+                          <div 
+                            key={task.id}
+                            className="animate-slide-up"
+                            style={{ animationDelay: `${index * 0.1}s` }}
+                          >
+                            <TaskCard
+                              task={task}
+                              onToggle={handleToggleTask}
+                              onUpdateDueDate={handleUpdateDueDate}
+                              onUpdateStatus={handleUpdateStatus}
+                              onDelete={handleDeleteTask}
+                            />
+                          </div>
+                        ))}
                     </div>
-                  ))
+                  )}
+                </>
               )}
             </div>
           </section>
