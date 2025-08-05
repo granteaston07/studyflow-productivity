@@ -87,7 +87,7 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="gradient-button flex items-center gap-2">
+        <Button className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg flex items-center gap-2">
           <Plus className="h-4 w-4" />
           Add Task
         </Button>
@@ -250,7 +250,7 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" className="gradient-button w-full">
+          <Button type="submit" className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg w-full">
             <Plus className="h-4 w-4 mr-2" />
             Add Task
           </Button>

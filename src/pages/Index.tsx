@@ -280,8 +280,54 @@ const Index = () => {
                     if (a.completed && !b.completed) return 1;
                     if (!a.completed && b.completed) return -1;
                     
-                    // For incomplete tasks, sort by priority (high -> medium -> low)
+                    // For incomplete tasks, implement the new sorting logic
                     if (!a.completed && !b.completed) {
+                      const now = new Date();
+                      const oneWeekFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+                      
+                      // Tasks with due dates
+                      const aHasDueDate = a.dueDate !== undefined;
+                      const bHasDueDate = b.dueDate !== undefined;
+                      
+                      if (aHasDueDate && bHasDueDate) {
+                        // Both have due dates - sort by due date first, then priority
+                        const dueDateDiff = a.dueDate!.getTime() - b.dueDate!.getTime();
+                        if (dueDateDiff !== 0) return dueDateDiff;
+                        
+                        // Same due date - sort by priority
+                        const priorityWeight = { high: 3, medium: 2, low: 1 };
+                        const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
+                        const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
+                        return bPriority - aPriority;
+                      }
+                      
+                      if (aHasDueDate && !bHasDueDate) {
+                        // A has due date, B doesn't
+                        const aDueWithinWeek = a.dueDate! <= oneWeekFromNow;
+                        if (aDueWithinWeek) {
+                          // A is due within a week - comes first regardless of B's priority
+                          return -1;
+                        } else {
+                          // A is due after a week - compare with B's priority
+                          if (b.priority === 'high') return 1; // High priority B comes first
+                          return -1; // A comes first for medium/low priority B
+                        }
+                      }
+                      
+                      if (!aHasDueDate && bHasDueDate) {
+                        // B has due date, A doesn't
+                        const bDueWithinWeek = b.dueDate! <= oneWeekFromNow;
+                        if (bDueWithinWeek) {
+                          // B is due within a week - comes first regardless of A's priority
+                          return 1;
+                        } else {
+                          // B is due after a week - compare with A's priority
+                          if (a.priority === 'high') return -1; // High priority A comes first
+                          return 1; // B comes first for medium/low priority A
+                        }
+                      }
+                      
+                      // Neither has due dates - sort by priority hierarchy
                       const priorityWeight = { high: 3, medium: 2, low: 1 };
                       const aPriority = priorityWeight[a.priority as keyof typeof priorityWeight] || 2;
                       const bPriority = priorityWeight[b.priority as keyof typeof priorityWeight] || 2;
