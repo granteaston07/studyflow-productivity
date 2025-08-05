@@ -139,25 +139,6 @@ export const AnalyticsDashboard = ({ tasks, studyGoals }: AnalyticsDashboardProp
           </CardContent>
         </Card>
       </div>
-
-      {/* Quick Summary */}
-      <Card className="bg-gradient-to-r from-muted/30 to-muted/10">
-        <CardContent className="p-4">
-          <div className="text-sm text-muted-foreground">
-            {analytics.currentStreak > 0 ? (
-              <p>🎉 Great consistency! You've studied {analytics.currentStreak} days in a row.</p>
-            ) : analytics.completionRate >= 80 ? (
-              <p>💪 You're crushing your tasks! {analytics.completionRate}% completion rate.</p>
-            ) : analytics.overdueTasks > 0 ? (
-              <p>⚠️ Focus needed: {analytics.overdueTasks} overdue tasks need attention.</p>
-            ) : analytics.activeTasks > 0 ? (
-              <p>📋 {analytics.activeTasks} tasks remaining. You've got this!</p>
-            ) : (
-              <p>✨ All caught up! Great job staying on top of everything.</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 };
