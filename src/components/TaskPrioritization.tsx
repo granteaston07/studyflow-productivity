@@ -25,115 +25,306 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     let score = 0;
     const reasons: string[] = [];
     const now = new Date();
+    const currentHour = now.getHours();
+    const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
     
-    // Advanced due date analysis with exponential urgency curve
+    // Advanced due date analysis with exponential urgency curve and varied messaging
     if (task.dueDate) {
       const dueDate = new Date(task.dueDate);
       const hoursUntilDue = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60);
       const daysUntilDue = hoursUntilDue / 24;
       
+      const overdueMessages = [
+        "🚨 Critical overdue task needs immediate attention",
+        "⚠️ Deadline passed - priority escalation required",
+        "🔴 Task requires urgent completion",
+        "⏰ Time-sensitive task overdue"
+      ];
+      
+      const todayMessages = [
+        "🔥 Due today - schedule immediately",
+        "⭐ Today's deadline approaching fast",
+        "🎯 Critical task due before midnight",
+        "⚡ Deadline today - high focus needed"
+      ];
+      
+      const tomorrowMessages = [
+        "⏰ Due tomorrow - plan completion today",
+        "📍 Next-day deadline - start preparation",
+        "🌅 Tomorrow's task - begin early",
+        "⏳ 24-hour deadline window"
+      ];
+      
       if (hoursUntilDue < 0) {
         const hoursOverdue = Math.abs(hoursUntilDue);
-        score += 100 + Math.min(hoursOverdue * 2, 50); // Escalating penalty for overdue
-        reasons.push(`⚠️ Overdue by ${hoursOverdue < 24 ? Math.round(hoursOverdue) + 'h' : Math.round(hoursOverdue / 24) + 'd'}`);
+        score += 100 + Math.min(hoursOverdue * 2, 50);
+        const messageIndex = Math.floor(Math.random() * overdueMessages.length);
+        reasons.push(overdueMessages[messageIndex]);
       } else if (hoursUntilDue < 6) {
         score += 95;
-        reasons.push("🚨 Due in next 6 hours");
+        reasons.push("🚨 Critical: Less than 6 hours remaining");
       } else if (hoursUntilDue < 24) {
         score += 85;
-        reasons.push("🔥 Due today");
+        const messageIndex = Math.floor(Math.random() * todayMessages.length);
+        reasons.push(todayMessages[messageIndex]);
       } else if (daysUntilDue < 2) {
         score += 70;
-        reasons.push("⏰ Due tomorrow");
+        const messageIndex = Math.floor(Math.random() * tomorrowMessages.length);
+        reasons.push(tomorrowMessages[messageIndex]);
       } else if (daysUntilDue < 7) {
-        score += Math.max(50 - (daysUntilDue - 2) * 8, 20); // Gradual decrease
-        reasons.push(`📅 Due in ${Math.ceil(daysUntilDue)} days`);
+        score += Math.max(50 - (daysUntilDue - 2) * 8, 20);
+        const weekdayMessages = [
+          `📅 Due in ${Math.ceil(daysUntilDue)} days - good planning window`,
+          `🗓️ ${Math.ceil(daysUntilDue)}-day deadline - moderate urgency`,
+          `📋 Week-ahead task - plan strategically`,
+          `⏳ ${Math.ceil(daysUntilDue)} days to completion - track progress`
+        ];
+        const messageIndex = Math.floor(Math.random() * weekdayMessages.length);
+        reasons.push(weekdayMessages[messageIndex]);
       }
     }
     
-    // Enhanced priority analysis with workload consideration
+    // Enhanced priority analysis with varied messaging
     const allIncompleteTasks = incompleteTasks.length;
     const priorityMultiplier = allIncompleteTasks > 10 ? 1.2 : allIncompleteTasks > 5 ? 1.1 : 1.0;
     
-    switch (task.priority) {
-      case 'high':
-        score += 45 * priorityMultiplier;
-        reasons.push("🎯 High priority task");
-        break;
-      case 'medium':
-        score += 25 * priorityMultiplier;
-        reasons.push("📊 Medium priority");
-        break;
-      case 'low':
-        score += 10 * priorityMultiplier;
-        break;
-    }
-    
-    // Intelligent subject complexity and optimal timing analysis
-    const getSubjectComplexity = (subject: string) => {
-      const complexityMap: Record<string, { score: number; duration: string; timePreference: 'morning' | 'afternoon' | 'evening' | 'any' }> = {
-        'Math': { score: 25, duration: "75-120 min", timePreference: 'morning' },
-        'Physics': { score: 25, duration: "75-120 min", timePreference: 'morning' },
-        'Chemistry': { score: 23, duration: "70-100 min", timePreference: 'morning' },
-        'Science': { score: 20, duration: "60-90 min", timePreference: 'morning' },
-        'Computer Science': { score: 22, duration: "60-120 min", timePreference: 'any' },
-        'Programming': { score: 22, duration: "60-120 min", timePreference: 'any' },
-        'Engineering': { score: 24, duration: "75-120 min", timePreference: 'morning' },
-        'Philosophy': { score: 18, duration: "45-75 min", timePreference: 'afternoon' },
-        'Literature': { score: 15, duration: "45-75 min", timePreference: 'afternoon' },
-        'English': { score: 12, duration: "30-60 min", timePreference: 'afternoon' },
-        'History': { score: 12, duration: "30-60 min", timePreference: 'afternoon' },
-        'Art': { score: 8, duration: "30-90 min", timePreference: 'afternoon' },
-        'Music': { score: 8, duration: "30-90 min", timePreference: 'evening' },
-        'Language': { score: 10, duration: "30-45 min", timePreference: 'morning' },
-        'Biology': { score: 16, duration: "45-75 min", timePreference: 'morning' },
-        'Economics': { score: 14, duration: "45-75 min", timePreference: 'afternoon' },
-        'Psychology': { score: 13, duration: "40-70 min", timePreference: 'afternoon' }
-      };
-      
-      return complexityMap[subject] || { score: 10, duration: "30-45 min", timePreference: 'any' as const };
+    const priorityMessages = {
+      high: [
+        "🎯 High-impact task requiring focused attention",
+        "⭐ Top priority - allocate prime time",
+        "🚀 Critical importance - complete first",
+        "💎 High-value task - maximize effort"
+      ],
+      medium: [
+        "📊 Balanced priority - steady progress needed",
+        "⚖️ Medium importance - schedule appropriately",
+        "🎪 Moderate priority - consistent effort",
+        "📈 Standard priority task"
+      ],
+      low: [
+        "📝 Low priority - complete when time allows",
+        "🌱 Background task - fill spare time",
+        "💭 Lower urgency - flexible timing",
+        "🔄 Routine task - steady completion"
+      ]
     };
     
-    const subjectInfo = getSubjectComplexity(task.subject || '');
+    switch (task.priority) {
+      case "high":
+        score += 45 * priorityMultiplier;
+        const highIndex = Math.floor(Math.random() * priorityMessages.high.length);
+        reasons.push(priorityMessages.high[highIndex]);
+        break;
+      case "medium":
+        score += 25 * priorityMultiplier;
+        const medIndex = Math.floor(Math.random() * priorityMessages.medium.length);
+        reasons.push(priorityMessages.medium[medIndex]);
+        break;
+      case "low":
+        score += 10 * priorityMultiplier;
+        const lowIndex = Math.floor(Math.random() * priorityMessages.low.length);
+        reasons.push(priorityMessages.low[lowIndex]);
+        break;
+    }
+    
+    // Intelligent subject complexity with varied timing predictions
+    const getSubjectComplexity = (subject: string) => {
+      const complexityMap: Record<string, { 
+        score: number; 
+        durations: string[]; 
+        timePreference: "morning" | "afternoon" | "evening" | "any";
+        insights: string[];
+      }> = {
+        "Math": { 
+          score: 25, 
+          durations: ["60-90 min", "75-120 min", "90-150 min", "45-75 min"], 
+          timePreference: "morning",
+          insights: [
+            "🧮 Mathematical reasoning peaks in morning hours",
+            "🔢 Complex calculations require fresh mental energy",
+            "📐 Logical thinking optimized before noon"
+          ]
+        },
+        "Physics": { 
+          score: 25, 
+          durations: ["70-100 min", "80-130 min", "90-140 min", "60-90 min"], 
+          timePreference: "morning",
+          insights: [
+            "⚛️ Physics concepts need peak concentration",
+            "🔬 Scientific reasoning thrives in morning clarity",
+            "⚡ Problem-solving optimal with fresh mind"
+          ]
+        },
+        "Computer Science": { 
+          score: 22, 
+          durations: ["45-90 min", "60-120 min", "75-150 min", "30-60 min"], 
+          timePreference: "any",
+          insights: [
+            "💻 Coding can be productive at any hour",
+            "🖥️ Programming benefits from uninterrupted blocks",
+            "⌨️ Technical work suits your natural rhythm"
+          ]
+        },
+        "Literature": { 
+          score: 15, 
+          durations: ["30-60 min", "45-75 min", "60-90 min", "25-45 min"], 
+          timePreference: "afternoon",
+          insights: [
+            "📚 Reading comprehension peaks after lunch",
+            "✍️ Creative analysis thrives in afternoon calm",
+            "📖 Literary insight flows in relaxed hours"
+          ]
+        },
+        "Art": { 
+          score: 8, 
+          durations: ["45-120 min", "60-150 min", "30-90 min", "75-180 min"], 
+          timePreference: "afternoon",
+          insights: [
+            "🎨 Creative work flourishes in natural light",
+            "🖌️ Artistic expression peaks in relaxed state",
+            "🌈 Visual creativity optimized in afternoon"
+          ]
+        },
+        "History": { 
+          score: 12, 
+          durations: ["30-60 min", "40-70 min", "50-80 min", "35-65 min"], 
+          timePreference: "afternoon",
+          insights: [
+            "🏛️ Historical analysis benefits from reflection time",
+            "📜 Context understanding grows throughout day",
+            "⏳ Timeline comprehension peaks in afternoon"
+          ]
+        }
+      };
+      
+      const defaultInfo = { 
+        score: 10, 
+        durations: ["25-45 min", "30-60 min", "35-50 min", "20-40 min"], 
+        timePreference: "any" as const,
+        insights: [
+          "📋 General task suitable for any time",
+          "⏰ Flexible timing allows for optimal scheduling",
+          "🔄 Adaptable to your daily rhythm"
+        ]
+      };
+      
+      return complexityMap[subject] || defaultInfo;
+    };
+    
+    const subjectInfo = getSubjectComplexity(task.subject || "");
     score += subjectInfo.score;
-    let estimatedDuration = subjectInfo.duration;
     
-    // Optimal timing bonus (simple heuristic based on current time)
-    const currentHour = now.getHours();
-    if (subjectInfo.timePreference === 'morning' && currentHour >= 6 && currentHour < 12) {
-      score += 8;
-      reasons.push("🌅 Optimal morning timing for " + (task.subject || 'this subject'));
-    } else if (subjectInfo.timePreference === 'afternoon' && currentHour >= 12 && currentHour < 18) {
-      score += 8;
-      reasons.push("☀️ Peak afternoon focus time");
-    } else if (subjectInfo.timePreference === 'evening' && currentHour >= 18 && currentHour < 22) {
-      score += 8;
-      reasons.push("🌙 Creative evening hours");
+    // Varied duration estimation based on multiple factors
+    const durationIndex = Math.floor(Math.random() * subjectInfo.durations.length);
+    let estimatedDuration = subjectInfo.durations[durationIndex];
+    
+    // Adjust duration based on task complexity indicators
+    if (task.description && task.description.length > 100) {
+      const extendedDurations = subjectInfo.durations.map(d => {
+        const [min, max] = d.split("-").map(x => parseInt(x));
+        return `${min + 15}-${max + 30} min`;
+      });
+      estimatedDuration = extendedDurations[durationIndex];
+      reasons.push("📝 Detailed task - extended time allocated");
     }
     
-    // Task momentum and context switching analysis
-    if (task.status === 'in-progress') {
+    // Optimal timing analysis with varied insights
+    const timingInsights = {
+      morning: [
+        "🌅 Morning clarity perfect for analytical work",
+        "☕ Peak mental energy in early hours",
+        "🧠 Cognitive performance highest before noon",
+        "⏰ Fresh mind ideal for complex thinking"
+      ],
+      afternoon: [
+        "☀️ Afternoon focus window for creative tasks",
+        "🎯 Post-lunch concentration for detailed work",
+        "📈 Steady energy levels in afternoon hours",
+        "🔄 Balanced mental state for comprehensive work"
+      ],
+      evening: [
+        "🌙 Evening creativity for expressive tasks",
+        "✨ Relaxed state perfect for artistic work",
+        "🎭 Creative insight flows in evening calm",
+        "💫 Reflective hours suit interpretive tasks"
+      ]
+    };
+    
+    if (subjectInfo.timePreference === "morning" && currentHour >= 6 && currentHour < 12) {
+      score += 8;
+      const insightIndex = Math.floor(Math.random() * timingInsights.morning.length);
+      reasons.push(timingInsights.morning[insightIndex]);
+    } else if (subjectInfo.timePreference === "afternoon" && currentHour >= 12 && currentHour < 18) {
+      score += 8;
+      const insightIndex = Math.floor(Math.random() * timingInsights.afternoon.length);
+      reasons.push(timingInsights.afternoon[insightIndex]);
+    } else if (subjectInfo.timePreference === "evening" && currentHour >= 18 && currentHour < 22) {
+      score += 8;
+      const insightIndex = Math.floor(Math.random() * timingInsights.evening.length);
+      reasons.push(timingInsights.evening[insightIndex]);
+    }
+    
+    // Add subject-specific insights
+    if (subjectInfo.insights && Math.random() > 0.7) {
+      const insightIndex = Math.floor(Math.random() * subjectInfo.insights.length);
+      reasons.push(subjectInfo.insights[insightIndex]);
+    }
+    
+    // Enhanced momentum and context analysis
+    const momentumMessages = [
+      "🚀 Continue current momentum - avoid task switching",
+      "⚡ In-progress task - maintain flow state",
+      "🎯 Active task - complete while engaged",
+      "🔥 Riding productivity wave - keep going"
+    ];
+    
+    if (task.status === "in-progress") {
       score += 30;
-      reasons.push("🚀 Continue momentum - avoid context switching");
+      const momentumIndex = Math.floor(Math.random() * momentumMessages.length);
+      reasons.push(momentumIndex < momentumMessages.length ? momentumMessages[momentumIndex] : momentumMessages[0]);
     }
     
-    // Workload distribution intelligence
+    // Weekend vs weekday insights
+    const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+    if (isWeekend && task.priority === "low") {
+      score += 5;
+      reasons.push("🏖️ Perfect weekend task - relaxed completion");
+    } else if (!isWeekend && task.priority === "high") {
+      score += 3;
+      reasons.push("📅 Weekday focus - prime time for important work");
+    }
+    
+    // Smart batching insights
     const tasksWithSameSubject = incompleteTasks.filter(t => t.subject === task.subject).length;
     if (tasksWithSameSubject > 1 && task.subject) {
       score += 5;
-      reasons.push(`📚 Batch with ${tasksWithSameSubject - 1} other ${task.subject} tasks`);
+      const batchMessages = [
+        `📚 Batch ${tasksWithSameSubject - 1} ${task.subject} tasks together`,
+        `🎯 Group subject work - ${tasksWithSameSubject} tasks total`,
+        `📋 Subject clustering - ${tasksWithSameSubject - 1} related tasks`,
+        `🔗 Efficient batching with ${tasksWithSameSubject - 1} similar tasks`
+      ];
+      const batchIndex = Math.floor(Math.random() * batchMessages.length);
+      reasons.push(batchMessages[batchIndex]);
     }
     
-    // Task age consideration (older tasks get slight priority boost)
+    // Task aging with varied insights
     if (task.createdAt) {
       const taskAge = (now.getTime() - new Date(task.createdAt).getTime()) / (1000 * 60 * 60 * 24);
       if (taskAge > 7) {
         score += Math.min(taskAge * 2, 15);
-        reasons.push("⏳ Task has been pending for a while");
+        const ageMessages = [
+          "⏳ Long-pending task needs attention",
+          "🕰️ Aged task - time to complete",
+          "📅 Task maturity suggests priority",
+          "⌛ Extended timeline - completion due"
+        ];
+        const ageIndex = Math.floor(Math.random() * ageMessages.length);
+        reasons.push(ageMessages[ageIndex]);
       }
     }
     
-    // Smart deadline conflict detection
+    // Advanced conflict detection
     const conflictingTasks = incompleteTasks.filter(t => {
       if (!t.dueDate || !task.dueDate) return false;
       const taskDue = new Date(task.dueDate);
@@ -144,30 +335,45 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     
     if (conflictingTasks.length > 0) {
       score += 12;
-      reasons.push(`⚡ ${conflictingTasks.length} other task(s) due same day`);
+      const conflictMessages = [
+        `⚡ ${conflictingTasks.length} concurrent deadlines - strategic planning needed`,
+        `🎯 Multiple tasks due same day - prioritize carefully`,
+        `⏰ Deadline cluster detected - time management critical`,
+        `📊 ${conflictingTasks.length} competing priorities - balance required`
+      ];
+      const conflictIndex = Math.floor(Math.random() * conflictMessages.length);
+      reasons.push(conflictMessages[conflictIndex]);
     }
     
-    // Energy requirement matching (heuristic based on task complexity and current time)
+    // Energy matching with time-sensitive insights
     const isHighEnergyTime = (currentHour >= 9 && currentHour < 12) || (currentHour >= 14 && currentHour < 17);
     const taskRequiresHighEnergy = subjectInfo.score > 18;
     
     if (taskRequiresHighEnergy && isHighEnergyTime) {
       score += 10;
-      reasons.push("⚡ High-energy task during peak focus hours");
+      const energyMessages = [
+        "⚡ Peak energy aligns with high-demand task",
+        "🔋 Optimal energy-task matching detected",
+        "💪 High-energy window perfect for complex work",
+        "🎯 Prime cognitive hours for demanding task"
+      ];
+      const energyIndex = Math.floor(Math.random() * energyMessages.length);
+      reasons.push(energyMessages[energyIndex]);
     } else if (taskRequiresHighEnergy && !isHighEnergyTime) {
-      score -= 5; // Slight penalty for complex tasks during low-energy times
+      score -= 5;
+      reasons.push("🔋 Consider scheduling during peak energy hours");
     }
     
     // Determine urgency level with more nuanced thresholds
-    let urgencyLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
-    if (score >= 100) urgencyLevel = 'critical';
-    else if (score >= 75) urgencyLevel = 'high';
-    else if (score >= 45) urgencyLevel = 'medium';
+    let urgencyLevel: "low" | "medium" | "high" | "critical" = "low";
+    if (score >= 100) urgencyLevel = "critical";
+    else if (score >= 75) urgencyLevel = "high";
+    else if (score >= 45) urgencyLevel = "medium";
     
     return {
       task,
       score: Math.round(score),
-      reasons: reasons.slice(0, 3), // Top 3 most important reasons
+      reasons: reasons.slice(0, 4), // Top 4 most relevant insights
       estimatedDuration,
       urgencyLevel
     };
