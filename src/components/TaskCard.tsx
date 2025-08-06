@@ -213,7 +213,8 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                 <Calendar className="h-3 w-3" />
                 <span className={cn(
                   "text-xs",
-                  task.status === 'overdue' && "text-error font-medium"
+                  task.status === 'overdue' && "text-error font-medium",
+                  formatDueDate(task.dueDate) === 'Due today' && !task.completed && "text-warning font-medium"
                 )}>
                   {formatDueDate(task.dueDate)}
                 </span>

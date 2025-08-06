@@ -46,8 +46,11 @@ export function useTasks() {
         const dueDate = task.due_date ? new Date(task.due_date) : undefined;
         let status = task.status as Task['status'];
         
-        // Auto-update overdue status based on due date
-        if (!task.completed && dueDate && dueDate < now && status !== 'overdue') {
+        // Auto-update overdue status based on due date (only for tasks past today)
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const taskDate = dueDate ? new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()) : null;
+        
+        if (!task.completed && dueDate && taskDate && taskDate < today && status !== 'overdue') {
           status = 'overdue';
           // Update in database asynchronously (fire and forget)
           supabase
