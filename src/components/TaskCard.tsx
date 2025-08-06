@@ -31,12 +31,15 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   const handleToggle = async () => {
     if (!task.completed) {
       setIsCompleting(true);
+      
+      // Show feedback popup immediately for authenticated users
+      if (!isGuest) {
+        setFeedbackTask(task);
+        setShowFeedback(true);
+      }
+      
       setTimeout(async () => {
-        const result = await onToggle(task.id, !isGuest);
-        if (result.shouldShowFeedback && result.task) {
-          setFeedbackTask(result.task);
-          setShowFeedback(true);
-        }
+        await onToggle(task.id, !isGuest);
         setIsCompleting(false);
       }, 800);
     } else {
