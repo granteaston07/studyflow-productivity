@@ -310,7 +310,7 @@ export default function Landing() {
             Ready to Transform Your Study Habits?
           </h2>
           <p className="text-xl text-muted-foreground mb-6">
-            Join thousands of students who have improved their productivity with StudyFlow.
+            Join hundreds of students who have improved their productivity with StudyFlow.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
