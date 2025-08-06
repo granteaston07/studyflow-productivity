@@ -20,11 +20,13 @@ interface TaskCompletionFeedbackProps {
 }
 
 export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletionFeedbackProps) {
-  const [timeTaken, setTimeTaken] = useState([30]); // Default 30 minutes
+  const [timeTaken, setTimeTaken] = useState([3]); // Default to index 3 = 1 hour
   const [difficulty, setDifficulty] = useState([5]); // Default difficulty 5
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  console.log('TaskCompletionFeedback rendered:', { isOpen, user: !!user, task: task?.title });
 
   const timeLabels = [
     "5 min", "15 min", "30 min", "1 hour", "1.5 hours", 
@@ -37,12 +39,24 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
+    console.log('HandleSubmit called:', { user: !!user, timeTaken, difficulty });
+    
+    if (!user) {
+      console.error('No user found');
+      toast({
+        title: "Error",
+        description: "You must be signed in to save feedback.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsSubmitting(true);
+    console.log('Starting submission...');
     
     try {
       const timeInMinutes = getTimeInMinutes(timeTaken[0]);
+      console.log('Time in minutes:', timeInMinutes, 'Difficulty:', difficulty[0]);
       
       // Extract keywords from task title and description
       const keywords = [
@@ -61,12 +75,18 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
           difficulty_rating: difficulty[0],
         });
 
-      if (error) throw error;
+      console.log('Database insert successful');
 
-      // Update user behavior patterns
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+
       await supabase.rpc('update_user_behavior_patterns', {
         p_user_id: user.id
       });
+
+      console.log('Behavior patterns updated');
 
       toast({
         title: "Feedback saved!",
@@ -78,10 +98,11 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
       console.error('Error saving feedback:', error);
       toast({
         title: "Error saving feedback",
-        description: "Please try again.",
+        description: `Please try again. Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
     } finally {
+      console.log('Submission completed');
       setIsSubmitting(false);
     }
   };
