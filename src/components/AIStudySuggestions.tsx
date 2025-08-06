@@ -34,7 +34,7 @@ export function AIStudySuggestions({ tasks }: AIStudySuggestionsProps) {
         timeEstimate: "25 min cycles",
         difficulty: 'easy',
         subjects: ['All'],
-    icon: <Clock className="h-4 w-4" />,
+        icon: <Clock className="h-4 w-4" />,
         priority: 'high',
         category: 'time-management',
         applicableScenarios: ['high workload', 'focus issues', 'general productivity']
