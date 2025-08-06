@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Task } from "./TaskCard";
 import { differenceInDays, isToday, isTomorrow, isPast } from "date-fns";
+import { useLearningInsights } from "@/hooks/useLearningInsights";
 
 interface AIStudySuggestionsProps {
   tasks: Task[];
@@ -21,6 +22,8 @@ interface StudySuggestion {
 }
 
 export function AIStudySuggestions({ tasks }: AIStudySuggestionsProps) {
+  const { getTimeEstimateForTask, getDifficultyEstimate, recordSuggestionInteraction, behaviorPatterns } = useLearningInsights();
+
   const generateSuggestions = (): StudySuggestion[] => {
     const activeTasks = tasks.filter(task => !task.completed);
     const allSuggestions: StudySuggestion[] = [

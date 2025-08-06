@@ -9,30 +9,38 @@ import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Task } from "@/hooks/useTasks";
 import { useState, useEffect } from "react";
+import { TaskCompletionFeedback } from "./TaskCompletionFeedback";
 
 export type { Task } from "@/hooks/useTasks";
 
 interface TaskCardProps {
   task: Task;
-  onToggle: (id: string) => void;
+  onToggle: (id: string, showFeedback?: boolean) => Promise<{ task: Task | null; shouldShowFeedback: boolean }>;
   onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
   onUpdateStatus: (id: string, status: Task['status']) => void;
   onDelete: (id: string) => void;
+  isGuest?: boolean;
 }
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, isGuest = false }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
 
-  const handleToggle = () => {
+  const handleToggle = async () => {
     if (!task.completed) {
       setIsCompleting(true);
-      setTimeout(() => {
-        onToggle(task.id);
+      setTimeout(async () => {
+        const result = await onToggle(task.id, !isGuest);
+        if (result.shouldShowFeedback && result.task) {
+          setFeedbackTask(result.task);
+          setShowFeedback(true);
+        }
         setIsCompleting(false);
       }, 800);
     } else {
-      onToggle(task.id);
+      await onToggle(task.id);
     }
   };
 
@@ -108,6 +116,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   };
 
   return (
+    <>
     <Card className={cn(
       "p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]",
       isCompleting && "animate-task-complete",
@@ -229,5 +238,14 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
         </div>
       </div>
     </Card>
+
+    {feedbackTask && (
+      <TaskCompletionFeedback
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+        task={feedbackTask}
+      />
+    )}
+    </>
   );
 }

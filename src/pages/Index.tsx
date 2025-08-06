@@ -18,6 +18,7 @@ import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
+import { LearningInsightsDashboard } from "@/components/LearningInsightsDashboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
@@ -103,8 +104,8 @@ const Index = () => {
     }
   };
 
-  const handleToggleTask = async (taskId: string) => {
-    await toggleTask(taskId);
+  const handleToggleTask = async (taskId: string, showFeedback: boolean = false) => {
+    return await toggleTask(taskId, showFeedback);
   };
 
   const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
@@ -452,10 +453,18 @@ const Index = () => {
             <StudyCalendar />
           </section>
 
-          {/* Enhanced Analytics Dashboard */}
-          <section id="analytics-dashboard">
-            <AnalyticsDashboard tasks={tasks} studyGoals={studyGoals} />
-          </section>
+          {/* Two Column Layout for Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Enhanced Analytics Dashboard */}
+            <section id="analytics-dashboard">
+              <AnalyticsDashboard tasks={tasks} studyGoals={studyGoals} />
+            </section>
+            
+            {/* Learning Insights Dashboard */}
+            <section id="learning-insights">
+              <LearningInsightsDashboard />
+            </section>
+          </div>
 
           {/* Footer with Legal Info */}
           <footer className="pt-6 border-t border-border">

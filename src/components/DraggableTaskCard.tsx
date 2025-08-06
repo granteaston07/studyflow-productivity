@@ -6,7 +6,7 @@ import { GripVertical } from 'lucide-react';
 
 interface DraggableTaskCardProps {
   task: Task;
-  onToggle: (id: string) => void;
+  onToggle: (id: string, showFeedback?: boolean) => Promise<{ task: Task | null; shouldShowFeedback: boolean }>;
   onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
   onUpdateStatus: (id: string, status: Task['status']) => void;
   onDelete: (id: string) => void;

@@ -245,9 +245,9 @@ export function useTasks() {
     }
   };
 
-  const toggleTask = async (taskId: string) => {
+  const toggleTask = async (taskId: string, showFeedback: boolean = false) => {
     const task = tasks.find(t => t.id === taskId);
-    if (!task) return;
+    if (!task) return { task: null, shouldShowFeedback: false };
 
     const newCompleted = !task.completed;
     const newStatus = newCompleted ? 'completed' : 'pending';
@@ -257,6 +257,11 @@ export function useTasks() {
       status: newStatus,
       completedAt: newCompleted ? new Date() : undefined
     });
+
+    return { 
+      task: { ...task, completed: newCompleted }, 
+      shouldShowFeedback: newCompleted && showFeedback 
+    };
   };
 
   const reorderTasks = async (newOrder: Task[]) => {

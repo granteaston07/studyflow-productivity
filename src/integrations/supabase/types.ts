@@ -286,6 +286,78 @@ export type Database = {
         }
         Relationships: []
       }
+      suggestion_interactions: {
+        Row: {
+          created_at: string
+          effectiveness_rating: number | null
+          id: string
+          suggestion_technique: string
+          task_id: string | null
+          user_id: string
+          was_used: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          effectiveness_rating?: number | null
+          id?: string
+          suggestion_technique: string
+          task_id?: string | null
+          user_id: string
+          was_used?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          effectiveness_rating?: number | null
+          id?: string
+          suggestion_technique?: string
+          task_id?: string | null
+          user_id?: string
+          was_used?: boolean | null
+        }
+        Relationships: []
+      }
+      task_feedback: {
+        Row: {
+          completion_technique: string | null
+          created_at: string
+          difficulty_rating: number
+          helpful_factors: string[] | null
+          id: string
+          subject: string | null
+          task_id: string | null
+          task_keywords: string[] | null
+          time_taken_minutes: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completion_technique?: string | null
+          created_at?: string
+          difficulty_rating: number
+          helpful_factors?: string[] | null
+          id?: string
+          subject?: string | null
+          task_id?: string | null
+          task_keywords?: string[] | null
+          time_taken_minutes: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completion_technique?: string | null
+          created_at?: string
+          difficulty_rating?: number
+          helpful_factors?: string[] | null
+          id?: string
+          subject?: string | null
+          task_id?: string | null
+          task_keywords?: string[] | null
+          time_taken_minutes?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           completed: boolean | null
@@ -366,6 +438,48 @@ export type Database = {
           },
         ]
       }
+      user_behavior_patterns: {
+        Row: {
+          avg_difficulty_rating: number | null
+          avg_time_per_task: number | null
+          created_at: string
+          id: string
+          last_analyzed_at: string
+          optimal_study_times: number[] | null
+          preferred_techniques: string[] | null
+          subject: string | null
+          success_patterns: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_difficulty_rating?: number | null
+          avg_time_per_task?: number | null
+          created_at?: string
+          id?: string
+          last_analyzed_at?: string
+          optimal_study_times?: number[] | null
+          preferred_techniques?: string[] | null
+          subject?: string | null
+          success_patterns?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_difficulty_rating?: number | null
+          avg_time_per_task?: number | null
+          created_at?: string
+          id?: string
+          last_analyzed_at?: string
+          optimal_study_times?: number[] | null
+          preferred_techniques?: string[] | null
+          subject?: string | null
+          success_patterns?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -377,6 +491,10 @@ export type Database = {
       }
       update_study_streak: {
         Args: { p_user_id: string; p_streak_type?: string }
+        Returns: undefined
+      }
+      update_user_behavior_patterns: {
+        Args: { p_user_id: string }
         Returns: undefined
       }
     }
