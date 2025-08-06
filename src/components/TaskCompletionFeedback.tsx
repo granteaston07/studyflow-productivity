@@ -70,7 +70,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
 
       toast({
         title: "Feedback saved!",
-        description: "Thanks for helping improve your AI suggestions.",
+        description: "Task completed! Thanks for helping improve your AI suggestions.",
       });
 
       onClose();

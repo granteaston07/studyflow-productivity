@@ -30,21 +30,35 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
 
   const handleToggle = async () => {
     if (!task.completed) {
-      setIsCompleting(true);
-      
-      // Show feedback popup immediately for authenticated users
+      // For authenticated users, show feedback popup before completing the task
       if (!isGuest) {
         setFeedbackTask(task);
         setShowFeedback(true);
+        return; // Don't complete the task yet, let the popup handle it
       }
       
+      // For guest users, complete normally
+      setIsCompleting(true);
       setTimeout(async () => {
-        await onToggle(task.id, !isGuest);
+        await onToggle(task.id, false);
         setIsCompleting(false);
       }, 800);
     } else {
+      // Uncompleting a task
       await onToggle(task.id);
     }
+  };
+
+  const handleFeedbackClose = async () => {
+    setShowFeedback(false);
+    setFeedbackTask(null);
+    
+    // Now complete the task after feedback popup closes
+    setIsCompleting(true);
+    setTimeout(async () => {
+      await onToggle(task.id, false);
+      setIsCompleting(false);
+    }, 800);
   };
 
   const handleDelete = () => {
@@ -245,7 +259,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     {feedbackTask && (
       <TaskCompletionFeedback
         isOpen={showFeedback}
-        onClose={() => setShowFeedback(false)}
+        onClose={handleFeedbackClose}
         task={feedbackTask}
       />
     )}
