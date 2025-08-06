@@ -55,7 +55,12 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     }
   };
 
-  const getStatusIcon = (status: Task['status']) => {
+  const getStatusIcon = (status: Task['status'], dueDate?: Date) => {
+    // Don't show overdue icon for tasks due today
+    if (status === 'overdue' && dueDate && formatDueDate(dueDate) === 'Due today') {
+      return <Clock className="h-4 w-4" />;
+    }
+    
     switch (status) {
       case 'completed':
         return <Check className="h-4 w-4" />;
@@ -150,7 +155,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                 }}
               >
                 <span className="flex items-center gap-1">
-                  {getStatusIcon(task.status)}
+                  {getStatusIcon(task.status, task.dueDate)}
                   {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
                 </span>
               </Badge>
