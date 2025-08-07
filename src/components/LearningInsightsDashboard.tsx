@@ -2,11 +2,50 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Brain, Clock, Target, TrendingUp, BookOpen, Star } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Brain, Clock, Target, BookOpen, Trash2 } from 'lucide-react';
 import { useLearningInsights } from '@/hooks/useLearningInsights';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 export function LearningInsightsDashboard() {
-  const { insights, behaviorPatterns, loading } = useLearningInsights();
+  const { insights, behaviorPatterns, loading, refreshInsights } = useLearningInsights();
+
+  const handleDeleteSubjectData = async (subject: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Delete from task_feedback
+      await supabase
+        .from('task_feedback')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('subject', subject);
+
+      // Delete from user_behavior_patterns
+      await supabase
+        .from('user_behavior_patterns')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('subject', subject);
+
+      // Refresh insights after deletion
+      await refreshInsights();
+      
+      toast({
+        title: "Subject data deleted",
+        description: `All learning data for ${subject} has been removed.`,
+      });
+    } catch (error) {
+      console.error('Error deleting subject data:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete subject data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -71,117 +110,64 @@ export function LearningInsightsDashboard() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-primary" />
-          Your Learning Insights
+          <BookOpen className="h-5 w-5 text-primary" />
+          Subject Performance
         </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          AI-powered analysis of your study patterns and performance
-        </p>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Subject Performance */}
-        <div className="space-y-4">
-          <h4 className="font-medium flex items-center gap-2">
-            <BookOpen className="h-4 w-4" />
-            Subject Performance
-          </h4>
-          <div className="grid gap-4">
-            {insights.map((insight) => (
-              <div key={insight.subject} className="border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{insight.subject}</span>
-                    <Badge variant="secondary" className="text-xs">
-                      {insight.totalTasks} tasks
-                    </Badge>
-                  </div>
+      <CardContent>
+        <div className="grid gap-4">
+          {insights.map((insight) => (
+            <div key={insight.subject} className="border rounded-lg p-4 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{insight.subject}</span>
+                  <Badge variant="secondary" className="text-xs">
+                    {insight.totalTasks} tasks
+                  </Badge>
+                </div>
+                <div className="flex items-center gap-2">
                   <Badge 
                     className={`text-xs ${getDifficultyColor(insight.avgDifficulty)}`}
                   >
                     {getDifficultyLabel(insight.avgDifficulty)}
                   </Badge>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">Avg time:</span>
-                    <span className="font-medium">{formatTime(insight.avgTimePerTask)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Target className="h-3 w-3 text-muted-foreground" />
-                    <span className="text-muted-foreground">Difficulty:</span>
-                    <span className="font-medium">{insight.avgDifficulty.toFixed(1)}/10</span>
-                  </div>
-                </div>
-                
-                {/* Progress bar showing difficulty trend */}
-                <div className="space-y-1">
-                  <div className="flex justify-between text-xs text-muted-foreground">
-                    <span>Difficulty Level</span>
-                    <span>{insight.avgDifficulty.toFixed(1)}/10</span>
-                  </div>
-                  <Progress 
-                    value={(insight.avgDifficulty / 10) * 100} 
-                    className="h-2"
-                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleDeleteSubjectData(insight.subject)}
+                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Overall Patterns */}
-        {behaviorPatterns.length > 0 && (
-          <div className="space-y-4">
-            <h4 className="font-medium flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Learning Patterns
-            </h4>
-            <div className="grid gap-4">
-              {behaviorPatterns.slice(0, 3).map((pattern) => (
-                <div key={pattern.id} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">{pattern.subject}</span>
-                    <Star className="h-4 w-4 text-yellow-500" />
-                  </div>
-                  <div className="text-sm text-muted-foreground space-y-1">
-                    <p>
-                      You typically spend <span className="font-medium text-foreground">
-                        {formatTime(pattern.avg_time_per_task)}
-                      </span> on {pattern.subject} tasks
-                    </p>
-                    {pattern.avg_difficulty_rating <= 4 && (
-                      <p className="text-green-600">
-                        ✓ You find {pattern.subject} relatively easy!
-                      </p>
-                    )}
-                    {pattern.avg_difficulty_rating > 7 && (
-                      <p className="text-orange-600">
-                        ⚡ {pattern.subject} is challenging - consider breaking tasks into smaller parts
-                      </p>
-                    )}
-                  </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <Clock className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Avg time:</span>
+                  <span className="font-medium">{formatTime(insight.avgTimePerTask)}</span>
                 </div>
-              ))}
+                <div className="flex items-center gap-2">
+                  <Target className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-muted-foreground">Difficulty:</span>
+                  <span className="font-medium">{insight.avgDifficulty.toFixed(1)}/10</span>
+                </div>
+              </div>
+              
+              {/* Progress bar showing difficulty trend */}
+              <div className="space-y-1">
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Difficulty Level</span>
+                  <span>{insight.avgDifficulty.toFixed(1)}/10</span>
+                </div>
+                <Progress 
+                  value={(insight.avgDifficulty / 10) * 100} 
+                  className="h-2"
+                />
+              </div>
             </div>
-          </div>
-        )}
-
-        {/* Quick Tips */}
-        <div className="border-t pt-4">
-          <h4 className="font-medium mb-2">💡 AI Recommendations</h4>
-          <div className="text-sm text-muted-foreground space-y-1">
-            {insights.some(i => i.avgTimePerTask > 120) && (
-              <p>• Consider using the Pomodoro technique for longer tasks</p>
-            )}
-            {insights.some(i => i.avgDifficulty > 7) && (
-              <p>• Break challenging tasks into smaller, manageable steps</p>
-            )}
-            {insights.length >= 3 && (
-              <p>• Your study patterns are becoming more consistent! Keep it up.</p>
-            )}
-          </div>
+          ))}
         </div>
       </CardContent>
     </Card>

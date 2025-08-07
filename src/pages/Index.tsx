@@ -453,18 +453,11 @@ const Index = () => {
             <StudyCalendar />
           </section>
 
-          {/* Two Column Layout for Analytics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Enhanced Analytics Dashboard */}
-            <section id="analytics-dashboard">
-              <AnalyticsDashboard tasks={tasks} studyGoals={studyGoals} />
-            </section>
-            
-            {/* Learning Insights Dashboard */}
-            <section id="learning-insights">
-              <LearningInsightsDashboard />
-            </section>
-          </div>
+          {/* Analytics Dashboard with Learning Insights */}
+          <section className="space-y-6">
+            <AnalyticsDashboard tasks={tasks} studyGoals={studyGoals} />
+            <LearningInsightsDashboard />
+          </section>
 
           {/* Footer with Legal Info */}
           <footer className="pt-6 border-t border-border">
