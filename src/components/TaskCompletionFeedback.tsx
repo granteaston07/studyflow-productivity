@@ -112,7 +112,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <CheckCircle className="h-5 w-5 text-green-500" />
+            <CheckCircle className="h-5 w-5 text-success" />
             Task Completed!
           </DialogTitle>
         </DialogHeader>
@@ -134,7 +134,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
           <div className="space-y-4">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-blue-500" />
+                <Clock className="h-4 w-4 text-primary" />
                 <span className="font-medium text-sm">Time taken</span>
               </div>
               <div className="px-4">
@@ -158,7 +158,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
 
             <div className="space-y-3">
               <div className="flex items-center gap-2">
-                <Target className="h-4 w-4 text-orange-500" />
+                <Target className="h-4 w-4 text-warning" />
                 <span className="font-medium text-sm">Difficulty level</span>
               </div>
               <div className="px-4">
