@@ -11,37 +11,39 @@ import { toast } from '@/hooks/use-toast';
 export function LearningInsightsDashboard() {
   const { insights, behaviorPatterns, loading, refreshInsights } = useLearningInsights();
 
-  const handleDeleteSubjectData = async (subject: string) => {
+  const handleDeleteTaskFeedback = async (subject: string, taskId?: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Delete from task_feedback
-      await supabase
+      let query = supabase
         .from('task_feedback')
         .delete()
         .eq('user_id', user.id)
         .eq('subject', subject);
 
-      // Delete from user_behavior_patterns
-      await supabase
-        .from('user_behavior_patterns')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('subject', subject);
+      if (taskId) {
+        query = query.eq('task_id', taskId);
+      }
+
+      const { error } = await query;
+      if (error) throw error;
+
+      // Update behavior patterns after deleting feedback
+      await supabase.rpc('update_user_behavior_patterns', { p_user_id: user.id });
 
       // Refresh insights after deletion
       await refreshInsights();
       
       toast({
-        title: "Subject data deleted",
-        description: `All learning data for ${subject} has been removed.`,
+        title: "Data deleted",
+        description: taskId ? "Task feedback removed" : `All feedback for ${subject} has been removed.`,
       });
     } catch (error) {
-      console.error('Error deleting subject data:', error);
+      console.error('Error deleting feedback:', error);
       toast({
         title: "Error",
-        description: "Failed to delete subject data. Please try again.",
+        description: "Failed to delete data. Please try again.",
         variant: "destructive",
       });
     }
@@ -127,15 +129,16 @@ export function LearningInsightsDashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge 
-                    className={`text-xs ${getDifficultyColor(insight.avgDifficulty)}`}
+                    className={`text-xs pointer-events-none ${getDifficultyColor(insight.avgDifficulty)}`}
                   >
                     {getDifficultyLabel(insight.avgDifficulty)}
                   </Badge>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleDeleteSubjectData(insight.subject)}
+                    onClick={() => handleDeleteTaskFeedback(insight.subject)}
                     className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                    title={`Delete all ${insight.subject} data`}
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
