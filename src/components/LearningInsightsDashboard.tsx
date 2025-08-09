@@ -9,9 +9,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 export function LearningInsightsDashboard() {
-  const { insights, behaviorPatterns, loading, refreshInsights } = useLearningInsights();
+  const { insights, behaviorPatterns, loading, refreshInsights, feedbackBySubject } = useLearningInsights();
 
-  const handleDeleteTaskFeedback = async (subject: string, taskId?: string) => {
+  const handleDeleteTaskFeedback = async (subject: string, taskId?: string, feedbackId?: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -19,11 +19,14 @@ export function LearningInsightsDashboard() {
       let query = supabase
         .from('task_feedback')
         .delete()
-        .eq('user_id', user.id)
-        .eq('subject', subject);
+        .eq('user_id', user.id);
 
-      if (taskId) {
+      if (feedbackId) {
+        query = query.eq('id', feedbackId);
+      } else if (taskId) {
         query = query.eq('task_id', taskId);
+      } else {
+        query = query.eq('subject', subject);
       }
 
       const { error } = await query;
@@ -37,7 +40,11 @@ export function LearningInsightsDashboard() {
       
       toast({
         title: "Data deleted",
-        description: taskId ? "Task feedback removed" : `All feedback for ${subject} has been removed.`,
+        description: feedbackId
+          ? "This feedback entry was removed."
+          : taskId
+            ? "All feedback for this task was removed."
+            : `All feedback for ${subject} has been removed.`,
       });
     } catch (error) {
       console.error('Error deleting feedback:', error);
@@ -169,6 +176,36 @@ export function LearningInsightsDashboard() {
                   className="h-2"
                 />
               </div>
+
+              {/* Recent feedback entries for precise deletion */}
+              {feedbackBySubject?.[insight.subject]?.length ? (
+                <div className="mt-3 space-y-2">
+                  <div className="text-xs text-muted-foreground">Recent feedback</div>
+                  <ul className="space-y-1">
+                    {feedbackBySubject[insight.subject]
+                      .slice()
+                      .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                      .slice(0, 5)
+                      .map((fb: any) => (
+                        <li key={fb.id} className="flex items-center justify-between text-xs">
+                          <span className="flex items-center gap-2">
+                            <span>Difficulty {fb.difficulty_rating}/10</span>
+                            <span className="text-muted-foreground">• {formatTime(fb.time_taken_minutes)}</span>
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTaskFeedback(insight.subject, fb.task_id || undefined, fb.id)}
+                            className="h-7 px-2 hover:bg-destructive/10 hover:text-destructive"
+                            title="Delete this entry"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              ) : null}
             </div>
           ))}
         </div>

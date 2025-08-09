@@ -25,6 +25,7 @@ export function useLearningInsights() {
   const [insights, setInsights] = useState<LearningInsight[]>([]);
   const [behaviorPatterns, setBehaviorPatterns] = useState<BehaviorPattern[]>([]);
   const [loading, setLoading] = useState(true);
+  const [feedbackBySubject, setFeedbackBySubject] = useState<Record<string, any[]>>({});
   const { user } = useAuth();
 
   const fetchInsights = async () => {
@@ -53,10 +54,15 @@ export function useLearningInsights() {
 
       // Process insights
       const subjectInsights = new Map<string, LearningInsight>();
+      const grouped: Record<string, any[]> = {};
 
       feedback?.forEach((item) => {
         const subject = item.subject || 'General';
         const existing = subjectInsights.get(subject);
+
+        // Group raw feedback by subject for detailed deletion
+        if (!grouped[subject]) grouped[subject] = [];
+        grouped[subject].push(item);
 
         if (existing) {
           const totalTasks = existing.totalTasks + 1;
@@ -77,6 +83,7 @@ export function useLearningInsights() {
       });
 
       setInsights(Array.from(subjectInsights.values()));
+      setFeedbackBySubject(grouped);
     } catch (error) {
       console.error('Error fetching learning insights:', error);
     } finally {
@@ -137,5 +144,6 @@ export function useLearningInsights() {
     getDifficultyEstimate,
     recordSuggestionInteraction,
     refreshInsights: fetchInsights,
+    feedbackBySubject,
   };
 }
