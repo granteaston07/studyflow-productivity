@@ -42,22 +42,25 @@ export function useTasks() {
       if (error) throw error;
 
       const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const formattedTasks: Task[] = data.map(task => {
         const dueDate = task.due_date ? new Date(task.due_date) : undefined;
         let status = task.status as Task['status'];
-        
-        // Auto-update overdue status based on due date (only for tasks past today)
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const isCompleted = !!task.completed;
         const taskDate = dueDate ? new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate()) : null;
-        
-        if (!task.completed && dueDate && taskDate && taskDate < today && status !== 'overdue') {
-          status = 'overdue';
+
+        // Normalize status based on completion and day-level due date
+        if (isCompleted && status !== 'completed') {
+          status = 'completed';
           // Update in database asynchronously (fire and forget)
-          supabase
-            .from('tasks')
-            .update({ status: 'overdue' })
-            .eq('id', task.id)
-            .then(() => {});
+          supabase.from('tasks').update({ status: 'completed' }).eq('id', task.id).then(() => {});
+        } else if (!isCompleted && taskDate && taskDate < today && status !== 'overdue') {
+          status = 'overdue';
+          supabase.from('tasks').update({ status: 'overdue' }).eq('id', task.id).then(() => {});
+        } else if (!isCompleted && status === 'overdue' && (!taskDate || taskDate >= today)) {
+          // No longer overdue → reset to pending
+          status = 'pending';
+          supabase.from('tasks').update({ status: 'pending' }).eq('id', task.id).then(() => {});
         }
         
         return {

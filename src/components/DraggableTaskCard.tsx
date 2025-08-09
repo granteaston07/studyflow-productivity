@@ -9,6 +9,8 @@ interface DraggableTaskCardProps {
   onToggle: (id: string, showFeedback?: boolean) => Promise<{ task: Task | null; shouldShowFeedback: boolean }>;
   onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
   onUpdateStatus: (id: string, status: Task['status']) => void;
+  onUpdateTitle: (id: string, title: string) => void;
+  onUpdatePriority: (id: string, priority: Task['priority']) => void;
   onDelete: (id: string) => void;
   isReorderMode: boolean;
 }

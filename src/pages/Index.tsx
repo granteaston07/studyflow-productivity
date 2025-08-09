@@ -112,21 +112,20 @@ const Index = () => {
     const task = tasks.find(t => t.id === taskId);
     if (!task) return;
 
-    // Determine the new status based on the due date
+    // Determine the new status based on the due date (day-level)
     let newStatus = task.status;
     const now = new Date();
-    
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
     if (dueDate) {
-      // If setting a due date
-      if (dueDate < now && !task.completed) {
-        // Past due date and not completed = overdue
+      const d = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
+      if (d < today && !task.completed) {
         newStatus = 'overdue';
-      } else if (task.status === 'overdue' && dueDate >= now) {
-        // Was overdue but now has future date = reset to pending or in-progress
+      } else if (task.status === 'overdue' && d >= today) {
         newStatus = task.completed ? 'completed' : 'pending';
       }
     } else {
-      // If removing due date and was overdue, reset to pending
+      // Removing due date resets overdue to pending
       if (task.status === 'overdue') {
         newStatus = task.completed ? 'completed' : 'pending';
       }
@@ -166,18 +165,19 @@ const Index = () => {
 
   const activeTasks = tasks.filter(task => !task.completed);
   
-  // Check for overdue tasks by comparing due date to current time
+  // Check for overdue and today tasks by comparing day-level dates
   const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const overdueTasks = tasks.filter(task => {
     if (!task.dueDate || task.completed) return false;
-    return task.dueDate < now;
+    const d = new Date(task.dueDate.getFullYear(), task.dueDate.getMonth(), task.dueDate.getDate());
+    return d < today;
   });
   
   const todayTasks = tasks.filter(task => {
     if (!task.dueDate || task.completed) return false;
-    const today = new Date();
-    const taskDate = task.dueDate;
-    return taskDate.toDateString() === today.toDateString() && task.dueDate >= now;
+    const d = new Date(task.dueDate.getFullYear(), task.dueDate.getMonth(), task.dueDate.getDate());
+    return d.getTime() === today.getTime();
   });
 
   const handleExitStudyMode = () => {

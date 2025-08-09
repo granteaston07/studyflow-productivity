@@ -39,7 +39,13 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
       dueDate: taskData.dueDate,
       completed: false,
       priority: taskData.priority,
-      status: taskData.dueDate && taskData.dueDate < new Date() ? 'overdue' : 'pending',
+      status: (() => {
+        if (!taskData.dueDate) return 'pending';
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const d = new Date(taskData.dueDate.getFullYear(), taskData.dueDate.getMonth(), taskData.dueDate.getDate());
+        return d < today ? 'overdue' : 'pending';
+      })(),
       completedAt: undefined
     });
     

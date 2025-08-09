@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Task } from "@/hooks/useTasks";
@@ -18,6 +20,8 @@ interface TaskCardProps {
   onToggle: (id: string, showFeedback?: boolean) => Promise<{ task: Task | null; shouldShowFeedback: boolean }>;
   onUpdateDueDate: (id: string, dueDate: Date | undefined) => void;
   onUpdateStatus: (id: string, status: Task['status']) => void;
+  onUpdateTitle?: (id: string, title: string) => void;
+  onUpdatePriority?: (id: string, priority: Task['priority']) => void;
   onDelete: (id: string) => void;
   isGuest?: boolean;
 }
