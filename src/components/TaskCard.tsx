@@ -1,4 +1,4 @@
-import { Check, Clock, AlertTriangle, Calendar, Edit, Trash2, Pencil } from "lucide-react";
+import { Check, Clock, AlertTriangle, Calendar, Trash2, Pencil, NotebookPen } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -218,7 +218,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                       onClick={() => setIsEditingTitle(true)}
                       aria-label="Edit task title"
                     >
-                      <Edit className="h-3 w-3" />
+                      <Pencil className="h-3 w-3" />
                     </Button>
                   )}
                 </div>
@@ -248,16 +248,6 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
               </Badge>
               {!task.completed && (
                 <>
-                  {/* Edit Task Title Button */}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-                    onClick={() => setIsEditingTitle(true)}
-                    aria-label="Edit task title"
-                  >
-                    <Pencil className="h-3 w-3" />
-                  </Button>
 
                   {/* Edit Due Date Button */}
                   <Popover>
@@ -267,7 +257,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                         size="sm"
                         className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
                       >
-                        <Edit className="h-3 w-3" />
+                        <NotebookPen className="h-3 w-3" />
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="end">
