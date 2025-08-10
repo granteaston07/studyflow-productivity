@@ -15,7 +15,7 @@ interface DraggableTaskCardProps {
   isReorderMode: boolean;
 }
 
-export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, isReorderMode }: DraggableTaskCardProps) {
+export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onUpdateTitle, onUpdatePriority, onDelete, isReorderMode }: DraggableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -49,6 +49,8 @@ export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateSta
           onToggle={onToggle}
           onUpdateDueDate={onUpdateDueDate}
           onUpdateStatus={onUpdateStatus}
+          onUpdateTitle={onUpdateTitle}
+          onUpdatePriority={onUpdatePriority}
           onDelete={onDelete}
         />
       </div>

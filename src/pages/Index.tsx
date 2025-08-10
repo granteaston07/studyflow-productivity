@@ -151,6 +151,14 @@ const Index = () => {
     await deleteTask(taskId);
   };
 
+  const handleUpdateTitle = async (taskId: string, title: string) => {
+    await updateTask(taskId, { title });
+  };
+
+  const handleUpdatePriority = async (taskId: string, priority: Task['priority']) => {
+    await updateTask(taskId, { priority });
+  };
+
   // Show loading state while checking auth
   if (authLoading) {
     return (
@@ -340,6 +348,8 @@ const Index = () => {
                                 onToggle={handleToggleTask}
                                 onUpdateDueDate={handleUpdateDueDate}
                                 onUpdateStatus={handleUpdateStatus}
+                                onUpdateTitle={handleUpdateTitle}
+                                onUpdatePriority={handleUpdatePriority}
                                 onDelete={handleDeleteTask}
                                 isReorderMode={isReorderMode}
                               />
