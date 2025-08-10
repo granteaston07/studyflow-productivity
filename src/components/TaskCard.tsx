@@ -1,11 +1,11 @@
-import { Check, Clock, AlertTriangle, Calendar, Edit, Trash2 } from "lucide-react";
+import { Check, Clock, AlertTriangle, Calendar, Edit, Trash2, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -26,7 +26,7 @@ interface TaskCardProps {
   isGuest?: boolean;
 }
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, isGuest = false }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -41,8 +41,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   const handleTitleSave = () => {
     const trimmed = titleInput.trim();
     if (trimmed && trimmed !== task.title) {
-      // @ts-expect-error optional handler
-      if (typeof (onUpdateTitle as any) === 'function') (onUpdateTitle as any)(task.id, trimmed);
+      if (onUpdateTitle) onUpdateTitle(task.id, trimmed);
     }
     setIsEditingTitle(false);
   };
@@ -249,23 +248,16 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
               </Badge>
               {!task.completed && (
                 <>
-                  {/* Priority selector */}
-                  <Select
-                    defaultValue={task.priority}
-                    onValueChange={(val) => {
-                      // @ts-expect-error optional handler
-                      if (typeof (onUpdatePriority as any) === 'function') (onUpdatePriority as any)(task.id, val as Task['priority']);
-                    }}
+                  {/* Edit Task Title Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                    onClick={() => setIsEditingTitle(true)}
+                    aria-label="Edit task title"
                   >
-                    <SelectTrigger className="h-6 w-[90px] text-xs">
-                      <SelectValue placeholder="Priority" />
-                    </SelectTrigger>
-                    <SelectContent align="end">
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Pencil className="h-3 w-3" />
+                  </Button>
 
                   {/* Edit Due Date Button */}
                   <Popover>

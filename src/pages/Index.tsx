@@ -16,14 +16,14 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
-import { StudyCalendar } from "@/components/StudyCalendar";
+// import { StudyCalendar } from "@/components/StudyCalendar";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { LearningInsightsDashboard } from "@/components/LearningInsightsDashboard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
-import { useStudyGoals } from "@/hooks/useStudyGoals";
+// import { useStudyGoals } from "@/hooks/useStudyGoals";
 
 const Index = () => {
   // Allow both authenticated users and guest mode (no redirect for guest users)
@@ -31,7 +31,7 @@ const Index = () => {
   const navigate = useNavigate();
   
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
-  const { goals: studyGoals } = useStudyGoals();
+  // const { goals: studyGoals } = useStudyGoals();
   const [isReorderMode, setIsReorderMode] = useState(false);
   // Timer state management at parent level
   const [timerActive, setTimerActive] = useState(false);
@@ -462,14 +462,14 @@ const Index = () => {
             />
           </section>
 
-          {/* Study Calendar & Recurring Goals */}
-          <section id="study-calendar">
-            <StudyCalendar />
-          </section>
+{/* Study Calendar & Recurring Goals */}
+{/* <section id="study-calendar">
+  <StudyCalendar />
+</section> */}
 
           {/* Analytics Dashboard with Learning Insights */}
           <section className="space-y-6">
-            <AnalyticsDashboard tasks={tasks} studyGoals={studyGoals} />
+            <AnalyticsDashboard tasks={tasks} studyGoals={[]} />
             <LearningInsightsDashboard />
           </section>
 
