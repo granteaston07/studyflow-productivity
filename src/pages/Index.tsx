@@ -380,6 +380,8 @@ const Index = () => {
                               onToggle={handleToggleTask}
                               onUpdateDueDate={handleUpdateDueDate}
                               onUpdateStatus={handleUpdateStatus}
+                              onUpdateTitle={handleUpdateTitle}
+                              onUpdatePriority={handleUpdatePriority}
                               onDelete={handleDeleteTask}
                             />
                           </div>
@@ -411,6 +413,8 @@ const Index = () => {
                                 onToggle={handleToggleTask}
                                 onUpdateDueDate={handleUpdateDueDate}
                                 onUpdateStatus={handleUpdateStatus}
+                                onUpdateTitle={handleUpdateTitle}
+                                onUpdatePriority={handleUpdatePriority}
                                 onDelete={handleDeleteTask}
                               />
                             </div>

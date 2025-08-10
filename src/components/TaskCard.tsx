@@ -31,6 +31,21 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   const [isDeleting, setIsDeleting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(task.title);
+
+  useEffect(() => {
+    setTitleInput(task.title);
+  }, [task.title]);
+
+  const handleTitleSave = () => {
+    const trimmed = titleInput.trim();
+    if (trimmed && trimmed !== task.title) {
+      // @ts-expect-error optional handler
+      if (typeof (onUpdateTitle as any) === 'function') (onUpdateTitle as any)(task.id, trimmed);
+    }
+    setIsEditingTitle(false);
+  };
 
   const handleToggle = async () => {
     if (!task.completed) {
@@ -86,7 +101,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
 
   const getStatusIcon = (status: Task['status'], dueDate?: Date) => {
     // Don't show overdue icon for tasks due today
-    if (status === 'overdue' && dueDate && formatDueDate(dueDate) === 'Due today') {
+    if (status === 'overdue' && dueDate && formatDueDate(dueDate, false) === 'Due today') {
       return <Clock className="h-4 w-4" />;
     }
     
@@ -115,7 +130,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     }
   };
 
-  const formatDueDate = (date?: Date) => {
+  const formatDueDate = (date?: Date, isCompleted?: boolean) => {
     if (!date) return null;
     
     const now = new Date();
@@ -127,6 +142,9 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     } else if (taskDate.getTime() === today.getTime() + 86400000) {
       return 'Due tomorrow';
     } else if (taskDate < today) {
+      if (isCompleted) {
+        return `Due ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+      }
       return 'Overdue';
     } else {
       return `Due ${date.toLocaleDateString('en-US', { 
@@ -135,6 +153,17 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
       })}`;
     }
   };
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const displayStatus: Task['status'] = (() => {
+    if (task.completed) return 'completed';
+    if (task.status === 'overdue' && task.dueDate) {
+      const d = new Date(task.dueDate.getFullYear(), task.dueDate.getMonth(), task.dueDate.getDate());
+      if (d.getTime() === today.getTime()) return 'pending';
+    }
+    return task.status;
+  })();
 
   return (
     <>
@@ -160,12 +189,41 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                 "w-2 h-2 rounded-full shrink-0",
                 getPriorityColor(task.priority)
               )} />
-              <h3 className={cn(
-                "font-medium text-foreground leading-tight",
-                task.completed && "line-through text-muted-foreground"
-              )}>
-                {task.title}
-              </h3>
+              {isEditingTitle ? (
+                <div className="flex items-center gap-2">
+                  <Input
+                    value={titleInput}
+                    onChange={(e) => setTitleInput(e.target.value)}
+                    onBlur={handleTitleSave}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleTitleSave();
+                      if (e.key === 'Escape') setIsEditingTitle(false);
+                    }}
+                    className="h-7"
+                  />
+                  <Button variant="ghost" size="sm" className="h-6 px-2" onClick={handleTitleSave}>Save</Button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <h3 className={cn(
+                    "font-medium text-foreground leading-tight",
+                    task.completed && "line-through text-muted-foreground"
+                  )}>
+                    {task.title}
+                  </h3>
+                  {!task.completed && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                      onClick={() => setIsEditingTitle(true)}
+                      aria-label="Edit task title"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
             
             <div className="flex items-center gap-2">
@@ -173,58 +231,78 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                 variant="secondary"
                 className={cn(
                   "text-xs font-medium px-2 py-1 shrink-0 cursor-pointer transition-opacity",
-                  getStatusColor(task.status),
-                  (task.status === 'pending' || task.status === 'in-progress') && "hover:opacity-80"
+                  getStatusColor(displayStatus),
+                  (displayStatus === 'pending' || displayStatus === 'in-progress') && "hover:opacity-80"
                 )}
                 onClick={() => {
-                  if (task.status === 'pending') {
+                  if (displayStatus === 'pending') {
                     onUpdateStatus(task.id, 'in-progress');
-                  } else if (task.status === 'in-progress') {
+                  } else if (displayStatus === 'in-progress') {
                     onUpdateStatus(task.id, 'pending');
                   }
                 }}
               >
                 <span className="flex items-center gap-1">
-                  {getStatusIcon(task.status, task.dueDate)}
-                  {task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('-', ' ')}
+                  {getStatusIcon(displayStatus, task.dueDate)}
+                  {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1).replace('-', ' ')}
                 </span>
               </Badge>
-              
-              {/* Edit Due Date Button */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+              {!task.completed && (
+                <>
+                  {/* Priority selector */}
+                  <Select
+                    defaultValue={task.priority}
+                    onValueChange={(val) => {
+                      // @ts-expect-error optional handler
+                      if (typeof (onUpdatePriority as any) === 'function') (onUpdatePriority as any)(task.id, val as Task['priority']);
+                    }}
                   >
-                    <Edit className="h-3 w-3" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="end">
-                  <div className="p-3 space-y-3">
-                    <div className="text-sm font-medium">Edit Due Date</div>
-                    <CalendarComponent
-                      mode="single"
-                      selected={task.dueDate}
-                      onSelect={(date) => onUpdateDueDate(task.id, date)}
-                      initialFocus
-                      className="rounded-md border-0"
-                    />
-                    {task.dueDate && (
+                    <SelectTrigger className="h-6 w-[90px] text-xs">
+                      <SelectValue placeholder="Priority" />
+                    </SelectTrigger>
+                    <SelectContent align="end">
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  {/* Edit Due Date Button */}
+                  <Popover>
+                    <PopoverTrigger asChild>
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        onClick={() => onUpdateDueDate(task.id, undefined)}
-                        className="w-full text-xs"
+                        className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
                       >
-                        Remove Due Date
+                        <Edit className="h-3 w-3" />
                       </Button>
-                    )}
-                  </div>
-                </PopoverContent>
-              </Popover>
-              
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="end">
+                      <div className="p-3 space-y-3">
+                        <div className="text-sm font-medium">Edit Due Date</div>
+                        <CalendarComponent
+                          mode="single"
+                          selected={task.dueDate}
+                          onSelect={(date) => onUpdateDueDate(task.id, date)}
+                          initialFocus
+                          className="rounded-md border-0"
+                        />
+                        {task.dueDate && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onUpdateDueDate(task.id, undefined)}
+                            className="w-full text-xs"
+                          >
+                            Remove Due Date
+                          </Button>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                </>
+              )}
               {/* Delete Task Button */}
               <Button
                 variant="ghost"
@@ -248,10 +326,10 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                 <Calendar className="h-3 w-3" />
                 <span className={cn(
                   "text-xs",
-                  task.status === 'overdue' && "text-error font-medium",
-                  formatDueDate(task.dueDate) === 'Due today' && !task.completed && "text-warning font-medium"
+                  displayStatus === 'overdue' && "text-error font-medium",
+                  formatDueDate(task.dueDate, false) === 'Due today' && !task.completed && "text-warning font-medium"
                 )}>
-                  {formatDueDate(task.dueDate)}
+                  {formatDueDate(task.dueDate, task.completed)}
                 </span>
               </div>
             )}
