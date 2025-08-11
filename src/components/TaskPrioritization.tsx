@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Task } from "./TaskCard";
+import { useLearningInsights } from "@/hooks/useLearningInsights";
 
 interface TaskPrioritizationProps {
   tasks: Task[];
@@ -19,7 +20,8 @@ interface AIRecommendation {
 
 export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-
+  const { getTimeEstimateForTask, getDifficultyEstimate } = useLearningInsights();
+  
   // Prevent background scrolling when modal is open
   useEffect(() => {
     if (isExpanded) {
@@ -231,6 +233,28 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     // Varied duration estimation based on multiple factors
     const durationIndex = Math.floor(Math.random() * subjectInfo.durations.length);
     let estimatedDuration = subjectInfo.durations[durationIndex];
+    
+    // Personalized adjustments from learning insights
+    const subj = task.subject || undefined;
+    const userDiff = getDifficultyEstimate(subj);
+    if (userDiff !== null) {
+      score += (userDiff - 5) * 4; // center around neutral 5/10
+      if (task.subject) {
+        reasons.push(`Personalized: you rate ${task.subject} ~${userDiff}/10`);
+      } else {
+        reasons.push("Personalized difficulty insights applied");
+      }
+    }
+    const userTime = getTimeEstimateForTask(subj);
+    if (userTime !== null) {
+      estimatedDuration = `~${Math.round(userTime)} min`;
+      if (userTime > 60) {
+        score += Math.min((userTime - 60) / 6, 10);
+        reasons.push("History suggests longer sessions needed for this subject");
+      } else {
+        reasons.push("Based on your past pace for this subject");
+      }
+    }
     
     // Adjust duration based on task complexity indicators
     if (task.description && task.description.length > 100) {
