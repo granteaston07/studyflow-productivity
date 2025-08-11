@@ -24,9 +24,12 @@ interface TaskCardProps {
   onUpdatePriority?: (id: string, priority: Task['priority']) => void;
   onDelete: (id: string) => void;
   isGuest?: boolean;
+  selected?: boolean;
+  onSelect?: (id: string) => void;
 }
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false }: TaskCardProps) {
+
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false, selected = false, onSelect }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -168,6 +171,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     <>
     <Card className={cn(
       "p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]",
+      selected && "border-primary bg-primary/10",
       isCompleting && "animate-task-complete",
       isDeleting && "animate-task-poof"
     )}>
@@ -181,7 +185,9 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
           )}
         />
         
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-2 cursor-pointer"
+          onClick={() => { if (!task.completed) { onSelect?.(task.id); } }}
+        >
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
               <div className={cn(
@@ -198,9 +204,10 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                       if (e.key === 'Enter') handleTitleSave();
                       if (e.key === 'Escape') setIsEditingTitle(false);
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     className="h-7"
                   />
-                  <Button variant="ghost" size="sm" className="h-6 px-2" onClick={handleTitleSave}>Save</Button>
+                  <Button variant="ghost" size="sm" className="h-6 px-2" onClick={(e) => { e.stopPropagation(); handleTitleSave(); }}>Save</Button>
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
@@ -215,7 +222,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                       variant="ghost"
                       size="sm"
                       className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-                      onClick={() => setIsEditingTitle(true)}
+                      onClick={(e) => { e.stopPropagation(); setIsEditingTitle(true); }}
                       aria-label="Edit task title"
                     >
                       <Pencil className="h-3 w-3" />
@@ -225,7 +232,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
               )}
             </div>
             
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
               <Badge
                 variant="secondary"
                 className={cn(
@@ -233,7 +240,8 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                   getStatusColor(displayStatus),
                   (displayStatus === 'pending' || displayStatus === 'in-progress') && "hover:opacity-80"
                 )}
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (displayStatus === 'pending') {
                     onUpdateStatus(task.id, 'in-progress');
                   } else if (displayStatus === 'in-progress') {
@@ -256,6 +264,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                         variant="ghost"
                         size="sm"
                         className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
+                        onClick={(e) => e.stopPropagation()}
                       >
                         <NotebookPen className="h-3 w-3" />
                       </Button>
@@ -289,7 +298,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleDelete}
+                onClick={(e) => { e.stopPropagation(); handleDelete(); }}
                 className="h-6 w-6 p-0 text-muted-foreground hover:text-error"
               >
                 <Trash2 className="h-3 w-3" />

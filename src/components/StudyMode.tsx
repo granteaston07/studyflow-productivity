@@ -12,6 +12,7 @@ interface StudyModeProps {
   onExit: () => void;
   onPauseTimer: () => void;
   onResetTimer: () => void;
+  selectedTaskTitle?: string;
 }
 
 const encouragingMessages = [
@@ -53,7 +54,7 @@ const encouragingMessages = [
   "You're building habits that will last a lifetime 🏗️"
 ];
 
-export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onExit, onPauseTimer, onResetTimer }: StudyModeProps) => {
+export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onExit, onPauseTimer, onResetTimer, selectedTaskTitle }: StudyModeProps) => {
   const [currentMessage, setCurrentMessage] = useState(Math.floor(Math.random() * encouragingMessages.length));
   const [currentTime, setCurrentTime] = useState(new Date());
 
@@ -139,6 +140,14 @@ export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onEx
               {encouragingMessages[currentMessage]}
             </p>
           </div>
+
+          {/* Focused Task Name */}
+          {selectedTaskTitle && (
+            <div className="animate-fade-in">
+              <p className="text-xs uppercase tracking-wide text-muted-foreground">Focusing on</p>
+              <h2 className="text-2xl md:text-3xl font-semibold text-primary">{selectedTaskTitle}</h2>
+            </div>
+          )}
 
           {/* Timer Display (if active) */}
           {timerActive && (

@@ -40,6 +40,7 @@ const Index = () => {
   const [selectedSessionDuration, setSelectedSessionDuration] = useState(25 * 60); // 25 minutes default
   const [selectedSession, setSelectedSession] = useState<any>({ type: 'work', duration: 25, label: 'Homework' });
   const [studyMode, setStudyMode] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   
   // Timer logic - runs independently of which component is displayed
   useEffect(() => {
@@ -159,6 +160,10 @@ const Index = () => {
     await updateTask(taskId, { priority });
   };
 
+  const handleSelectTask = (taskId: string) => {
+    setSelectedTaskId(prev => (prev === taskId ? null : taskId));
+  };
+
   // Show loading state while checking auth
   if (authLoading) {
     return (
@@ -194,6 +199,7 @@ const Index = () => {
 
   // If study mode is active, show the StudyMode component
   if (studyMode) {
+    const selectedTaskTitle = selectedTaskId ? tasks.find(t => t.id === selectedTaskId)?.title : undefined;
     return (
       <StudyMode
         tasks={tasks}
@@ -203,6 +209,7 @@ const Index = () => {
         onExit={handleExitStudyMode}
         onPauseTimer={pauseTimer}
         onResetTimer={resetTimer}
+        selectedTaskTitle={selectedTaskTitle}
       />
     );
   }
@@ -383,6 +390,8 @@ const Index = () => {
                               onUpdateTitle={handleUpdateTitle}
                               onUpdatePriority={handleUpdatePriority}
                               onDelete={handleDeleteTask}
+                              selected={selectedTaskId === task.id}
+                              onSelect={handleSelectTask}
                             />
                           </div>
                         ))}
@@ -416,6 +425,8 @@ const Index = () => {
                                 onUpdateTitle={handleUpdateTitle}
                                 onUpdatePriority={handleUpdatePriority}
                                 onDelete={handleDeleteTask}
+                                selected={selectedTaskId === task.id}
+                                onSelect={handleSelectTask}
                               />
                             </div>
                           ))}
