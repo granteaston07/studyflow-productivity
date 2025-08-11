@@ -94,6 +94,14 @@ const Index = () => {
     })
   );
 
+  // Clear selection if the selected task becomes completed or disappears
+  useEffect(() => {
+    if (selectedTaskId) {
+      const t = tasks.find(t => t.id === selectedTaskId);
+      if (!t || t.completed) setSelectedTaskId(null);
+    }
+  }, [tasks, selectedTaskId]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -106,7 +114,11 @@ const Index = () => {
   };
 
   const handleToggleTask = async (taskId: string, showFeedback: boolean = false) => {
-    return await toggleTask(taskId, showFeedback);
+    const result = await toggleTask(taskId, showFeedback);
+    if (result?.task?.completed) {
+      setSelectedTaskId(prev => (prev === taskId ? null : prev));
+    }
+    return result;
   };
 
   const handleUpdateDueDate = async (taskId: string, dueDate: Date | undefined) => {
@@ -390,7 +402,7 @@ const Index = () => {
                               onUpdateTitle={handleUpdateTitle}
                               onUpdatePriority={handleUpdatePriority}
                               onDelete={handleDeleteTask}
-                              selected={selectedTaskId === task.id}
+                              selected={selectedTaskId === task.id && !task.completed}
                               onSelect={handleSelectTask}
                             />
                           </div>
@@ -425,7 +437,7 @@ const Index = () => {
                                 onUpdateTitle={handleUpdateTitle}
                                 onUpdatePriority={handleUpdatePriority}
                                 onDelete={handleDeleteTask}
-                                selected={selectedTaskId === task.id}
+                                selected={selectedTaskId === task.id && !task.completed}
                                 onSelect={handleSelectTask}
                               />
                             </div>
