@@ -18,7 +18,10 @@ export default {
 			}
 		},
 		extend: {
-			colors: {
+			fontFamily: {
+				sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "Segoe UI", "Roboto", "Ubuntu", "Cantarell", "Noto Sans", "sans-serif"],
+				display: ["Playfair Display", "Georgia", "ui-serif", "serif"]
+			},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',
