@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Brain, Clock, Target, BookOpen, Trash2, ChevronDown } from 'lucide-react';
+import { Lightbulb, Clock, Target, BookOpen, Trash2, ChevronDown } from 'lucide-react';
 import { useLearningInsights } from '@/hooks/useLearningInsights';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -61,7 +61,7 @@ export function LearningInsightsDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-primary" />
+            <Lightbulb className="h-5 w-5 text-primary" />
             Learning Insights
           </CardTitle>
         </CardHeader>
@@ -81,13 +81,13 @@ export function LearningInsightsDashboard() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Brain className="h-5 w-5 text-primary" />
+            <Lightbulb className="h-5 w-5 text-primary" />
             Learning Insights
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8 text-muted-foreground">
-            <Brain className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <Lightbulb className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Complete some tasks to see your learning patterns!</p>
             <p className="text-sm mt-2">The AI will analyze your study habits and provide personalized insights.</p>
           </div>
