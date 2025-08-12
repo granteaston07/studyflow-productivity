@@ -61,13 +61,6 @@ All colors MUST be HSL for consistency */
     --ai-secondary: 260 100% 80%;
     --ai-accent: 300 100% 75%;
 
-    /* Gradients, shadows, transitions */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--ai-primary)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--surface)), hsl(var(--background)));
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.25);
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.35);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
@@ -130,13 +123,6 @@ All colors MUST be HSL for consistency */
     --input: 217 32% 17%;
     --ring: 217 91% 65%;
 
-    /* Gradients, shadows, transitions */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--ai-accent)));
-    --gradient-subtle: linear-gradient(180deg, hsl(var(--surface)), hsl(var(--background)));
-    --shadow-elegant: 0 10px 30px -10px hsl(var(--primary) / 0.35);
-    --shadow-glow: 0 0 40px hsl(var(--primary) / 0.45);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -154,7 +140,7 @@ All colors MUST be HSL for consistency */
   }
 
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply bg-background text-foreground;
   }
 }
 
@@ -231,13 +217,6 @@ All colors MUST be HSL for consistency */
   .animate-task-poof {
     animation: task-poof 0.5s ease-out forwards;
   }
-
-  /* Design token utility helpers */
-  .bg-gradient-primary { background-image: var(--gradient-primary); }
-  .bg-gradient-subtle { background-image: var(--gradient-subtle); }
-  .shadow-elegant { box-shadow: var(--shadow-elegant); }
-  .shadow-glow { box-shadow: var(--shadow-glow); }
-  .transition-smooth { transition: var(--transition-smooth); }
 }
 
 @keyframes bounce-gentle {
