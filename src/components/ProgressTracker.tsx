@@ -61,10 +61,10 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
                 strokeWidth="8"
                 fill="transparent"
               />
-              {/* Progress circle with pink-blue gradient */}
+              {/* Progress circle with purple-blue gradient */}
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#ec4899" />
+                  <stop offset="0%" stopColor="#8b5cf6" />
                   <stop offset="100%" stopColor="#3b82f6" />
                 </linearGradient>
               </defs>
@@ -82,7 +82,7 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <span className="text-2xl font-bold text-primary">
                 {Math.round(completionPercentage)}%
               </span>
               <span className="text-xs text-muted-foreground">Complete</span>
@@ -99,7 +99,7 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
             <span className="text-muted-foreground">Task Completion</span>
             <span className="text-primary font-medium">{Math.round(completionPercentage)}%</span>
           </div>
-          <Progress value={completionPercentage} className="h-3 bg-gradient-to-r from-secondary to-muted [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-accent" />
+          <Progress value={completionPercentage} className="h-3" />
         </div>
 
         {/* Statistics */}
