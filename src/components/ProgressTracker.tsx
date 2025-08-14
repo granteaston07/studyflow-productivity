@@ -2,12 +2,60 @@ import { TrendingUp, CheckCircle, Clock, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Task } from "./TaskCard";
+import { useState, useEffect } from "react";
 
 interface ProgressTrackerProps {
   tasks: Task[];
 }
 
 export function ProgressTracker({ tasks }: ProgressTrackerProps) {
+  const [gradientIndex, setGradientIndex] = useState(0);
+  
+  const gradientVariations = [
+    // Heavy purple start
+    { stops: [
+      { offset: "0%", color: "#8b5cf6" },
+      { offset: "40%", color: "#a855f7" },
+      { offset: "80%", color: "#6366f1" },
+      { offset: "100%", color: "#3b82f6" }
+    ]},
+    // Purple in middle
+    { stops: [
+      { offset: "0%", color: "#3b82f6" },
+      { offset: "30%", color: "#6366f1" },
+      { offset: "70%", color: "#8b5cf6" },
+      { offset: "100%", color: "#a855f7" }
+    ]},
+    // Purple at end
+    { stops: [
+      { offset: "0%", color: "#3b82f6" },
+      { offset: "50%", color: "#6366f1" },
+      { offset: "100%", color: "#8b5cf6" }
+    ]},
+    // Deep purple dominant
+    { stops: [
+      { offset: "0%", color: "#7c3aed" },
+      { offset: "25%", color: "#8b5cf6" },
+      { offset: "60%", color: "#a855f7" },
+      { offset: "100%", color: "#6366f1" }
+    ]},
+    // Balanced mix
+    { stops: [
+      { offset: "0%", color: "#6366f1" },
+      { offset: "35%", color: "#8b5cf6" },
+      { offset: "65%", color: "#a855f7" },
+      { offset: "100%", color: "#3b82f6" }
+    ]}
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGradientIndex((prev) => (prev + 1) % gradientVariations.length);
+    }, 3 * 60 * 1000); // Change every 3 minutes
+
+    return () => clearInterval(interval);
+  }, [gradientVariations.length]);
+
   const totalTasks = tasks.length;
   const completedTasks = tasks.filter(task => task.completed).length;
   const inProgressTasks = tasks.filter(task => task.status === 'in-progress').length;
@@ -61,13 +109,17 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
                 strokeWidth="8"
                 fill="transparent"
               />
-              {/* Progress circle with enhanced purple-blue gradient */}
+              {/* Dynamic progress circle gradient */}
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#8b5cf6" />
-                  <stop offset="30%" stopColor="#a855f7" />
-                  <stop offset="70%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#3b82f6" />
+                  {gradientVariations[gradientIndex].stops.map((stop, index) => (
+                    <stop 
+                      key={index} 
+                      offset={stop.offset} 
+                      stopColor={stop.color}
+                      className="transition-all duration-2000 ease-in-out"
+                    />
+                  ))}
                 </linearGradient>
               </defs>
               <circle
