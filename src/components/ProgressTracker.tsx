@@ -61,22 +61,28 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
                 strokeWidth="8"
                 fill="transparent"
               />
-              {/* Progress circle */}
+              {/* Progress circle with gradient */}
+              <defs>
+                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" />
+                  <stop offset="100%" stopColor="hsl(var(--accent))" />
+                </linearGradient>
+              </defs>
               <circle
                 cx="50"
                 cy="50"
                 r="40"
-                stroke="hsl(var(--primary))"
+                stroke="url(#progressGradient)"
                 strokeWidth="8"
                 fill="transparent"
                 strokeDasharray={`${2 * Math.PI * 40}`}
                 strokeDashoffset={`${2 * Math.PI * 40 * (1 - completionPercentage / 100)}`}
                 strokeLinecap="round"
-                className="transition-all duration-1000 ease-out"
+                className="transition-all duration-1000 ease-out drop-shadow-sm"
               />
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-primary">
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 {Math.round(completionPercentage)}%
               </span>
               <span className="text-xs text-muted-foreground">Complete</span>
@@ -93,7 +99,7 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
             <span className="text-muted-foreground">Task Completion</span>
             <span className="text-primary font-medium">{Math.round(completionPercentage)}%</span>
           </div>
-          <Progress value={completionPercentage} className="h-3" />
+          <Progress value={completionPercentage} className="h-3 bg-gradient-to-r from-secondary to-muted [&>div]:bg-gradient-to-r [&>div]:from-primary [&>div]:to-accent" />
         </div>
 
         {/* Statistics */}
@@ -102,8 +108,8 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
             const Icon = stat.icon;
             return (
               <div key={stat.label} className="text-center">
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${stat.bgColor} mb-2`}>
-                  <Icon className={`h-6 w-6 ${stat.color}`} />
+                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${stat.bgColor} mb-2 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl`}>
+                  <Icon className={`h-6 w-6 ${stat.color} drop-shadow-sm`} />
                 </div>
                 <div className="space-y-1">
                   <p className="text-2xl font-bold text-foreground">{stat.value}</p>
