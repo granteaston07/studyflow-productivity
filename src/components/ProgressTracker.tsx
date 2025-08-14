@@ -61,10 +61,12 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
                 strokeWidth="8"
                 fill="transparent"
               />
-              {/* Progress circle with purple-blue gradient */}
+              {/* Progress circle with enhanced purple-blue gradient */}
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stopColor="#8b5cf6" />
+                  <stop offset="30%" stopColor="#a855f7" />
+                  <stop offset="70%" stopColor="#6366f1" />
                   <stop offset="100%" stopColor="#3b82f6" />
                 </linearGradient>
               </defs>
