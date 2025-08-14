@@ -61,11 +61,11 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
                 strokeWidth="8"
                 fill="transparent"
               />
-              {/* Progress circle with gradient */}
+              {/* Progress circle with pink-blue gradient */}
               <defs>
                 <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="hsl(var(--primary))" />
-                  <stop offset="100%" stopColor="hsl(var(--accent))" />
+                  <stop offset="0%" stopColor="#ec4899" />
+                  <stop offset="100%" stopColor="#3b82f6" />
                 </linearGradient>
               </defs>
               <circle
