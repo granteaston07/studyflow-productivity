@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus, Calendar, BookOpen } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Task } from "./TaskCard";
+import { useCustomSubjects } from "@/hooks/useCustomSubjects";
 
 interface AddTaskDialogProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => void;
@@ -23,9 +24,9 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
     dueDate: undefined as Date | undefined
   });
   
-  const [customSubjects, setCustomSubjects] = useState<string[]>([]);
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customSubjectInput, setCustomSubjectInput] = useState('');
+  const { allSubjects, addCustomSubject } = useCustomSubjects();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,32 +60,14 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
     setOpen(false);
   };
 
-  useEffect(() => {
-    const saved = localStorage.getItem('customSubjects');
-    if (saved) {
-      setCustomSubjects(JSON.parse(saved));
-    }
-  }, []);
-
-  const defaultSubjects = [
-    'Math',
-    'Science',
-    'English',
-    'Spanish',
-    'History',
-    'Personal'
-  ];
-
-  const allSubjects = [...defaultSubjects, ...customSubjects];
-
-  const handleAddCustomSubject = () => {
-    if (customSubjectInput.trim() && !allSubjects.includes(customSubjectInput.trim())) {
-      const newCustomSubjects = [...customSubjects, customSubjectInput.trim()];
-      setCustomSubjects(newCustomSubjects);
-      localStorage.setItem('customSubjects', JSON.stringify(newCustomSubjects));
-      setTaskData({ ...taskData, subject: customSubjectInput.trim() });
-      setCustomSubjectInput('');
-      setShowCustomInput(false);
+  const handleAddCustomSubject = async () => {
+    if (customSubjectInput.trim()) {
+      const success = await addCustomSubject(customSubjectInput.trim());
+      if (success) {
+        setTaskData({ ...taskData, subject: customSubjectInput.trim() });
+        setCustomSubjectInput('');
+        setShowCustomInput(false);
+      }
     }
   };
 
