@@ -50,6 +50,17 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
       });
       return;
     }
+
+    // Check if this is a guest task (starts with "guest-")
+    if (task.id.startsWith('guest-')) {
+      toast({
+        title: "Guest Mode",
+        description: "Sign in to save feedback and improve AI suggestions.",
+        variant: "destructive",
+      });
+      onClose();
+      return;
+    }
     
     setIsSubmitting(true);
     console.log('Starting submission...');
