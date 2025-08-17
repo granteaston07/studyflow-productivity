@@ -482,6 +482,7 @@ const Index = () => {
               onResetTimer={resetTimer}
               selectedSession={selectedSession}
               onSessionChange={setSelectedSession}
+              selectedTask={selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined}
             />
           </section>
 

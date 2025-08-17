@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Play, Pause, RotateCcw, Coffee, Brain, Plus } from "lucide-react";
+import { SmartFocusTimer } from "@/components/SmartFocusTimer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,7 @@ interface FocusTimerProps {
   onResetTimer: () => void;
   selectedSession?: TimerSession;
   onSessionChange?: (session: TimerSession) => void;
+  selectedTask?: any;
 }
 
 const AI_SUGGESTED_SESSIONS: TimerSession[] = [
@@ -35,7 +37,7 @@ const AI_SUGGESTED_SESSIONS: TimerSession[] = [
   { type: 'break', duration: 15, label: 'Long Break' },
 ];
 
-export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer, selectedSession: parentSelectedSession, onSessionChange }: FocusTimerProps) {
+export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer, selectedSession: parentSelectedSession, onSessionChange, selectedTask }: FocusTimerProps) {
   const [selectedSession, setSelectedSession] = useState<TimerSession>(parentSelectedSession || AI_SUGGESTED_SESSIONS[0]);
   const [customMinutes, setCustomMinutes] = useState(25);
   const [customType, setCustomType] = useState<'work' | 'break'>('work');
@@ -156,6 +158,17 @@ export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTim
             </Dialog>
           </div>
           <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
+            <SmartFocusTimer
+              selectedTask={selectedTask}
+              onSelectSession={(session) => {
+                setSelectedSession(session);
+                onUpdateDuration(session.duration * 60);
+              }}
+              selectedSession={selectedSession}
+              timerActive={timerActive}
+              timerPaused={timerPaused}
+            />
+            
             {AI_SUGGESTED_SESSIONS.map((session, index) => {
               const Icon = getSessionIcon(session.type);
               return (

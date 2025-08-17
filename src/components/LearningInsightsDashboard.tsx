@@ -8,6 +8,11 @@ import { useLearningInsights } from '@/hooks/useLearningInsights';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 export function LearningInsightsDashboard() {
   const { insights, behaviorPatterns, loading, refreshInsights, feedbackBySubject } = useLearningInsights();
 
@@ -116,20 +121,26 @@ export function LearningInsightsDashboard() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BookOpen className="h-5 w-5 text-primary" />
-          Subject Performance
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="flex items-center gap-2">
+          <Lightbulb className="h-4 w-4" />
+          Learning Insights
+          <ChevronDown className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-96 max-h-96 overflow-y-auto bg-background border z-50">
+        <div className="p-4 space-y-4">
+          <div className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5 text-primary" />
+            <span className="font-medium">Subject Performance</span>
+          </div>
+          
           {insights.map((insight) => (
-            <div key={insight.subject} className="border rounded-lg p-4 space-y-3">
+            <div key={insight.subject} className="border rounded-lg p-3 space-y-3">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">{insight.subject}</span>
+                  <span className="font-medium text-sm">{insight.subject}</span>
                   <Badge variant="secondary" className="text-xs">
                     {insight.totalTasks} tasks
                   </Badge>
@@ -144,7 +155,7 @@ export function LearningInsightsDashboard() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteTaskFeedback(insight.subject)}
-                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
+                    className="h-7 w-7 p-0 hover:bg-destructive/10 hover:text-destructive"
                     title={`Delete all ${insight.subject} data`}
                   >
                     <Trash2 className="h-3 w-3" />
@@ -152,16 +163,16 @@ export function LearningInsightsDashboard() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2">
                   <Clock className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Avg time:</span>
-                  <span className="font-medium">{formatTime(insight.avgTimePerTask)}</span>
+                  <span className="text-muted-foreground text-xs">Avg time:</span>
+                  <span className="font-medium text-xs">{formatTime(insight.avgTimePerTask)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Target className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-muted-foreground">Difficulty:</span>
-                  <span className="font-medium">{insight.avgDifficulty.toFixed(1)}/10</span>
+                  <span className="text-muted-foreground text-xs">Difficulty:</span>
+                  <span className="font-medium text-xs">{insight.avgDifficulty.toFixed(1)}/10</span>
                 </div>
               </div>
               
@@ -173,7 +184,7 @@ export function LearningInsightsDashboard() {
                 </div>
                 <Progress 
                   value={(insight.avgDifficulty / 10) * 100} 
-                  className="h-2"
+                  className="h-1"
                 />
               </div>
 
@@ -187,7 +198,7 @@ export function LearningInsightsDashboard() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-7 px-2 text-muted-foreground hover:text-foreground"
+                          className="h-6 px-2 text-muted-foreground hover:text-foreground"
                           title="Toggle recent feedback"
                         >
                           <ChevronDown className="h-3 w-3" />
@@ -210,7 +221,7 @@ export function LearningInsightsDashboard() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteTaskFeedback(insight.subject, fb.task_id || undefined, fb.id)}
-                                className="h-7 px-2 hover:bg-destructive/10 hover:text-destructive"
+                                className="h-6 px-2 hover:bg-destructive/10 hover:text-destructive"
                                 title="Delete this entry"
                               >
                                 <Trash2 className="h-3 w-3" />
@@ -225,7 +236,7 @@ export function LearningInsightsDashboard() {
             </div>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
