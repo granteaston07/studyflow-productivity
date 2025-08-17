@@ -93,7 +93,10 @@ export function useTasks() {
   }, [user]);
 
   const addTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => {
-    if (!user) {
+    // Check for authentication first
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    
+    if (!currentUser) {
       // Guest mode: Add to local state only, no database save
       const guestTask: Task = {
         id: `guest-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -133,14 +136,14 @@ export function useTasks() {
             .from('tasks')
             .update({ sort_order: update.sort_order })
             .eq('id', update.id)
-            .eq('user_id', user.id);
+            .eq('user_id', currentUser.id);
         }
       }
 
       const { data, error } = await supabase
         .from('tasks')
         .insert({
-          user_id: user.id,
+          user_id: currentUser.id,
           title: taskData.title,
           subject: taskData.subject,
           description: taskData.description,
