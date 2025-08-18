@@ -3,15 +3,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Clock, Target, BookOpen, Trash2, ChevronDown } from 'lucide-react';
+import { Lightbulb, Clock, Target, BookOpen, Trash2, ChevronDown, CalendarDays, Repeat } from 'lucide-react';
 import { useLearningInsights } from '@/hooks/useLearningInsights';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Collapsible, CollapsibleTrigger, CollapsibleContent } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
+import { StudyCalendar } from '@/components/StudyCalendar';
 export function LearningInsightsDashboard() {
   const { insights, behaviorPatterns, loading, refreshInsights, feedbackBySubject } = useLearningInsights();
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isCalendarExpanded, setIsCalendarExpanded] = useState(false);
 
   const handleDeleteTaskFeedback = async (subject: string, taskId?: string, feedbackId?: string) => {
     try {
@@ -119,6 +121,40 @@ export function LearningInsightsDashboard() {
 
   return (
     <div className="w-full space-y-4">
+      {/* Study Calendar Section */}
+      <Button 
+        variant="outline" 
+        onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
+        className="w-full justify-between text-left p-6 h-auto border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-r from-primary/5 via-ai-primary/5 to-ai-secondary/5 hover:from-primary/10 hover:via-ai-primary/10 hover:to-ai-secondary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group animate-fade-in"
+      >
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 hover:shadow-md hover:shadow-primary/20">
+            <CalendarDays className="h-6 w-6 text-primary group-hover:text-ai-primary transition-colors duration-300" />
+          </div>
+          <div>
+            <div className="font-semibold text-lg ai-gradient-text">Study Calendar & Goals</div>
+            <div className="text-sm text-muted-foreground">
+              Plan and track your study schedule
+            </div>
+          </div>
+        </div>
+        <ChevronDown className={cn(
+          "h-6 w-6 transition-all duration-300 text-primary group-hover:text-ai-primary", 
+          isCalendarExpanded && "rotate-180 scale-110"
+        )} />
+      </Button>
+
+      {isCalendarExpanded && (
+        <div className="animate-slide-up">
+          <Card className="border-2 border-primary/20 shadow-lg shadow-primary/5 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
+            <CardContent className="p-6">
+              <StudyCalendar />
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Learning Insights Section */}
       <Button 
         variant="outline" 
         onClick={() => setIsExpanded(!isExpanded)}
