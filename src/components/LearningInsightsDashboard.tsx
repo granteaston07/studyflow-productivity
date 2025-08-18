@@ -125,7 +125,7 @@ export function LearningInsightsDashboard() {
         className="w-full justify-between text-left p-6 h-auto border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-r from-primary/5 via-ai-primary/5 to-ai-secondary/5 hover:from-primary/10 hover:via-ai-primary/10 hover:to-ai-secondary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group animate-fade-in"
       >
         <div className="flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 animate-subtle-glow">
+          <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 hover:shadow-md hover:shadow-primary/20">
             <Lightbulb className="h-6 w-6 text-primary group-hover:text-ai-primary transition-colors duration-300" />
           </div>
           <div>
