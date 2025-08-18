@@ -122,156 +122,167 @@ export function LearningInsightsDashboard() {
       <Button 
         variant="outline" 
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full justify-between text-left p-4 h-auto border-border/50 hover:border-border hover:bg-accent/50 transition-all duration-200"
+        className="w-full justify-between text-left p-6 h-auto border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-r from-primary/5 via-ai-primary/5 to-ai-secondary/5 hover:from-primary/10 hover:via-ai-primary/10 hover:to-ai-secondary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group animate-fade-in"
       >
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-md bg-primary/10">
-            <Lightbulb className="h-5 w-5 text-primary" />
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 animate-subtle-glow">
+            <Lightbulb className="h-6 w-6 text-primary group-hover:text-ai-primary transition-colors duration-300" />
           </div>
           <div>
-            <div className="font-medium text-base">Learning Insights</div>
+            <div className="font-semibold text-lg ai-gradient-text">Learning Insights</div>
             <div className="text-sm text-muted-foreground">
-              {insights.length > 0 ? `${insights.length} subjects analyzed` : 'Complete tasks to see insights'}
+              {insights.length > 0 ? `${insights.length} subjects analyzed • AI-powered analytics` : 'Complete tasks to see AI insights'}
             </div>
           </div>
         </div>
-        <ChevronDown className={cn("h-5 w-5 transition-transform duration-200", isExpanded && "rotate-180")} />
+        <ChevronDown className={cn(
+          "h-6 w-6 transition-all duration-300 text-primary group-hover:text-ai-primary", 
+          isExpanded && "rotate-180 scale-110"
+        )} />
       </Button>
 
       {isExpanded && (
-        <Card className="border-border/50 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center gap-3 text-lg">
-              <BookOpen className="h-5 w-5 text-primary" />
-              Subject Performance Overview
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {insights.map((insight) => (
-              <Card key={insight.subject} className="border-border/30 bg-card/50">
-                <CardContent className="p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-md bg-primary/10">
-                        <BookOpen className="h-4 w-4 text-primary" />
-                      </div>
-                      <div>
-                        <span className="font-semibold text-lg">{insight.subject}</span>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="secondary" className="text-sm">
-                            {insight.totalTasks} tasks completed
-                          </Badge>
-                          <Badge 
-                            className={`text-sm ${getDifficultyColor(insight.avgDifficulty)} border-0`}
-                          >
-                            {getDifficultyLabel(insight.avgDifficulty)}
-                          </Badge>
+        <div className="animate-slide-up">
+          <Card className="border-2 border-primary/20 shadow-lg shadow-primary/5 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
+            <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 via-ai-primary/10 to-ai-secondary/10 border-b border-primary/20">
+              <CardTitle className="flex items-center gap-3 text-base">
+                <div className="p-2 rounded-md bg-gradient-to-br from-primary/20 to-ai-primary/20">
+                  <BookOpen className="h-5 w-5 text-primary" />
+                </div>
+                <span className="ai-gradient-text">Subject Performance Overview</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 p-4">
+              {insights.map((insight, index) => (
+                <Card 
+                  key={insight.subject} 
+                  className="border border-primary/20 bg-gradient-to-br from-card/80 to-primary/5 hover:shadow-md hover:shadow-primary/10 transition-all duration-300 animate-scale-in"
+                  style={{ animationDelay: `${index * 100}ms` }}
+                >
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-md bg-gradient-to-br from-primary/15 to-ai-primary/15">
+                          <BookOpen className="h-4 w-4 text-primary" />
                         </div>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteTaskFeedback(insight.subject)}
-                      className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive rounded-md"
-                      title={`Delete all ${insight.subject} data`}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        Average Time per Task
-                      </div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {formatTime(insight.avgTimePerTask)}
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Target className="h-4 w-4" />
-                        Average Difficulty
-                      </div>
-                      <div className="text-2xl font-bold text-foreground">
-                        {insight.avgDifficulty.toFixed(1)}/10
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Progress bar showing difficulty trend */}
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Difficulty Distribution</span>
-                      <span className="font-medium">{((insight.avgDifficulty / 10) * 100).toFixed(0)}%</span>
-                    </div>
-                    <Progress 
-                      value={(insight.avgDifficulty / 10) * 100} 
-                      className="h-2"
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground">
-                      <span>Easy</span>
-                      <span>Moderate</span>
-                      <span>Challenging</span>
-                    </div>
-                  </div>
-
-                  {/* Recent feedback entries for precise deletion (now collapsible) */}
-                  {feedbackBySubject?.[insight.subject]?.length ? (
-                    <div className="border-t border-border/30 pt-4">
-                      <Collapsible>
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="text-sm font-medium text-muted-foreground">Recent Task Feedback</div>
-                          <CollapsibleTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-3 text-muted-foreground hover:text-foreground"
-                              title="Toggle recent feedback"
+                        <div>
+                          <span className="font-semibold text-base">{insight.subject}</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="secondary" className="text-xs bg-primary/10 text-primary border-primary/20">
+                              {insight.totalTasks} tasks
+                            </Badge>
+                            <Badge 
+                              className={`text-xs ${getDifficultyColor(insight.avgDifficulty)} border-0`}
                             >
-                              Show Details
-                              <ChevronDown className="h-4 w-4 ml-1" />
-                            </Button>
-                          </CollapsibleTrigger>
-                        </div>
-                        <CollapsibleContent className="space-y-2">
-                          <div className="space-y-2">
-                            {feedbackBySubject[insight.subject]
-                              .slice()
-                              .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-                              .slice(0, 8)
-                              .map((fb: any) => (
-                                <div key={fb.id} className="flex items-center justify-between p-3 bg-accent/30 rounded-md border border-border/20">
-                                  <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-2">
-                                      <div className="text-sm font-medium">Difficulty: {fb.difficulty_rating}/10</div>
-                                      <div className="w-px h-4 bg-border"></div>
-                                      <div className="text-sm text-muted-foreground">Time: {formatTime(fb.time_taken_minutes)}</div>
-                                    </div>
-                                  </div>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDeleteTaskFeedback(insight.subject, fb.task_id || undefined, fb.id)}
-                                    className="h-8 w-8 p-0 hover:bg-destructive/10 hover:text-destructive"
-                                    title="Delete this entry"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              ))}
+                              {getDifficultyLabel(insight.avgDifficulty)}
+                            </Badge>
                           </div>
-                        </CollapsibleContent>
-                      </Collapsible>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteTaskFeedback(insight.subject)}
+                        className="h-8 w-8 p-0 hover:bg-error/10 hover:text-error rounded-md transition-all duration-200 hover:scale-110"
+                        title={`Delete all ${insight.subject} data`}
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                  </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <div className="stats-card-primary">
+                        <div className="flex items-center gap-2 text-xs text-primary/80 mb-1">
+                          <Clock className="h-3 w-3" />
+                          Average Time
+                        </div>
+                        <div className="text-lg font-bold text-primary">
+                          {formatTime(insight.avgTimePerTask)}
+                        </div>
+                      </div>
+                      <div className="stats-card from-ai-primary/20 to-ai-primary/10 text-ai-primary border border-ai-primary/20">
+                        <div className="flex items-center gap-2 text-xs text-ai-primary/80 mb-1">
+                          <Target className="h-3 w-3" />
+                          Difficulty
+                        </div>
+                        <div className="text-lg font-bold text-ai-primary">
+                          {insight.avgDifficulty.toFixed(1)}/10
+                        </div>
+                      </div>
                     </div>
-                  ) : null}
-                </CardContent>
-              </Card>
-            ))}
-          </CardContent>
-        </Card>
+                    
+                    {/* Progress bar showing difficulty trend */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-muted-foreground">Difficulty Level</span>
+                        <span className="font-medium text-primary">{((insight.avgDifficulty / 10) * 100).toFixed(0)}%</span>
+                      </div>
+                      <Progress 
+                        value={(insight.avgDifficulty / 10) * 100} 
+                        className="h-1.5 bg-muted/50"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Easy</span>
+                        <span>Moderate</span>
+                        <span>Hard</span>
+                      </div>
+                    </div>
+
+                    {/* Recent feedback entries for precise deletion (now collapsible) */}
+                    {feedbackBySubject?.[insight.subject]?.length ? (
+                      <div className="border-t border-primary/10 pt-3">
+                        <Collapsible>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs font-medium text-muted-foreground">Recent Feedback</div>
+                            <CollapsibleTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground transition-colors duration-200"
+                                title="Toggle recent feedback"
+                              >
+                                Details
+                                <ChevronDown className="h-3 w-3 ml-1" />
+                              </Button>
+                            </CollapsibleTrigger>
+                          </div>
+                          <CollapsibleContent className="space-y-1">
+                            <div className="space-y-1">
+                              {feedbackBySubject[insight.subject]
+                                .slice()
+                                .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+                                .slice(0, 6)
+                                .map((fb: any) => (
+                                  <div key={fb.id} className="flex items-center justify-between p-2 bg-gradient-to-r from-accent/20 to-primary/5 rounded-md border border-border/10 hover:border-primary/20 transition-all duration-200">
+                                    <div className="flex items-center gap-3">
+                                      <div className="flex items-center gap-2">
+                                        <div className="text-xs font-medium">Difficulty: {fb.difficulty_rating}/10</div>
+                                        <div className="w-px h-3 bg-border/50"></div>
+                                        <div className="text-xs text-muted-foreground">Time: {formatTime(fb.time_taken_minutes)}</div>
+                                      </div>
+                                    </div>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleDeleteTaskFeedback(insight.subject, fb.task_id || undefined, fb.id)}
+                                      className="h-6 w-6 p-0 hover:bg-error/10 hover:text-error transition-all duration-200 hover:scale-110"
+                                      title="Delete this entry"
+                                    >
+                                      <Trash2 className="h-2 w-2" />
+                                    </Button>
+                                  </div>
+                                ))}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
+                      </div>
+                    ) : null}
+                  </CardContent>
+                </Card>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );
