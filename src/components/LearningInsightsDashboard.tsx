@@ -62,43 +62,46 @@ export function LearningInsightsDashboard() {
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-primary" />
-            Learning Insights
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
-            <div className="h-4 bg-muted rounded w-2/3"></div>
+      <div className="w-full space-y-4">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lightbulb className="h-5 w-5 text-primary" />
+              Learning Insights
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-muted rounded w-3/4"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-4 bg-muted rounded w-2/3"></div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Study Calendar & Goals Section */}
+        <div className="mt-16 space-y-4">
+          <div className="flex items-center gap-3 mb-4">
+            <CalendarDays className="h-5 w-5 text-primary" />
+            <h2 className="text-lg font-semibold text-foreground">Study Calendar & Goals</h2>
           </div>
-        </CardContent>
-      </Card>
+          <StudyCalendar />
+        </div>
+
+        {/* Contact Information */}
+        <div className="mt-8 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
+          For help or feedback, email{' '}
+          <a 
+            href="mailto:contact.studyflow@gmail.org" 
+            className="text-primary hover:text-primary/80 transition-colors underline"
+          >
+            contact.studyflow@gmail.org
+          </a>
+        </div>
+      </div>
     );
   }
 
-  if (insights.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-primary" />
-            Learning Insights
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Lightbulb className="h-12 w-12 mx-auto mb-4 opacity-50" />
-            <p>Complete some tasks to see your learning patterns!</p>
-            <p className="text-sm mt-2">The AI will analyze your study habits and provide personalized insights.</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${Math.round(minutes)}m`;
@@ -122,31 +125,34 @@ export function LearningInsightsDashboard() {
   return (
     <div className="w-full space-y-4">
       {/* Learning Insights Section */}
-      <Button 
-        variant="outline" 
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full justify-between text-left p-6 h-auto border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-r from-primary/5 via-ai-primary/5 to-ai-secondary/5 hover:from-primary/10 hover:via-ai-primary/10 hover:to-ai-secondary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group animate-fade-in"
-      >
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 hover:shadow-md hover:shadow-primary/20">
-            <Lightbulb className="h-6 w-6 text-primary group-hover:text-ai-primary transition-colors duration-300" />
-          </div>
-          <div>
-            <div className="font-semibold text-lg ai-gradient-text">Learning Insights</div>
-            <div className="text-sm text-muted-foreground">
-              {insights.length > 0 ? `${insights.length} subjects analyzed • AI-powered analytics` : 'Complete tasks to see AI insights'}
+      <Card className={cn(
+        "border-2 border-primary/20 shadow-lg shadow-primary/5 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden transition-all duration-300 animate-fade-in",
+        isExpanded && "shadow-xl shadow-primary/10"
+      )}>
+        <Button 
+          variant="ghost" 
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full justify-between text-left p-6 h-auto hover:bg-transparent group"
+        >
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 hover:shadow-md hover:shadow-primary/20">
+              <Lightbulb className="h-6 w-6 text-primary group-hover:text-ai-primary transition-colors duration-300" />
+            </div>
+            <div>
+              <div className="font-semibold text-lg ai-gradient-text">Learning Insights</div>
+              <div className="text-sm text-muted-foreground">
+                {insights.length > 0 ? `${insights.length} subjects analyzed • AI-powered analytics` : 'Complete tasks to see AI insights'}
+              </div>
             </div>
           </div>
-        </div>
-        <ChevronDown className={cn(
-          "h-6 w-6 transition-all duration-300 text-primary group-hover:text-ai-primary", 
-          isExpanded && "rotate-180 scale-110"
-        )} />
-      </Button>
+          <ChevronDown className={cn(
+            "h-6 w-6 transition-all duration-300 text-primary group-hover:text-ai-primary", 
+            isExpanded && "rotate-180 scale-110"
+          )} />
+        </Button>
 
-      {isExpanded && (
-        <div className="animate-slide-up">
-          <Card className="border-2 border-primary/20 shadow-lg shadow-primary/5 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
+        {isExpanded && insights.length > 0 && (
+          <div className="animate-accordion-down border-t border-primary/10">
             <CardContent className="space-y-4 p-6">
               {insights.map((insight, index) => (
                 <Card 
@@ -267,14 +273,24 @@ export function LearningInsightsDashboard() {
                 </Card>
               ))}
             </CardContent>
-          </Card>
-        </div>
-      )}
+          </div>
+        )}
+
+        {isExpanded && insights.length === 0 && (
+          <div className="animate-accordion-down border-t border-primary/10">
+            <CardContent className="text-center py-8 text-muted-foreground">
+              <Lightbulb className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p>Complete some tasks to see your learning patterns!</p>
+              <p className="text-sm mt-2">The AI will analyze your study habits and provide personalized insights.</p>
+            </CardContent>
+          </div>
+        )}
+      </Card>
 
       {/* Study Calendar & Goals Section */}
       <div className="mt-16 space-y-4">
         <div className="flex items-center gap-3 mb-4">
-          <CalendarDays className="h-5 w-5 text-foreground" />
+          <CalendarDays className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Study Calendar & Goals</h2>
         </div>
         <StudyCalendar />
