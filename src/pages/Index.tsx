@@ -539,7 +539,7 @@ const Index = () => {
                     For help or feedback, email{' '}
                     <a 
                       href="mailto:contact.studyflow@gmail.org" 
-                      className="text-primary hover:text-primary/80 transition-colors underline"
+                      className="underline transition-colors"
                     >
                       contact.studyflow@gmail.org
                     </a>
