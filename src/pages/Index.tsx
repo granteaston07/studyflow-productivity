@@ -534,13 +534,7 @@ const Index = () => {
                   </p>
                   <p>
                     By using StudyFlow, you agree to our Terms of Service and Privacy Policy. 
-                    If you have questions about data handling, please contact us.
                   </p>
-                </div>
-                
-                <div className="text-xs text-muted-foreground/80">
-                  <p>© 2025 StudyFlow. All Rights Reserved.</p>
-                  <p className="mt-1">Educational use only. Not affiliated with any educational institution.</p>
                   <p className="mt-2">
                     For help or feedback, email{' '}
                     <a 
@@ -550,6 +544,11 @@ const Index = () => {
                       contact.studyflow@gmail.org
                     </a>
                   </p>
+                </div>
+                
+                <div className="text-xs text-muted-foreground/80">
+                  <p>© 2025 StudyFlow. All Rights Reserved.</p>
+                  <p className="mt-1">Educational use only. Not affiliated with any educational institution.</p>
                 </div>
               </div>
             </div>
