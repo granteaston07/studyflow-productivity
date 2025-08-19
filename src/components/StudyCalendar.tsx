@@ -24,7 +24,6 @@ export const StudyCalendar = () => {
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<StudyGoal | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const [skippedGoals, setSkippedGoals] = useState<Set<string>>(new Set());
   const { goals, loading, addGoal, updateGoal, deleteGoal, toggleGoalCompletion } = useStudyGoals();
   const { toast } = useToast();
   
@@ -174,10 +173,6 @@ export const StudyCalendar = () => {
     return goal.completed_dates.includes(dateString);
   };
 
-  const isGoalSkippedOnDate = (goalId: string, date: Date) => {
-    const dateString = format(date, 'yyyy-MM-dd');
-    return skippedGoals.has(`${goalId}-${dateString}`);
-  };
 
   const getFrequencyLabel = (goal: StudyGoal) => {
     switch (goal.frequency) {
@@ -489,7 +484,6 @@ export const StudyCalendar = () => {
             <div className="space-y-3">
               {selectedDateGoals.map(goal => {
                 const isCompleted = isGoalCompletedOnDate(goal, selectedDate!);
-                const isSkipped = isGoalSkippedOnDate(goal.id, selectedDate!);
                 return (
                   <div 
                     key={goal.id}
@@ -497,8 +491,6 @@ export const StudyCalendar = () => {
                       "p-4 rounded-lg border transition-all cursor-pointer",
                       isCompleted 
                         ? "bg-success/10 border-success/30" 
-                        : isSkipped
-                        ? "bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-800"
                         : "bg-card border-border hover:border-primary/30"
                     )}
                     onClick={() => handleGoalClick(goal.id, selectedDate!)}
@@ -514,12 +506,7 @@ export const StudyCalendar = () => {
                          </div>
                        </div>
                        <div className="flex items-center gap-2">
-                         {isSkipped && (
-                           <Badge variant="outline" className="text-orange-600 border-orange-300 dark:text-orange-400">
-                             Skipped
-                           </Badge>
-                         )}
-                         {isCompleted && !isSkipped && (
+                         {isCompleted && (
                            <Badge variant="outline" className="text-success border-success/30">
                              Completed
                            </Badge>
@@ -549,44 +536,30 @@ export const StudyCalendar = () => {
                              <div className="space-y-2 pt-4">
                                <AlertDialogAction asChild>
                                  <Button 
-                                   variant="outline" 
+                                   variant="destructive" 
                                    className="w-full"
                                     onClick={async () => {
-                                      if (goal.frequency === 'once') {
-                                        await deleteGoal(goal.id);
-                                      } else {
+                                      await deleteGoal(goal.id);
+                                    }}
+                                  >
+                                   Delete Completely
+                                  </Button>
+                               </AlertDialogAction>
+                               {goal.frequency !== 'once' && (
+                                 <AlertDialogAction asChild>
+                                   <Button 
+                                     variant="outline" 
+                                     className="w-full"
+                                      onClick={async () => {
                                         // Set end date to today so it stops appearing from tomorrow
                                         const today = new Date();
                                         await updateGoal(goal.id, { repeat_end_date: today.toISOString() });
-                                      }
-                                    }}
-                                  >
-                                   Stop from tomorrow onwards
-                                  </Button>
-                               </AlertDialogAction>
-                               <AlertDialogAction asChild>
-                                 <Button 
-                                   variant="secondary" 
-                                   className="w-full"
-                                    onClick={async () => {
-                                      // For one-time goals, delete the entire goal
-                                      if (goal.frequency === 'once') {
-                                        await deleteGoal(goal.id);
-                                      } else {
-                                        // For recurring goals, mark as skipped
-                                        const dateString = format(selectedDate!, 'yyyy-MM-dd');
-                                        setSkippedGoals(prev => new Set([...prev, `${goal.id}-${dateString}`]));
-                                        // Also add to completed_dates to track the skip
-                                        if (!goal.completed_dates.includes(dateString)) {
-                                          const updatedCompletedDates = [...goal.completed_dates, dateString];
-                                          await updateGoal(goal.id, { completed_dates: updatedCompletedDates });
-                                        }
-                                      }
-                                    }}
-                                  >
-                                   Skip this instance only
-                                  </Button>
-                               </AlertDialogAction>
+                                      }}
+                                    >
+                                     Stop from tomorrow
+                                    </Button>
+                                 </AlertDialogAction>
+                               )}
                                <AlertDialogCancel className="w-full">Cancel</AlertDialogCancel>
                               </div>
                            </AlertDialogContent>
@@ -605,7 +578,7 @@ export const StudyCalendar = () => {
                          </Badge>
                        </div>
                        <div className="text-sm text-muted-foreground">
-                         {isSkipped ? 'Skipped' : isCompleted ? 'Completed ✓' : 'Click to complete'}
+                         {isCompleted ? 'Completed ✓' : 'Click to complete'}
                        </div>
                      </div>
                    </div>

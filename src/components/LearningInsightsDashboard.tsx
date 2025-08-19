@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Lightbulb, Clock, Target, BookOpen, Trash2, ChevronDown, CalendarDays, Repeat } from 'lucide-react';
+import { Lightbulb, Clock, Target, BookOpen, Trash2, ChevronDown, CalendarDays, Repeat, Brain } from 'lucide-react';
 import { useLearningInsights } from '@/hooks/useLearningInsights';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -80,23 +80,12 @@ export function LearningInsightsDashboard() {
         </Card>
 
         {/* Study Calendar & Goals Section */}
-        <div className="mt-16 space-y-4">
+        <div className="mt-20 space-y-4">
           <div className="flex items-center gap-3 mb-4">
             <CalendarDays className="h-5 w-5 text-primary" />
             <h2 className="text-lg font-semibold text-foreground">Study Calendar & Goals</h2>
           </div>
           <StudyCalendar />
-        </div>
-
-        {/* Contact Information */}
-        <div className="mt-8 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
-          For help or feedback, email{' '}
-          <a 
-            href="mailto:contact.studyflow@gmail.org" 
-            className="text-primary hover:text-primary/80 transition-colors underline"
-          >
-            contact.studyflow@gmail.org
-          </a>
         </div>
       </div>
     );
@@ -220,6 +209,43 @@ export function LearningInsightsDashboard() {
                       </div>
                     </div>
 
+                    {/* AI Insights Section */}
+                    <div className="border-t border-primary/10 pt-3">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="p-1.5 rounded-md bg-gradient-to-br from-ai-primary/15 to-ai-secondary/15">
+                          <Brain className="h-3 w-3 text-ai-primary" />
+                        </div>
+                        <h4 className="text-sm font-medium ai-gradient-text">AI Insights</h4>
+                      </div>
+                      <div className="space-y-2 text-sm">
+                        {insight.avgTimePerTask > 60 && (
+                          <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
+                            <span className="text-ai-primary font-medium">📈 Long Study Sessions:</span> You typically spend {formatTime(insight.avgTimePerTask)} per task. Consider breaking complex tasks into smaller parts.
+                          </div>
+                        )}
+                        {insight.avgTimePerTask < 15 && (
+                          <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
+                            <span className="text-ai-primary font-medium">⚡ Quick Tasks:</span> You complete {insight.subject} tasks efficiently in {formatTime(insight.avgTimePerTask)}. Perfect for study breaks!
+                          </div>
+                        )}
+                        {insight.avgDifficulty > 7 && (
+                          <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
+                            <span className="text-ai-primary font-medium">🎯 Challenge Subject:</span> {insight.subject} is your most challenging subject. Consider extra preparation time.
+                          </div>
+                        )}
+                        {insight.avgDifficulty < 4 && (
+                          <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
+                            <span className="text-ai-primary font-medium">✨ Strength Area:</span> You find {insight.subject} relatively easy! Use this confidence for tackling harder subjects.
+                          </div>
+                        )}
+                        {insight.totalTasks >= 10 && (
+                          <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
+                            <span className="text-ai-primary font-medium">🔥 Consistent Practice:</span> Great job staying consistent with {insight.totalTasks} completed tasks in {insight.subject}!
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
                     {/* Recent feedback entries for precise deletion (now collapsible) */}
                     {feedbackBySubject?.[insight.subject]?.length ? (
                       <div className="border-t border-primary/10 pt-3">
@@ -288,23 +314,12 @@ export function LearningInsightsDashboard() {
       </Card>
 
       {/* Study Calendar & Goals Section */}
-      <div className="mt-16 space-y-4">
+      <div className="mt-20 space-y-4">
         <div className="flex items-center gap-3 mb-4">
           <CalendarDays className="h-5 w-5 text-primary" />
           <h2 className="text-lg font-semibold text-foreground">Study Calendar & Goals</h2>
         </div>
         <StudyCalendar />
-      </div>
-
-      {/* Contact Information */}
-      <div className="mt-8 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
-        For help or feedback, email{' '}
-        <a 
-          href="mailto:contact.studyflow@gmail.org" 
-          className="text-primary hover:text-primary/80 transition-colors underline"
-        >
-          contact.studyflow@gmail.org
-        </a>
       </div>
     </div>
   );

@@ -541,6 +541,15 @@ const Index = () => {
                 <div className="text-xs text-muted-foreground/80">
                   <p>© 2025 StudyFlow. All Rights Reserved.</p>
                   <p className="mt-1">Educational use only. Not affiliated with any educational institution.</p>
+                  <p className="mt-2">
+                    For help or feedback, email{' '}
+                    <a 
+                      href="mailto:contact.studyflow@gmail.org" 
+                      className="text-primary hover:text-primary/80 transition-colors underline"
+                    >
+                      contact.studyflow@gmail.org
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>
