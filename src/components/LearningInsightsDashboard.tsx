@@ -121,39 +121,6 @@ export function LearningInsightsDashboard() {
 
   return (
     <div className="w-full space-y-4">
-      {/* Study Calendar Section */}
-      <Button 
-        variant="outline" 
-        onClick={() => setIsCalendarExpanded(!isCalendarExpanded)}
-        className="w-full justify-between text-left p-6 h-auto border-2 border-primary/20 hover:border-primary/40 bg-gradient-to-r from-primary/5 via-ai-primary/5 to-ai-secondary/5 hover:from-primary/10 hover:via-ai-primary/10 hover:to-ai-secondary/10 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 group animate-fade-in"
-      >
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-lg bg-gradient-to-br from-primary/20 to-ai-primary/20 group-hover:from-primary/30 group-hover:to-ai-primary/30 transition-all duration-300 hover:shadow-md hover:shadow-primary/20">
-            <CalendarDays className="h-6 w-6 text-primary group-hover:text-ai-primary transition-colors duration-300" />
-          </div>
-          <div>
-            <div className="font-semibold text-lg ai-gradient-text">Study Calendar & Goals</div>
-            <div className="text-sm text-muted-foreground">
-              Plan and track your study schedule
-            </div>
-          </div>
-        </div>
-        <ChevronDown className={cn(
-          "h-6 w-6 transition-all duration-300 text-primary group-hover:text-ai-primary", 
-          isCalendarExpanded && "rotate-180 scale-110"
-        )} />
-      </Button>
-
-      {isCalendarExpanded && (
-        <div className="animate-slide-up">
-          <Card className="border-2 border-primary/20 shadow-lg shadow-primary/5 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
-            <CardContent className="p-6">
-              <StudyCalendar />
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
       {/* Learning Insights Section */}
       <Button 
         variant="outline" 
@@ -196,7 +163,7 @@ export function LearningInsightsDashboard() {
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <CardContent className="p-4 space-y-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className="p-2 rounded-md bg-gradient-to-br from-primary/15 to-ai-primary/15">
                           <BookOpen className="h-4 w-4 text-primary" />
@@ -224,43 +191,34 @@ export function LearningInsightsDashboard() {
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>
-                  </div>
+                    </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div className="stats-card-primary">
-                        <div className="flex items-center gap-2 text-xs text-primary/80 mb-1">
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                      <div className="text-center p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg border border-primary/20">
+                        <div className="flex items-center justify-center gap-1 text-xs text-primary/80 mb-1">
                           <Clock className="h-3 w-3" />
-                          Average Time
+                          Avg Time
                         </div>
-                        <div className="text-lg font-bold text-primary">
+                        <div className="text-sm font-bold text-primary">
                           {formatTime(insight.avgTimePerTask)}
                         </div>
                       </div>
-                      <div className="stats-card from-ai-primary/20 to-ai-primary/10 text-ai-primary border border-ai-primary/20">
-                        <div className="flex items-center gap-2 text-xs text-ai-primary/80 mb-1">
+                      <div className="text-center p-3 bg-gradient-to-br from-ai-primary/10 to-ai-primary/5 rounded-lg border border-ai-primary/20">
+                        <div className="flex items-center justify-center gap-1 text-xs text-ai-primary/80 mb-1">
                           <Target className="h-3 w-3" />
                           Difficulty
                         </div>
-                        <div className="text-lg font-bold text-ai-primary">
+                        <div className="text-sm font-bold text-ai-primary">
                           {insight.avgDifficulty.toFixed(1)}/10
                         </div>
                       </div>
-                    </div>
-                    
-                    {/* Progress bar showing difficulty trend */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span className="text-muted-foreground">Difficulty Level</span>
-                        <span className="font-medium text-primary">{((insight.avgDifficulty / 10) * 100).toFixed(0)}%</span>
-                      </div>
-                      <Progress 
-                        value={(insight.avgDifficulty / 10) * 100} 
-                        className="h-1.5 bg-muted/50"
-                      />
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Easy</span>
-                        <span>Moderate</span>
-                        <span>Hard</span>
+                      <div className="text-center p-3 bg-gradient-to-br from-muted/20 to-muted/10 rounded-lg border border-border/20">
+                        <div className="text-xs text-muted-foreground mb-1">
+                          Progress
+                        </div>
+                        <div className="text-sm font-bold">
+                          {((insight.avgDifficulty / 10) * 100).toFixed(0)}%
+                        </div>
                       </div>
                     </div>
 
@@ -320,6 +278,28 @@ export function LearningInsightsDashboard() {
           </Card>
         </div>
       )}
+
+      {/* Study Calendar & Goals Section */}
+      <div className="mt-8 space-y-4">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-2 rounded-md bg-gradient-to-br from-primary/15 to-ai-primary/15">
+            <CalendarDays className="h-5 w-5 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold ai-gradient-text">Study Calendar & Goals</h2>
+        </div>
+        <StudyCalendar />
+      </div>
+
+      {/* Contact Information */}
+      <div className="mt-8 pt-6 border-t border-border/50 text-center text-sm text-muted-foreground">
+        For help or feedback, email{' '}
+        <a 
+          href="mailto:contact.studyflow@gmail.org" 
+          className="text-primary hover:text-primary/80 transition-colors underline"
+        >
+          contact.studyflow@gmail.org
+        </a>
+      </div>
     </div>
   );
 }

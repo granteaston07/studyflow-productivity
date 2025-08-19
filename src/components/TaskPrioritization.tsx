@@ -474,16 +474,6 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
             </div>
             
             <CardContent className="p-4">
-              {/* Beta Warning */}
-              <div className="mb-4 p-3 bg-warning/10 border border-warning/20 rounded-lg">
-                <div className="flex items-center gap-2 mb-1">
-                  <AlertTriangle className="h-4 w-4 text-warning" />
-                  <span className="text-sm font-medium text-warning">Beta Version</span>
-                </div>
-                <p className="text-xs text-warning/80">
-                  This AI feature is still being improved. Recommendations may contain inaccuracies and should be used as guidance only.
-                </p>
-              </div>
 
               {recommendations.length === 0 ? (
                 <div className="text-center py-8">
