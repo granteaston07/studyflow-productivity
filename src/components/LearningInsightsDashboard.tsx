@@ -147,15 +147,7 @@ export function LearningInsightsDashboard() {
       {isExpanded && (
         <div className="animate-slide-up">
           <Card className="border-2 border-primary/20 shadow-lg shadow-primary/5 bg-gradient-to-br from-card via-card to-primary/5 overflow-hidden">
-            <CardHeader className="pb-3 bg-gradient-to-r from-primary/10 via-ai-primary/10 to-ai-secondary/10 border-b border-primary/20">
-              <CardTitle className="flex items-center gap-3 text-base">
-                <div className="p-2 rounded-md bg-gradient-to-br from-primary/20 to-ai-primary/20">
-                  <BookOpen className="h-5 w-5 text-primary" />
-                </div>
-                <span className="ai-gradient-text">Subject Performance Overview</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 p-4">
+            <CardContent className="space-y-4 p-6">
               {insights.map((insight, index) => (
                 <Card 
                   key={insight.subject} 
@@ -280,12 +272,10 @@ export function LearningInsightsDashboard() {
       )}
 
       {/* Study Calendar & Goals Section */}
-      <div className="mt-8 space-y-4">
+      <div className="mt-16 space-y-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-md bg-gradient-to-br from-primary/15 to-ai-primary/15">
-            <CalendarDays className="h-5 w-5 text-primary" />
-          </div>
-          <h2 className="text-lg font-semibold ai-gradient-text">Study Calendar & Goals</h2>
+          <CalendarDays className="h-5 w-5 text-foreground" />
+          <h2 className="text-lg font-semibold text-foreground">Study Calendar & Goals</h2>
         </div>
         <StudyCalendar />
       </div>
