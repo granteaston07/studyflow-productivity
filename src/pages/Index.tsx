@@ -501,7 +501,7 @@ const Index = () => {
           <section className="space-y-6 mt-32">
             <div className="flex items-center gap-2">
               <CalendarDays className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Study Calendar & Goals</h2>
+              <h2 className="text-xl font-semibold text-foreground">Study Goals & Calendar</h2>
             </div>
             <StudyCalendar />
           </section>
