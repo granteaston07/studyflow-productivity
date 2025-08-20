@@ -314,7 +314,7 @@ export function LearningInsightsDashboard() {
       </Card>
 
       {/* Study Calendar & Goals Section */}
-      <div className="mt-20 space-y-4">
+      <div className="mt-32 space-y-4">
         <div className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5 text-primary" />
           <h2 className="text-xl font-semibold text-foreground">Study Calendar & Goals</h2>
