@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn, ArrowUpDown, Check } from "lucide-react";
+import { Brain, CheckSquare, Timer, Plus, LogOut, GraduationCap, LogIn, ArrowUpDown, Check, CalendarDays } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { DraggableTaskCard } from "@/components/DraggableTaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
@@ -16,7 +16,7 @@ import { FloatingStatus } from "@/components/FloatingStatus";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
-// import { StudyCalendar } from "@/components/StudyCalendar";
+import { StudyCalendar } from "@/components/StudyCalendar";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { LearningInsightsDashboard } from "@/components/LearningInsightsDashboard";
 import { Badge } from "@/components/ui/badge";
@@ -495,6 +495,15 @@ const Index = () => {
           <section className="space-y-6">
             <AnalyticsDashboard tasks={tasks} studyGoals={[]} />
             <LearningInsightsDashboard />
+          </section>
+
+          {/* Study Calendar & Goals Section */}
+          <section className="space-y-6 mt-32">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Study Calendar & Goals</h2>
+            </div>
+            <StudyCalendar />
           </section>
 
           {/* Footer with Legal Info */}
