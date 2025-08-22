@@ -122,6 +122,23 @@ export const useStudyGoals = () => {
 
   const updateGoal = async (id: string, updates: Partial<StudyGoal>) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        // Handle local updates for non-authenticated users
+        const updatedGoals = goals.map(goal => 
+          goal.id === id ? { ...goal, ...updates } : goal
+        );
+        setGoals(updatedGoals);
+        localStorage.setItem('study_goals', JSON.stringify(updatedGoals));
+        
+        toast({
+          title: "Success",
+          description: "Study goal updated locally. Sign in to sync across devices.",
+        });
+        return;
+      }
+
       const { data, error } = await supabase
         .from('study_calendar_goals')
         .update(updates)

@@ -18,8 +18,18 @@ import { useToast } from "@/hooks/use-toast";
 
 export const StudyCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
+    // Always default to today if no stored date or if stored date is invalid
     const stored = localStorage.getItem('studyCalendar-selectedDate');
-    return stored ? new Date(stored) : new Date();
+    if (stored) {
+      const storedDate = new Date(stored);
+      // Only use stored date if it's valid and not too old (within 30 days)
+      const today = new Date();
+      const diffDays = Math.abs((today.getTime() - storedDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (!isNaN(storedDate.getTime()) && diffDays <= 30) {
+        return storedDate;
+      }
+    }
+    return new Date(); // Always default to today
   });
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<StudyGoal | null>(null);
@@ -223,21 +233,22 @@ export const StudyCalendar = () => {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6">
+    <div className="flex flex-col gap-6">
       {/* Calendar */}
-      <Card className="lg:w-fit lg:flex-shrink-0">
+      <Card className="w-full">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <CalendarIcon className="h-5 w-5 text-primary" />
             Study Calendar
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex justify-center">
           <Calendar
             mode="single"
             selected={selectedDate}
             onSelect={setSelectedDate}
-            className="w-full"
+            defaultMonth={new Date()} // Always start on current month
+            className="w-fit"
             modifiers={{
               hasGoals: (date) => getGoalsForDate(date).length > 0,
               completed: (date) => {
@@ -269,20 +280,20 @@ export const StudyCalendar = () => {
       </Card>
 
       {/* Goals for Selected Date */}
-      <Card className="flex-1">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+      <Card className="w-full">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 pb-4">
           <CardTitle className="flex items-center gap-2">
             <Repeat className="h-5 w-5 text-primary" />
             {selectedDate ? getDateTitle(selectedDate) : 'Select a date'}
           </CardTitle>
           <Dialog open={showAddGoal} onOpenChange={setShowAddGoal}>
             <DialogTrigger asChild>
-              <Button size="sm" variant="outline">
+              <Button size="sm" variant="outline" className="w-full sm:w-auto">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Goal
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md mx-4 max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Add Study Goal</DialogTitle>
               </DialogHeader>
@@ -485,41 +496,41 @@ export const StudyCalendar = () => {
               {selectedDateGoals.map(goal => {
                 const isCompleted = isGoalCompletedOnDate(goal, selectedDate!);
                 return (
-                  <div 
-                    key={goal.id}
-                    className={cn(
-                      "p-4 rounded-lg border transition-all cursor-pointer",
-                      isCompleted 
-                        ? "bg-success/10 border-success/30" 
-                        : "bg-card border-border hover:border-primary/30"
-                    )}
-                    onClick={() => handleGoalClick(goal.id, selectedDate!)}
-                   >
-                     <div className="flex items-center justify-between mb-2">
-                       <div className="flex items-center gap-3">
-                         <div className={cn("w-3 h-3 rounded-full", goal.color)} />
-                         <div>
-                           <h4 className="font-medium">{goal.title}</h4>
-                           {goal.description && (
-                             <p className="text-sm text-muted-foreground">{goal.description}</p>
-                           )}
-                         </div>
-                       </div>
-                       <div className="flex items-center gap-2">
-                         {isCompleted && (
-                           <Badge variant="outline" className="text-success border-success/30">
-                             Completed
-                           </Badge>
-                         )}
-                         <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
-                        <Button 
-                          size="sm" 
-                          variant="ghost" 
-                          className="h-8 w-8 p-0"
-                          onClick={() => handleEditGoal(goal)}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Button>
+                    <div 
+                     key={goal.id}
+                     className={cn(
+                       "p-4 rounded-lg border transition-all cursor-pointer",
+                       isCompleted 
+                         ? "bg-success/10 border-success/30" 
+                         : "bg-card border-border hover:border-primary/30"
+                     )}
+                     onClick={() => handleGoalClick(goal.id, selectedDate!)}
+                    >
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-2">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={cn("w-3 h-3 rounded-full flex-shrink-0", goal.color)} />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium truncate">{goal.title}</h4>
+                            {goal.description && (
+                              <p className="text-sm text-muted-foreground truncate">{goal.description}</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          {isCompleted && (
+                            <Badge variant="outline" className="text-success border-success/30 hidden sm:inline-flex">
+                              Completed
+                            </Badge>
+                          )}
+                          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                         <Button 
+                           size="sm" 
+                           variant="ghost" 
+                           className="h-8 w-8 p-0"
+                           onClick={() => handleEditGoal(goal)}
+                         >
+                           <Edit2 className="h-4 w-4" />
+                         </Button>
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-destructive hover:text-destructive">
@@ -567,20 +578,25 @@ export const StudyCalendar = () => {
                        </div>
                      </div>
                    </div>
-                     
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2">
-                         <Badge variant={isCompleted ? "default" : "secondary"}>
-                           {goal.target_value} {goal.unit}
-                         </Badge>
-                         <Badge variant="outline" className="text-xs">
-                           {getFrequencyLabel(goal)}
-                         </Badge>
-                       </div>
-                       <div className="text-sm text-muted-foreground">
-                         {isCompleted ? 'Completed ✓' : 'Click to complete'}
-                       </div>
-                     </div>
+                      
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <Badge variant={isCompleted ? "default" : "secondary"}>
+                            {goal.target_value} {goal.unit}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {getFrequencyLabel(goal)}
+                          </Badge>
+                          {isCompleted && (
+                            <Badge variant="outline" className="text-success border-success/30 sm:hidden">
+                              ✓
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {isCompleted ? 'Completed ✓' : 'Tap to complete'}
+                        </div>
+                      </div>
                    </div>
                 );
               })}
