@@ -412,7 +412,7 @@ const Index = () => {
                   
                   {/* Completed Tasks */}
                   {tasks.filter(t => t.completed).length > 0 && (
-                    <div className="space-y-4 mt-16">
+                    <div className="space-y-4 mt-20">
                       <h3 className="text-lg font-medium text-muted-foreground">Completed Tasks</h3>
                       <div className="space-y-3">
                         {tasks

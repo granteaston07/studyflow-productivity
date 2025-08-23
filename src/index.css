@@ -217,6 +217,11 @@ All colors MUST be HSL for consistency */
   .animate-task-poof {
     animation: task-poof 0.5s ease-out forwards;
   }
+
+  /* Task undo animation */
+  .animate-task-undo {
+    animation: task-undo 0.4s ease-out;
+  }
 }
 
 @keyframes bounce-gentle {
@@ -276,5 +281,20 @@ All colors MUST be HSL for consistency */
   100% { 
     transform: scale(0.3) rotate(0deg);
     opacity: 0;
+  }
+}
+
+@keyframes task-undo {
+  0% { 
+    transform: translateY(-20px) scale(0.95);
+    opacity: 0;
+  }
+  50% { 
+    transform: translateY(-5px) scale(1.02);
+    opacity: 0.7;
+  }
+  100% { 
+    transform: translateY(0) scale(1);
+    opacity: 1;
   }
 }

@@ -33,6 +33,7 @@ interface TaskCardProps {
 export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false, selected = false, onSelect, isReorderMode = false }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isUndoing, setIsUndoing] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -66,8 +67,12 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
         setIsCompleting(false);
       }, 800);
     } else {
-      // Uncompleting a task
-      await onToggle(task.id);
+      // Uncompleting a task - smooth transition
+      setIsUndoing(true);
+      setTimeout(async () => {
+        await onToggle(task.id);
+        setIsUndoing(false);
+      }, 200);
     }
   };
 
@@ -175,7 +180,8 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
       !isReorderMode && "transition-all duration-200 hover:shadow-lg hover:border-primary/30 hover:scale-[1.02]",
       selected && "border-primary bg-primary/10",
       isCompleting && "animate-task-complete",
-      isDeleting && "animate-task-poof"
+      isDeleting && "animate-task-poof",
+      isUndoing && "animate-task-undo"
     )}>
       <div className="flex items-start gap-3">
         <Checkbox
