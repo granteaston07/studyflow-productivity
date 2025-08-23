@@ -316,7 +316,7 @@ const Index = () => {
           </div>
 
           {/* Tasks Section */}
-          <section className="space-y-6">
+          <section className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CheckSquare className="h-5 w-5 text-primary" />
@@ -412,7 +412,7 @@ const Index = () => {
                   
                   {/* Completed Tasks */}
                   {tasks.filter(t => t.completed).length > 0 && (
-                    <div className="space-y-4 mt-12">
+                    <div className="space-y-4 mt-16">
                       <h3 className="text-lg font-medium text-muted-foreground">Completed Tasks</h3>
                       <div className="space-y-3">
                         {tasks

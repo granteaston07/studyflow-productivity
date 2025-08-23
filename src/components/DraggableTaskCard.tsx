@@ -52,6 +52,7 @@ export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateSta
           onUpdateTitle={onUpdateTitle}
           onUpdatePriority={onUpdatePriority}
           onDelete={onDelete}
+          isReorderMode={isReorderMode}
         />
       </div>
     </div>

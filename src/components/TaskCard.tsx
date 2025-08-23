@@ -26,10 +26,11 @@ interface TaskCardProps {
   isGuest?: boolean;
   selected?: boolean;
   onSelect?: (id: string) => void;
+  isReorderMode?: boolean;
 }
 
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false, selected = false, onSelect }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false, selected = false, onSelect, isReorderMode = false }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
@@ -170,7 +171,8 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   return (
     <>
     <Card className={cn(
-      "p-4 transition-all duration-200 hover:shadow-lg border border-border/50 hover:border-primary/30 bg-card/50 backdrop-blur-sm animate-fade-in hover:scale-[1.02]",
+      "p-4 border border-border/50 bg-card/50 backdrop-blur-sm animate-fade-in",
+      !isReorderMode && "transition-all duration-200 hover:shadow-lg hover:border-primary/30 hover:scale-[1.02]",
       selected && "border-primary bg-primary/10",
       isCompleting && "animate-task-complete",
       isDeleting && "animate-task-poof"
@@ -217,7 +219,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                   )}>
                     {task.title}
                   </h3>
-                  {!task.completed && (
+                  {!task.completed && !isReorderMode && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -254,7 +256,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                   {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1).replace('-', ' ')}
                 </span>
               </Badge>
-              {!task.completed && (
+              {!task.completed && !isReorderMode && (
                 <>
 
                   {/* Edit Due Date Button */}
@@ -295,14 +297,16 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
                 </>
               )}
               {/* Delete Task Button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-                className="h-6 w-6 p-0 text-muted-foreground hover:text-error"
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
+              {!isReorderMode && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => { e.stopPropagation(); handleDelete(); }}
+                  className="h-6 w-6 p-0 text-muted-foreground hover:text-error"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              )}
             </div>
           </div>
           
