@@ -5,33 +5,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { QuickNotesExpanded } from "./QuickNotesExpanded";
-
-interface Note {
-  id: string;
-  content: string;
-  timestamp: Date;
-}
+import { useNotes } from "@/hooks/useNotes";
 
 export function QuickNotes() {
-  const [notes, setNotes] = useState<Note[]>([]);
+  const { notes, loading, addNote, deleteNote } = useNotes();
   const [newNote, setNewNote] = useState("");
   const [showExpanded, setShowExpanded] = useState(false);
 
-  const addNote = () => {
+  const handleAddNote = async () => {
     if (!newNote.trim()) return;
-    
-    const note: Note = {
-      id: Date.now().toString(),
-      content: newNote.trim(),
-      timestamp: new Date()
-    };
-    
-    setNotes(prev => [note, ...prev]);
+    await addNote(newNote.trim());
     setNewNote("");
   };
 
-  const deleteNote = (id: string) => {
-    setNotes(prev => prev.filter(note => note.id !== id));
+  const handleDeleteNote = async (id: string) => {
+    await deleteNote(id);
   };
 
   return (
@@ -64,10 +52,10 @@ export function QuickNotes() {
               className="resize-none h-12 text-xs"
             />
             <Button 
-              onClick={addNote} 
+              onClick={handleAddNote} 
               size="sm" 
               className="w-full h-7 text-xs"
-              disabled={!newNote.trim()}
+              disabled={!newNote.trim() || loading}
             >
               <Plus className="h-3 w-3 mr-1" />
               Add Note
@@ -76,7 +64,11 @@ export function QuickNotes() {
 
           {/* Notes List - Shows 3 notes before scrolling */}
           <div className="space-y-1 flex-1 overflow-y-auto min-h-0" style={{ maxHeight: '180px' }}>
-            {notes.length === 0 ? (
+            {loading ? (
+              <p className="text-xs text-muted-foreground text-center py-4">
+                Loading notes...
+              </p>
+            ) : notes.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-4">
                 No notes yet. Add your first note above!
               </p>
@@ -91,7 +83,7 @@ export function QuickNotes() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => deleteNote(note.id)}
+                    onClick={() => handleDeleteNote(note.id)}
                     className="absolute top-1 right-1 h-4 w-4 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
                   >
                     <X className="h-2 w-2" />
