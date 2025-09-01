@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Checkbox } from "@/components/ui/checkbox";
 import { CalendarIcon, Plus, Repeat, Trash2, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, isSameDay, getDay, getDate, isToday, isTomorrow, isYesterday } from "date-fns";
@@ -31,8 +32,9 @@ export const StudyCalendar = () => {
     title: string;
     description: string;
     frequency: 'once' | 'daily' | 'weekly' | 'monthly';
-    target_value: number;
+    target_value: number | null;
     unit: string;
+    has_target: boolean;
     specific_date?: Date;
     week_day?: number;
     month_date?: number;
@@ -43,6 +45,7 @@ export const StudyCalendar = () => {
     frequency: 'daily',
     target_value: 30,
     unit: 'minutes',
+    has_target: true,
     specific_date: undefined,
     week_day: undefined,
     month_date: undefined,
@@ -101,7 +104,7 @@ export const StudyCalendar = () => {
         description: newGoal.description,
         frequency: newGoal.frequency === 'weekly' ? 'weekly_same_day' : 
                    newGoal.frequency === 'monthly' ? 'monthly_same_date' : newGoal.frequency,
-        target_value: newGoal.target_value,
+        target_value: newGoal.has_target ? newGoal.target_value : null,
         unit: newGoal.unit,
         color: colors[Math.floor(Math.random() * colors.length)],
         week_day: newGoal.frequency === 'weekly' ? newGoal.week_day : null,
@@ -117,6 +120,7 @@ export const StudyCalendar = () => {
         frequency: 'daily',
         target_value: 30,
         unit: 'minutes',
+        has_target: true,
         specific_date: undefined,
         week_day: undefined,
         month_date: undefined,
@@ -435,30 +439,48 @@ export const StudyCalendar = () => {
 
                  <div>
                    <Label htmlFor="target">Target</Label>
-                   <div className="flex gap-2">
-                     <Input
-                       id="target"
-                       type="number"
-                       value={newGoal.target_value}
-                       onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
-                       min="1"
-                       className="flex-1"
-                     />
-                     <Select 
-                       value={newGoal.unit} 
-                       onValueChange={(value) => setNewGoal(prev => ({ ...prev, unit: value }))}
-                     >
-                       <SelectTrigger className="w-32">
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="minutes">Minutes</SelectItem>
-                         <SelectItem value="hours">Hours</SelectItem>
-                         <SelectItem value="pages">Pages</SelectItem>
-                         <SelectItem value="problems">Problems</SelectItem>
-                         <SelectItem value="exercises">Exercises</SelectItem>
-                       </SelectContent>
-                     </Select>
+                   <div className="space-y-3">
+                     <div className="flex items-center space-x-2">
+                       <input
+                         type="checkbox"
+                         id="has_target"
+                         checked={newGoal.has_target}
+                         onChange={(e) => setNewGoal(prev => ({ 
+                           ...prev, 
+                           has_target: e.target.checked,
+                           target_value: e.target.checked ? prev.target_value : null
+                         }))}
+                         className="h-4 w-4"
+                       />
+                       <Label htmlFor="has_target" className="text-sm">Set a specific target</Label>
+                     </div>
+                     {newGoal.has_target && (
+                       <div className="flex gap-2">
+                         <Input
+                           id="target"
+                           type="number"
+                           value={newGoal.target_value || 30}
+                           onChange={(e) => setNewGoal(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
+                           min="1"
+                           className="flex-1"
+                         />
+                         <Select 
+                           value={newGoal.unit} 
+                           onValueChange={(value) => setNewGoal(prev => ({ ...prev, unit: value }))}
+                         >
+                           <SelectTrigger className="w-32">
+                             <SelectValue />
+                           </SelectTrigger>
+                           <SelectContent>
+                             <SelectItem value="minutes">Minutes</SelectItem>
+                             <SelectItem value="hours">Hours</SelectItem>
+                             <SelectItem value="pages">Pages</SelectItem>
+                             <SelectItem value="problems">Problems</SelectItem>
+                             <SelectItem value="exercises">Exercises</SelectItem>
+                           </SelectContent>
+                         </Select>
+                       </div>
+                     )}
                    </div>
                  </div>
 
@@ -568,19 +590,19 @@ export const StudyCalendar = () => {
                      </div>
                    </div>
                      
-                     <div className="flex items-center justify-between">
-                       <div className="flex items-center gap-2">
-                         <Badge variant={isCompleted ? "default" : "secondary"}>
-                           {goal.target_value} {goal.unit}
-                         </Badge>
-                         <Badge variant="outline" className="text-xs">
-                           {getFrequencyLabel(goal)}
-                         </Badge>
-                       </div>
-                       <div className="text-sm text-muted-foreground">
-                         {isCompleted ? 'Completed ✓' : 'Click to complete'}
-                       </div>
-                     </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={isCompleted ? "default" : "secondary"}>
+                            {goal.target_value ? `${goal.target_value} ${goal.unit}` : 'No target'}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {getFrequencyLabel(goal)}
+                          </Badge>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {isCompleted ? 'Completed ✓' : 'Click to complete'}
+                        </div>
+                      </div>
                    </div>
                 );
               })}

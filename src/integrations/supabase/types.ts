@@ -140,7 +140,7 @@ export type Database = {
           repeat_count: number | null
           repeat_end_date: string | null
           repeat_interval: number | null
-          target_value: number
+          target_value: number | null
           title: string
           unit: string
           updated_at: string
@@ -158,7 +158,7 @@ export type Database = {
           repeat_count?: number | null
           repeat_end_date?: string | null
           repeat_interval?: number | null
-          target_value?: number
+          target_value?: number | null
           title: string
           unit?: string
           updated_at?: string
@@ -176,7 +176,7 @@ export type Database = {
           repeat_count?: number | null
           repeat_end_date?: string | null
           repeat_interval?: number | null
-          target_value?: number
+          target_value?: number | null
           title?: string
           unit?: string
           updated_at?: string

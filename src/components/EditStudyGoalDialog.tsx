@@ -23,8 +23,9 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
     title: '',
     description: '',
     frequency: 'daily' as 'once' | 'daily' | 'weekly' | 'monthly',
-    target_value: 30,
+    target_value: 30 as number | null,
     unit: 'minutes',
+    has_target: true,
     end_date: undefined as Date | undefined
   });
 
@@ -41,6 +42,7 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
         frequency: simpleFreq,
         target_value: goal.target_value,
         unit: goal.unit,
+        has_target: goal.target_value !== null,
         end_date: goal.repeat_end_date ? new Date(goal.repeat_end_date) : undefined
       });
     }
@@ -58,7 +60,7 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
       description: editData.description,
       frequency: editData.frequency === 'weekly' ? 'weekly_same_day' :
                 editData.frequency === 'monthly' ? 'monthly_same_date' : editData.frequency,
-      target_value: editData.target_value,
+      target_value: editData.has_target ? editData.target_value : null,
       unit: editData.unit,
       week_day: editData.frequency === 'weekly' ? currentDay : null,
       month_date: editData.frequency === 'monthly' ? currentDate : null,
@@ -150,30 +152,48 @@ export const EditStudyGoalDialog = ({ goal, open, onOpenChange, onSave }: EditSt
 
           <div>
             <Label htmlFor="edit-target">Target</Label>
-            <div className="flex gap-2">
-              <Input
-                id="edit-target"
-                type="number"
-                value={editData.target_value}
-                onChange={(e) => setEditData(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
-                min="1"
-                className="flex-1"
-              />
-              <Select 
-                value={editData.unit} 
-                onValueChange={(value) => setEditData(prev => ({ ...prev, unit: value }))}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="minutes">Minutes</SelectItem>
-                  <SelectItem value="hours">Hours</SelectItem>
-                  <SelectItem value="pages">Pages</SelectItem>
-                  <SelectItem value="problems">Problems</SelectItem>
-                  <SelectItem value="exercises">Exercises</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="edit_has_target"
+                  checked={editData.has_target}
+                  onChange={(e) => setEditData(prev => ({ 
+                    ...prev, 
+                    has_target: e.target.checked,
+                    target_value: e.target.checked ? prev.target_value : null
+                  }))}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="edit_has_target" className="text-sm">Set a specific target</Label>
+              </div>
+              {editData.has_target && (
+                <div className="flex gap-2">
+                  <Input
+                    id="edit-target"
+                    type="number"
+                    value={editData.target_value || 30}
+                    onChange={(e) => setEditData(prev => ({ ...prev, target_value: parseInt(e.target.value) || 30 }))}
+                    min="1"
+                    className="flex-1"
+                  />
+                  <Select 
+                    value={editData.unit} 
+                    onValueChange={(value) => setEditData(prev => ({ ...prev, unit: value }))}
+                  >
+                    <SelectTrigger className="w-32">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minutes">Minutes</SelectItem>
+                      <SelectItem value="hours">Hours</SelectItem>
+                      <SelectItem value="pages">Pages</SelectItem>
+                      <SelectItem value="problems">Problems</SelectItem>
+                      <SelectItem value="exercises">Exercises</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
           
