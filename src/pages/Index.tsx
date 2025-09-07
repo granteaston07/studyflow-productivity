@@ -23,6 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
+import { useBackgroundTimer } from "@/hooks/useBackgroundTimer";
 // import { useStudyGoals } from "@/hooks/useStudyGoals";
 
 const Index = () => {
@@ -33,59 +34,24 @@ const Index = () => {
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
   // const { goals: studyGoals } = useStudyGoals();
   const [isReorderMode, setIsReorderMode] = useState(false);
-  // Timer state management at parent level
-  const [timerActive, setTimerActive] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [timerPaused, setTimerPaused] = useState(false);
-  const [selectedSessionDuration, setSelectedSessionDuration] = useState(25 * 60); // 25 minutes default
+  
+  // Timer state management using background timer hook
+  const {
+    timerActive,
+    timeRemaining,
+    timerPaused,
+    selectedSessionDuration,
+    startTimer,
+    updateTimerDuration,
+    pauseTimer,
+    resetTimer
+  } = useBackgroundTimer();
+  
   const [selectedSession, setSelectedSession] = useState<any>({ type: 'work', duration: 25, label: 'Homework' });
   const [studyMode, setStudyMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   
-  // Timer logic - runs independently of which component is displayed
-  useEffect(() => {
-    let interval: NodeJS.Timeout | null = null;
-
-    if (timerActive && !timerPaused && timeRemaining > 0) {
-      interval = setInterval(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && timerActive) {
-      setTimerActive(false);
-      // Timer completed - could trigger notification here
-    }
-
-    return () => {
-      if (interval) clearInterval(interval);
-    };
-  }, [timerActive, timerPaused, timeRemaining]);
-
-  // Timer control functions
-  const startTimer = (duration?: number) => {
-    if (duration && !timerActive) {
-      setTimeRemaining(duration);
-      setSelectedSessionDuration(duration);
-    }
-    setTimerActive(true);
-    setTimerPaused(false);
-  };
-
-  const updateTimerDuration = (duration: number) => {
-    if (!timerActive) {
-      setTimeRemaining(duration);
-      setSelectedSessionDuration(duration);
-    }
-  };
-
-  const pauseTimer = () => {
-    setTimerPaused(!timerPaused);
-  };
-
-  const resetTimer = () => {
-    setTimerActive(false);
-    setTimerPaused(false);
-    setTimeRemaining(selectedSessionDuration);
-  };
+  // Timer control functions are now handled by useBackgroundTimer hook
 
   const sensors = useSensors(
     useSensor(PointerSensor),
