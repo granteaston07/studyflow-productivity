@@ -67,7 +67,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
       <div className="relative z-10 text-center space-y-8 p-8 rounded-2xl bg-card/90 backdrop-blur-sm border shadow-2xl animate-scale-in max-w-md mx-4">
         {/* Party icon with animation */}
         <div className="relative">
-          <div className="w-24 h-24 mx-auto bg-gradient-to-r from-primary to-secondary rounded-full flex items-center justify-center animate-pulse">
+          <div className="w-24 h-24 mx-auto bg-primary rounded-full flex items-center justify-center animate-pulse">
             <PartyPopper className="w-12 h-12 text-primary-foreground" />
           </div>
           
@@ -78,7 +78,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
 
         {/* Success message */}
         <div className="space-y-4">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent animate-fade-in">
+          <h2 className="text-4xl font-bold text-primary animate-fade-in">
             🎉 Amazing Work! 🎉
           </h2>
           <p className="text-xl text-muted-foreground animate-fade-in" style={{ animationDelay: '0.2s' }}>
@@ -93,10 +93,10 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
         <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <Button 
             onClick={onReset}
-            className="flex-1 h-12 text-lg font-semibold bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 transition-all duration-300 hover:scale-105"
+            className="flex-1 h-12 text-lg font-semibold hover:scale-105 transition-all duration-300"
           >
             <RotateCcw className="w-5 h-5 mr-2" />
-            Start New Session
+            Continue Study Session
           </Button>
           <Button 
             variant="outline" 
@@ -110,7 +110,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
 
       {/* Background pattern */}
       <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-secondary to-primary animate-pulse" />
+        <div className="absolute inset-0 bg-primary animate-pulse" />
       </div>
     </div>
   );
