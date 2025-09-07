@@ -19,6 +19,7 @@ import { StudyMode } from "@/components/StudyMode";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { LearningInsightsDashboard } from "@/components/LearningInsightsDashboard";
+import TimerCelebration from "@/components/TimerCelebration";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
@@ -34,6 +35,7 @@ const Index = () => {
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
   // const { goals: studyGoals } = useStudyGoals();
   const [isReorderMode, setIsReorderMode] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
   
   // Timer state management using background timer hook
   const {
@@ -45,7 +47,12 @@ const Index = () => {
     updateTimerDuration,
     pauseTimer,
     resetTimer
-  } = useBackgroundTimer();
+  } = useBackgroundTimer(() => {
+    // Only show celebration in study mode
+    if (studyMode) {
+      setShowCelebration(true);
+    }
+  });
   
   const [selectedSession, setSelectedSession] = useState<any>({ type: 'work', duration: 25, label: 'Homework' });
   const [studyMode, setStudyMode] = useState(false);
@@ -179,16 +186,28 @@ const Index = () => {
   if (studyMode) {
     const selectedTaskTitle = selectedTaskId ? tasks.find(t => t.id === selectedTaskId)?.title : undefined;
     return (
-      <StudyMode
-        tasks={tasks}
-        timerActive={timerActive}
-        timeRemaining={timeRemaining}
-        timerPaused={timerPaused}
-        onExit={handleExitStudyMode}
-        onPauseTimer={pauseTimer}
-        onResetTimer={resetTimer}
-        selectedTaskTitle={selectedTaskTitle}
-      />
+      <>
+        <StudyMode
+          tasks={tasks}
+          timerActive={timerActive}
+          timeRemaining={timeRemaining}
+          timerPaused={timerPaused}
+          onExit={handleExitStudyMode}
+          onPauseTimer={pauseTimer}
+          onResetTimer={resetTimer}
+          selectedTaskTitle={selectedTaskTitle}
+        />
+        
+        {/* Timer Celebration Overlay */}
+        <TimerCelebration
+          isVisible={showCelebration}
+          onDismiss={() => setShowCelebration(false)}
+          onReset={() => {
+            setShowCelebration(false);
+            resetTimer();
+          }}
+        />
+      </>
     );
   }
 

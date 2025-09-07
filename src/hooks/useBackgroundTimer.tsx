@@ -11,7 +11,7 @@ interface TimerState {
 
 const TIMER_STORAGE_KEY = 'studyflow_timer_state';
 
-export const useBackgroundTimer = () => {
+export const useBackgroundTimer = (onTimerComplete?: () => void) => {
   const [timerActive, setTimerActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(0);
   const [timerPaused, setTimerPaused] = useState(false);
@@ -109,12 +109,17 @@ export const useBackgroundTimer = () => {
       setTimerActive(false);
       saveTimerState({ isActive: false, isPaused: false });
       
-      // Show completion notification
-      toast({
-        title: "🎉 Timer Complete!",
-        description: "Your focus session has ended. Great work! Click reset to start a new session.",
-        duration: 0, // Persistent until dismissed
-      });
+      // Call the completion callback if provided
+      if (onTimerComplete) {
+        onTimerComplete();
+      } else {
+        // Show completion notification only if no callback is provided
+        toast({
+          title: "🎉 Timer Complete!",
+          description: "Your focus session has ended. Great work! Click reset to start a new session.",
+          duration: 0, // Persistent until dismissed
+        });
+      }
     }
 
     return () => {
