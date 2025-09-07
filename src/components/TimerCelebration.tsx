@@ -28,7 +28,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur-md animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/95 backdrop-blur-md animate-fade-in">
       {/* Confetti */}
       {confettiPieces.map((piece) => (
         <div
@@ -64,7 +64,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
       </div>
 
       {/* Main celebration content */}
-      <div className="relative z-10 text-center space-y-8 p-8 rounded-2xl bg-card/90 backdrop-blur-sm border shadow-2xl animate-scale-in max-w-md mx-4">
+      <div className="relative z-10 text-center space-y-8 p-8 rounded-2xl bg-card/90 backdrop-blur-sm border shadow-2xl animate-scale-in w-full max-w-md">
         {/* Party icon with animation */}
         <div className="relative">
           <div className="w-24 h-24 mx-auto bg-primary rounded-full flex items-center justify-center animate-pulse">
