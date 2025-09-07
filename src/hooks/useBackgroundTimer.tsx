@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { toast } from "@/hooks/use-toast";
 
 interface TimerState {
   isActive: boolean;
@@ -107,6 +108,13 @@ export const useBackgroundTimer = () => {
     } else if (timeRemaining === 0 && timerActive) {
       setTimerActive(false);
       saveTimerState({ isActive: false, isPaused: false });
+      
+      // Show completion notification
+      toast({
+        title: "🎉 Timer Complete!",
+        description: "Your focus session has ended. Great work! Click reset to start a new session.",
+        duration: 0, // Persistent until dismissed
+      });
     }
 
     return () => {
