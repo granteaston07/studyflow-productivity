@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { BarChart3, CheckCircle2, Zap, Clock, TrendingUp } from 'lucide-react';
-import { format, subDays } from 'date-fns';
+import { useStudyStreak } from '@/hooks/useStudyStreak';
 
 interface AnalyticsDashboardProps {
   tasks: Task[];
@@ -13,6 +13,7 @@ interface AnalyticsDashboardProps {
 }
 
 export const AnalyticsDashboard = ({ tasks, studyGoals }: AnalyticsDashboardProps) => {
+  const { streak } = useStudyStreak();
   const analytics = useMemo(() => {
     const now = new Date();
     
@@ -23,24 +24,8 @@ export const AnalyticsDashboard = ({ tasks, studyGoals }: AnalyticsDashboardProp
     const overdueTasks = tasks.filter(t => !t.completed && t.dueDate && t.dueDate < now).length;
     const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     
-    // Study streak calculation
-    const today = format(now, 'yyyy-MM-dd');
-    let currentStreak = 0;
-    let streakDate = now;
-    
-    while (currentStreak < 30) { // Limit to prevent infinite loop
-      const dateStr = format(streakDate, 'yyyy-MM-dd');
-      const hasGoalCompleted = studyGoals.some(goal => 
-        goal.completed_dates.includes(dateStr)
-      );
-      
-      if (hasGoalCompleted) {
-        currentStreak++;
-        streakDate = subDays(streakDate, 1);
-      } else {
-        break;
-      }
-    }
+    // Get current streak from database
+    const currentStreak = streak?.current_streak || 0;
     
     // Productivity score (simplified)
     const productivityScore = Math.min(100, Math.round(
@@ -57,7 +42,7 @@ export const AnalyticsDashboard = ({ tasks, studyGoals }: AnalyticsDashboardProp
       currentStreak,
       productivityScore,
     };
-  }, [tasks, studyGoals]);
+  }, [tasks, studyGoals, streak]);
 
   return (
     <div className="space-y-6">

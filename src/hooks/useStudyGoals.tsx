@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -14,6 +15,7 @@ export interface StudyGoal extends StudyCalendarGoalRow {
 export const useStudyGoals = () => {
   const [goals, setGoals] = useState<StudyGoal[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const { toast } = useToast();
 
   const fetchGoals = async () => {
@@ -180,7 +182,7 @@ export const useStudyGoals = () => {
 
   const toggleGoalCompletion = async (id: string, date: string) => {
     const goal = goals.find(g => g.id === id);
-    if (!goal) return;
+    if (!goal || !user) return;
 
     const isCompleted = goal.completed_dates.includes(date);
     const newCompletedDates = isCompleted 
@@ -188,6 +190,19 @@ export const useStudyGoals = () => {
       : [...goal.completed_dates, date];
 
     await updateGoal(id, { completed_dates: newCompletedDates });
+
+    // If marking as completed and it's today's date, update streak
+    const today = new Date().toISOString().split('T')[0];
+    if (!isCompleted && date === today) {
+      try {
+        await supabase.rpc('update_study_streak', {
+          p_user_id: user.id,
+          p_streak_type: 'daily_study'
+        });
+      } catch (error) {
+        console.error('Error updating study streak:', error);
+      }
+    }
   };
 
   const clearAllGoals = async () => {
