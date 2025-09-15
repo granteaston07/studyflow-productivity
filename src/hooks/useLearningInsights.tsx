@@ -48,11 +48,12 @@ export function useLearningInsights() {
       const { data: feedback, error: feedbackError } = await supabase
         .from('task_feedback')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
       if (feedbackError) throw feedbackError;
 
-      // Process insights
+      // Process insights with more sophisticated analysis
       const subjectInsights = new Map<string, LearningInsight>();
       const grouped: Record<string, any[]> = {};
 
@@ -66,18 +67,76 @@ export function useLearningInsights() {
 
         if (existing) {
           const totalTasks = existing.totalTasks + 1;
+          const allDifficulties = grouped[subject].map(f => f.difficulty_rating);
+          const allTimes = grouped[subject].map(f => f.time_taken_minutes);
+          
+          // Calculate weighted averages and trends
+          const recentWeight = 0.7; // Give more weight to recent tasks
+          const olderWeight = 0.3;
+          
+          const recentTasks = allDifficulties.slice(0, Math.min(5, totalTasks));
+          const olderTasks = allDifficulties.slice(5);
+          
+          const recentAvgDifficulty = recentTasks.reduce((a, b) => a + b, 0) / recentTasks.length;
+          const olderAvgDifficulty = olderTasks.length > 0 ? olderTasks.reduce((a, b) => a + b, 0) / olderTasks.length : recentAvgDifficulty;
+          
+          // Calculate difficulty trend
+          let difficultyTrend: 'improving' | 'stable' | 'challenging' = 'stable';
+          if (recentTasks.length >= 3 && olderTasks.length >= 2) {
+            const improvement = olderAvgDifficulty - recentAvgDifficulty;
+            if (improvement > 1.5) difficultyTrend = 'improving';
+            else if (improvement < -1.5) difficultyTrend = 'challenging';
+          }
+          
+          // Weighted difficulty calculation
+          const weightedDifficulty = totalTasks <= 5 
+            ? recentAvgDifficulty
+            : (recentAvgDifficulty * recentWeight + olderAvgDifficulty * olderWeight);
+          
+          // Apply curve adjustment based on sample size
+          let adjustedDifficulty = weightedDifficulty;
+          if (totalTasks >= 10) {
+            // For larger samples, apply statistical normalization
+            const variance = allDifficulties.reduce((acc, val) => acc + Math.pow(val - weightedDifficulty, 2), 0) / totalTasks;
+            const standardDev = Math.sqrt(variance);
+            
+            // Adjust based on consistency - more consistent = more reliable rating
+            if (standardDev < 1.5) {
+              // High consistency - trust the rating more
+              adjustedDifficulty = weightedDifficulty;
+            } else if (standardDev > 3) {
+              // High variance - moderate the extremes
+              adjustedDifficulty = weightedDifficulty * 0.85 + 5 * 0.15;
+            }
+          }
+          
+          // Apply subject-relative adjustment
+          const globalAvgDifficulty = feedback.reduce((sum, f) => sum + f.difficulty_rating, 0) / feedback.length;
+          const subjectComplexityFactor = Math.max(0.7, Math.min(1.3, adjustedDifficulty / globalAvgDifficulty));
+          
           subjectInsights.set(subject, {
             ...existing,
-            avgTimePerTask: (existing.avgTimePerTask * existing.totalTasks + item.time_taken_minutes) / totalTasks,
-            avgDifficulty: (existing.avgDifficulty * existing.totalTasks + item.difficulty_rating) / totalTasks,
+            avgTimePerTask: allTimes.reduce((a, b) => a + b, 0) / allTimes.length,
+            avgDifficulty: Math.max(1, Math.min(10, adjustedDifficulty * subjectComplexityFactor)),
             totalTasks,
+            difficultyTrend,
+            estimatedTimeForNewTask: Math.round(allTimes.slice(0, 3).reduce((a, b) => a + b, 0) / Math.min(3, allTimes.length))
           });
         } else {
+          // Initial difficulty with confidence adjustment
+          let initialDifficulty = item.difficulty_rating;
+          
+          // For single data points, add slight uncertainty
+          if (item.difficulty_rating === 5) {
+            initialDifficulty = 5.2; // Slight bias away from exact middle
+          }
+          
           subjectInsights.set(subject, {
             subject,
             avgTimePerTask: item.time_taken_minutes,
-            avgDifficulty: item.difficulty_rating,
+            avgDifficulty: initialDifficulty,
             totalTasks: 1,
+            estimatedTimeForNewTask: item.time_taken_minutes
           });
         }
       });

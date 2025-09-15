@@ -87,15 +87,150 @@ export function LearningInsightsDashboard() {
   };
 
   const getDifficultyColor = (difficulty: number) => {
-    if (difficulty <= 3) return 'text-green-600 bg-green-100';
-    if (difficulty <= 6) return 'text-yellow-600 bg-yellow-100';
+    if (difficulty <= 2.5) return 'text-emerald-600 bg-emerald-100';
+    if (difficulty <= 4) return 'text-green-600 bg-green-100';
+    if (difficulty <= 5.5) return 'text-blue-600 bg-blue-100';
+    if (difficulty <= 7) return 'text-yellow-600 bg-yellow-100';
+    if (difficulty <= 8.5) return 'text-orange-600 bg-orange-100';
     return 'text-red-600 bg-red-100';
   };
 
   const getDifficultyLabel = (difficulty: number) => {
-    if (difficulty <= 3) return 'Easy';
-    if (difficulty <= 6) return 'Moderate';
-    return 'Challenging';
+    if (difficulty <= 2.5) return 'Very Easy';
+    if (difficulty <= 4) return 'Easy';
+    if (difficulty <= 5.5) return 'Moderate';
+    if (difficulty <= 7) return 'Challenging';
+    if (difficulty <= 8.5) return 'Hard';
+    return 'Very Hard';
+  };
+
+  const getAdvancedInsights = (insight: any) => {
+    const insights = [];
+    
+    // Time-based insights
+    if (insight.avgTimePerTask > 90) {
+      insights.push({
+        type: 'time',
+        icon: '⏰',
+        title: 'Marathon Sessions',
+        description: `Your ${insight.subject} tasks average ${formatTime(insight.avgTimePerTask)}. Consider the Pomodoro technique to maintain focus.`,
+        priority: 'high'
+      });
+    } else if (insight.avgTimePerTask < 10) {
+      insights.push({
+        type: 'time',
+        icon: '⚡',
+        title: 'Speed Demon',
+        description: `Lightning fast at ${formatTime(insight.avgTimePerTask)} per task! Perfect for quick review sessions.`,
+        priority: 'medium'
+      });
+    } else if (insight.avgTimePerTask > 45 && insight.avgTimePerTask <= 90) {
+      insights.push({
+        type: 'time',
+        icon: '🎯',
+        title: 'Focused Sessions',
+        description: `Great balance with ${formatTime(insight.avgTimePerTask)} sessions. This is your sweet spot for deep work.`,
+        priority: 'low'
+      });
+    }
+
+    // Difficulty-based insights with more granular analysis
+    if (insight.avgDifficulty >= 8.5) {
+      insights.push({
+        type: 'difficulty',
+        icon: '🔥',
+        title: 'Master Challenge',
+        description: `${insight.subject} pushes your limits! Break complex topics into smaller chunks and celebrate small wins.`,
+        priority: 'high'
+      });
+    } else if (insight.avgDifficulty >= 7) {
+      insights.push({
+        type: 'difficulty',
+        icon: '💪',
+        title: 'Growth Zone',
+        description: `${insight.subject} is challenging but manageable. You're building real expertise here!`,
+        priority: 'medium'
+      });
+    } else if (insight.avgDifficulty <= 2.5) {
+      insights.push({
+        type: 'difficulty',
+        icon: '🌟',
+        title: 'Natural Talent',
+        description: `${insight.subject} feels effortless to you! Use this confidence to tackle harder subjects.`,
+        priority: 'medium'
+      });
+    } else if (insight.avgDifficulty >= 5.5 && insight.avgDifficulty < 7) {
+      insights.push({
+        type: 'difficulty',
+        icon: '⚖️',
+        title: 'Balanced Challenge',
+        description: `Perfect difficulty level for sustained learning. You're in the optimal learning zone!`,
+        priority: 'low'
+      });
+    }
+
+    // Trend-based insights
+    if (insight.difficultyTrend === 'improving') {
+      insights.push({
+        type: 'trend',
+        icon: '📈',
+        title: 'Getting Easier',
+        description: `You're mastering ${insight.subject}! Tasks that once felt hard now seem manageable.`,
+        priority: 'high'
+      });
+    } else if (insight.difficultyTrend === 'challenging') {
+      insights.push({
+        type: 'trend',
+        icon: '📊',
+        title: 'Increasing Complexity',
+        description: `Recent ${insight.subject} tasks are getting harder. You're tackling more advanced concepts!`,
+        priority: 'medium'
+      });
+    }
+
+    // Volume-based insights
+    if (insight.totalTasks >= 20) {
+      insights.push({
+        type: 'volume',
+        icon: '🏆',
+        title: 'Dedication Master',
+        description: `${insight.totalTasks} tasks completed! Your consistency in ${insight.subject} is paying off.`,
+        priority: 'high'
+      });
+    } else if (insight.totalTasks >= 10) {
+      insights.push({
+        type: 'volume',
+        icon: '🔄',
+        title: 'Building Momentum',
+        description: `Strong habit forming with ${insight.totalTasks} tasks. Keep this rhythm going!`,
+        priority: 'medium'
+      });
+    } else if (insight.totalTasks >= 5) {
+      insights.push({
+        type: 'volume',
+        icon: '🌱',
+        title: 'Good Start',
+        description: `${insight.totalTasks} tasks show you're building familiarity with ${insight.subject}.`,
+        priority: 'low'
+      });
+    }
+
+    // Efficiency insights
+    const efficiency = insight.totalTasks / Math.max(1, insight.avgTimePerTask / 60);
+    if (efficiency > 2) {
+      insights.push({
+        type: 'efficiency',
+        icon: '🚀',
+        title: 'High Efficiency',
+        description: `You complete ${insight.subject} tasks with impressive speed and consistency!`,
+        priority: 'medium'
+      });
+    }
+
+    return insights.sort((a, b) => {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }).slice(0, 3); // Show top 3 insights
   };
 
   return (
@@ -194,38 +329,44 @@ export function LearningInsightsDashboard() {
                     </div>
                   </div>
 
-                  {/* AI Insights Section */}
+                  {/* Advanced AI Insights Section */}
                   <div className="border-t border-primary/10 pt-3">
                     <div className="flex items-center gap-2 mb-3">
                       <div className="p-1.5 rounded-md bg-gradient-to-br from-ai-primary/15 to-ai-secondary/15">
                         <Brain className="h-3 w-3 text-ai-primary" />
                       </div>
-                      <h4 className="text-sm font-medium ai-gradient-text">AI Insights</h4>
+                      <h4 className="text-sm font-medium ai-gradient-text">AI Analysis</h4>
+                      {insight.difficultyTrend && (
+                        <Badge variant="outline" className="text-xs ml-auto">
+                          {insight.difficultyTrend === 'improving' ? '📈 Improving' : 
+                           insight.difficultyTrend === 'challenging' ? '📊 Getting Harder' : 
+                           '📊 Stable'}
+                        </Badge>
+                      )}
                     </div>
                     <div className="space-y-2 text-sm">
-                      {insight.avgTimePerTask > 60 && (
-                        <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
-                          <span className="text-ai-primary font-medium">📈 Long Study Sessions:</span> You typically spend {formatTime(insight.avgTimePerTask)} per task. Consider breaking complex tasks into smaller parts.
+                      {getAdvancedInsights(insight).map((aiInsight, idx) => (
+                        <div 
+                          key={idx}
+                          className={`p-2.5 rounded-md border transition-all duration-200 hover:shadow-sm ${
+                            aiInsight.priority === 'high' 
+                              ? 'bg-gradient-to-r from-ai-primary/15 to-ai-secondary/15 border-ai-primary/30' :
+                            aiInsight.priority === 'medium'
+                              ? 'bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 border-ai-primary/20' :
+                              'bg-gradient-to-r from-ai-primary/5 to-ai-secondary/5 border-ai-primary/10'
+                          }`}
+                        >
+                          <span className="text-ai-primary font-medium">
+                            {aiInsight.icon} {aiInsight.title}:
+                          </span>{' '}
+                          <span className="text-foreground/90">{aiInsight.description}</span>
                         </div>
-                      )}
-                      {insight.avgTimePerTask < 15 && (
-                        <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
-                          <span className="text-ai-primary font-medium">⚡ Quick Tasks:</span> You complete {insight.subject} tasks efficiently in {formatTime(insight.avgTimePerTask)}. Perfect for study breaks!
-                        </div>
-                      )}
-                      {insight.avgDifficulty > 7 && (
-                        <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
-                          <span className="text-ai-primary font-medium">🎯 Challenge Subject:</span> {insight.subject} is your most challenging subject. Consider extra preparation time.
-                        </div>
-                      )}
-                      {insight.avgDifficulty < 4 && (
-                        <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
-                          <span className="text-ai-primary font-medium">✨ Strength Area:</span> You find {insight.subject} relatively easy! Use this confidence for tackling harder subjects.
-                        </div>
-                      )}
-                      {insight.totalTasks >= 10 && (
-                        <div className="p-2 bg-gradient-to-r from-ai-primary/10 to-ai-secondary/10 rounded-md border border-ai-primary/20">
-                          <span className="text-ai-primary font-medium">🔥 Consistent Practice:</span> Great job staying consistent with {insight.totalTasks} completed tasks in {insight.subject}!
+                      ))}
+                      
+                      {/* Estimated time for next task */}
+                      {insight.estimatedTimeForNewTask && (
+                        <div className="p-2 bg-gradient-to-r from-muted/10 to-accent/5 rounded-md border border-border/20">
+                          <span className="text-muted-foreground font-medium">⏱️ Next Task Estimate:</span> {formatTime(insight.estimatedTimeForNewTask)} based on recent patterns.
                         </div>
                       )}
                     </div>
