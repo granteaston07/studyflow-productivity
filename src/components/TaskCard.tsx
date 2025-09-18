@@ -201,29 +201,22 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
               {!task.completed && !isReorderMode ? (
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 hover:bg-transparent"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className={cn(
-                        "w-3 h-3 rounded-full",
-                        getPriorityColor(task.priority)
-                      )} />
-                    </Button>
+                    <div className={cn(
+                      "w-2 h-2 rounded-full shrink-0 cursor-pointer hover:scale-125 transition-transform",
+                      getPriorityColor(task.priority)
+                    )} />
                   </PopoverTrigger>
-                  <PopoverContent className="w-48 p-2" align="start">
+                  <PopoverContent className="w-48 p-3 z-50 bg-background border shadow-lg" align="start">
                     <div className="space-y-2">
                       <div className="text-sm font-medium">Priority</div>
                       <Select 
                         value={task.priority} 
                         onValueChange={(value: Task['priority']) => onUpdatePriority?.(task.id, value)}
                       >
-                        <SelectTrigger className="w-full">
+                        <SelectTrigger className="w-full bg-background">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent className="bg-background border shadow-lg z-50">
                           <SelectItem value="high">
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-error" />
