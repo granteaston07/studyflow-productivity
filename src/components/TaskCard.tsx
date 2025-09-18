@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -30,7 +30,7 @@ interface TaskCardProps {
 }
 
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, isGuest = false, selected = false, onSelect, isReorderMode = false }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, onUpdatePriority, isGuest = false, selected = false, onSelect, isReorderMode = false }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUndoing, setIsUndoing] = useState(false);
@@ -198,10 +198,61 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
         >
           <div className="flex items-start justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className={cn(
-                "w-2 h-2 rounded-full shrink-0",
-                getPriorityColor(task.priority)
-              )} />
+              {!task.completed && !isReorderMode ? (
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 w-6 p-0 hover:bg-transparent"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className={cn(
+                        "w-3 h-3 rounded-full",
+                        getPriorityColor(task.priority)
+                      )} />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-48 p-2" align="start">
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium">Priority</div>
+                      <Select 
+                        value={task.priority} 
+                        onValueChange={(value: Task['priority']) => onUpdatePriority?.(task.id, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="high">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-error" />
+                              High
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="medium">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-warning" />
+                              Medium
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="low">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-success" />
+                              Low
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              ) : (
+                <div className={cn(
+                  "w-2 h-2 rounded-full shrink-0",
+                  getPriorityColor(task.priority)
+                )} />
+              )}
               {isEditingTitle ? (
                 <div className="flex items-center gap-2">
                   <Input
