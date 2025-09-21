@@ -488,7 +488,7 @@ const Index = () => {
               <CalendarDays className="h-5 w-5 text-primary" />
               <h2 className="text-xl font-semibold text-foreground">Study Goals & Calendar</h2>
             </div>
-            <StudyCalendar />
+            <StudyCalendar tasks={tasks} />
           </section>
 
           {/* Footer with Legal Info */}

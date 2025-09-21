@@ -16,8 +16,14 @@ import { format, isSameDay, getDay, getDate, isToday, isTomorrow, isYesterday } 
 import { useStudyGoals, StudyGoal } from "@/hooks/useStudyGoals";
 import { EditStudyGoalDialog } from "@/components/EditStudyGoalDialog";
 import { useToast } from "@/hooks/use-toast";
+import { SmartTaskScheduler } from "@/components/SmartTaskScheduler";
+import { Task } from "@/hooks/useTasks";
 
-export const StudyCalendar = () => {
+interface StudyCalendarProps {
+  tasks?: Task[];
+}
+
+export const StudyCalendar = ({ tasks = [] }: StudyCalendarProps) => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(() => {
     const stored = localStorage.getItem('studyCalendar-selectedDate');
     return stored ? new Date(stored) : new Date();
@@ -609,6 +615,9 @@ export const StudyCalendar = () => {
             </div>
           )}
         </CardContent>
+        <div className="px-6 pb-6">
+          <SmartTaskScheduler tasks={tasks} />
+        </div>
       </Card>
 
       <EditStudyGoalDialog
