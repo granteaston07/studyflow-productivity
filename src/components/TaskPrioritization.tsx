@@ -419,10 +419,11 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
 
   // Get AI recommendations for incomplete tasks
   const incompleteTasks = tasks.filter(task => !task.completed);
+  const maxRecommendations = Math.max(5, Math.min(incompleteTasks.length, 15)); // Show 5-15 based on incomplete tasks
   const recommendations = incompleteTasks
     .map(analyzeTaskPriority)
     .sort((a, b) => b.score - a.score)
-    .slice(0, 5); // Top 5 recommendations
+    .slice(0, maxRecommendations);
 
   const getUrgencyColor = (level: AIRecommendation['urgencyLevel']) => {
     switch (level) {
