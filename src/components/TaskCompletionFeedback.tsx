@@ -20,7 +20,7 @@ interface TaskCompletionFeedbackProps {
 }
 
 export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletionFeedbackProps) {
-  const [timeTaken, setTimeTaken] = useState([50]); // Default to middle of first section (1 hour)
+  const [timeTaken, setTimeTaken] = useState([36]); // Default to 1 hour (60 minutes)
   const [difficulty, setDifficulty] = useState([50]); // Default difficulty 5 (out of 100)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
