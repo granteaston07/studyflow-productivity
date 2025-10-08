@@ -20,22 +20,34 @@ interface TaskCompletionFeedbackProps {
 }
 
 export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletionFeedbackProps) {
-  const [timeTaken, setTimeTaken] = useState([3]); // Default to index 3 = 1 hour
-  const [difficulty, setDifficulty] = useState([5]); // Default difficulty 5
+  const [timeTaken, setTimeTaken] = useState([60]); // Default to 60 minutes (1 hour)
+  const [difficulty, setDifficulty] = useState([50]); // Default difficulty 5 (out of 100)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
   console.log('TaskCompletionFeedback rendered:', { isOpen, user: !!user, task: task?.title });
 
-  const timeLabels = [
-    "5 min", "15 min", "30 min", "1 hour", "1.5 hours", 
-    "2 hours", "3 hours", "4 hours", "6 hours", "8+ hours"
-  ];
+  const getTimeLabel = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (hours === 0) {
+      return `${mins} min`;
+    } else if (mins === 0) {
+      return `${hours} ${hours === 1 ? 'hour' : 'hours'}`;
+    } else {
+      return `${hours}h ${mins}m`;
+    }
+  };
 
-  const getTimeInMinutes = (sliderValue: number) => {
-    const timeValues = [5, 15, 30, 60, 90, 120, 180, 240, 360, 480];
-    return timeValues[sliderValue];
+  const getDifficultyLabel = (value: number) => {
+    const difficulty = Math.round(value / 10);
+    if (difficulty <= 2) return "Very Easy";
+    if (difficulty <= 4) return "Easy";
+    if (difficulty <= 6) return "Medium";
+    if (difficulty <= 8) return "Hard";
+    return "Very Hard";
   };
 
   const handleSubmit = async () => {
@@ -66,8 +78,9 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
     console.log('Starting submission...');
     
     try {
-      const timeInMinutes = getTimeInMinutes(timeTaken[0]);
-      console.log('Time in minutes:', timeInMinutes, 'Difficulty:', difficulty[0]);
+      const timeInMinutes = timeTaken[0];
+      const difficultyRating = Math.round(difficulty[0] / 10); // Convert to 1-10 scale
+      console.log('Time in minutes:', timeInMinutes, 'Difficulty:', difficultyRating);
       
       // Extract keywords from task title and description
       const keywords = [
@@ -83,7 +96,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
           subject: task.subject,
           task_keywords: keywords,
           time_taken_minutes: timeInMinutes,
-          difficulty_rating: difficulty[0],
+          difficulty_rating: difficultyRating,
         });
 
       console.log('Database insert successful');
@@ -152,17 +165,17 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
                 <Slider
                   value={timeTaken}
                   onValueChange={setTimeTaken}
-                  max={9}
-                  min={0}
-                  step={1}
+                  max={480}
+                  min={5}
+                  step={5}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
                   <span>5 min</span>
-                  <span className="font-medium text-foreground">
-                    {timeLabels[timeTaken[0]]}
+                  <span className="font-medium text-foreground text-sm">
+                    {getTimeLabel(timeTaken[0])}
                   </span>
-                  <span>8+ hours</span>
+                  <span>8 hours</span>
                 </div>
               </div>
             </div>
@@ -176,17 +189,17 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
                 <Slider
                   value={difficulty}
                   onValueChange={setDifficulty}
-                  max={10}
-                  min={1}
+                  max={100}
+                  min={10}
                   step={1}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
-                  <span>1 (Easy)</span>
-                  <span className="font-medium text-foreground">
-                    {difficulty[0]}/10
+                  <span>Easy</span>
+                  <span className="font-medium text-foreground text-sm">
+                    {getDifficultyLabel(difficulty[0])} ({Math.round(difficulty[0] / 10)}/10)
                   </span>
-                  <span>10 (Very Hard)</span>
+                  <span>Very Hard</span>
                 </div>
               </div>
             </div>
