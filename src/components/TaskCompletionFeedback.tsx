@@ -20,7 +20,7 @@ interface TaskCompletionFeedbackProps {
 }
 
 export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletionFeedbackProps) {
-  const [timeTaken, setTimeTaken] = useState([60]); // Default to 60 minutes (1 hour)
+  const [timeTaken, setTimeTaken] = useState([50]); // Default to middle of first section (1 hour)
   const [difficulty, setDifficulty] = useState([50]); // Default difficulty 5 (out of 100)
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
@@ -28,7 +28,19 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
 
   console.log('TaskCompletionFeedback rendered:', { isOpen, user: !!user, task: task?.title });
 
-  const getTimeLabel = (minutes: number) => {
+  // Non-linear mapping: 0-75% of slider = 5-120 min, 75-100% = 120-480 min
+  const sliderToMinutes = (sliderValue: number): number => {
+    if (sliderValue <= 75) {
+      // First 75% covers 5 to 120 minutes (2 hours)
+      return Math.round(5 + (sliderValue / 75) * 115);
+    } else {
+      // Last 25% covers 120 to 480 minutes (2 to 8 hours)
+      return Math.round(120 + ((sliderValue - 75) / 25) * 360);
+    }
+  };
+
+  const getTimeLabel = (sliderValue: number) => {
+    const minutes = sliderToMinutes(sliderValue);
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
     
@@ -78,7 +90,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
     console.log('Starting submission...');
     
     try {
-      const timeInMinutes = timeTaken[0];
+      const timeInMinutes = sliderToMinutes(timeTaken[0]);
       const difficultyRating = Math.round(difficulty[0] / 10); // Convert to 1-10 scale
       console.log('Time in minutes:', timeInMinutes, 'Difficulty:', difficultyRating);
       
@@ -165,9 +177,9 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
                 <Slider
                   value={timeTaken}
                   onValueChange={setTimeTaken}
-                  max={480}
-                  min={5}
-                  step={5}
+                  max={100}
+                  min={0}
+                  step={1}
                   className="w-full"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-2">
