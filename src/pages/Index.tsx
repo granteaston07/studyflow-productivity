@@ -309,6 +309,7 @@ const Index = () => {
                 <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
               <div className="flex items-center gap-2">
+                <SubjectNameEditor />
                 <Button
                   variant="ghost"
                   size="sm"
