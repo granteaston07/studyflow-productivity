@@ -310,6 +310,33 @@ export type Database = {
         }
         Relationships: []
       }
+      subject_display_names: {
+        Row: {
+          actual_name: string
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          actual_name: string
+          created_at?: string
+          display_name: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          actual_name?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       suggestion_interactions: {
         Row: {
           created_at: string

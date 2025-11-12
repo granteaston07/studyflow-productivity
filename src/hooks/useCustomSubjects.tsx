@@ -4,6 +4,7 @@ import { useAuth } from './useAuth';
 
 export function useCustomSubjects() {
   const [customSubjects, setCustomSubjects] = useState<string[]>([]);
+  const [displayNames, setDisplayNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
@@ -32,9 +33,22 @@ export function useCustomSubjects() {
       if (error) throw error;
 
       setCustomSubjects(data?.map(item => item.name) || []);
+      
+      // Fetch display names
+      const { data: displayData } = await supabase
+        .from('subject_display_names')
+        .select('actual_name, display_name')
+        .eq('user_id', user.id);
+      
+      const namesMap: Record<string, string> = {};
+      displayData?.forEach(item => {
+        namesMap[item.actual_name] = item.display_name;
+      });
+      setDisplayNames(namesMap);
     } catch (error) {
       console.error('Error fetching custom subjects:', error);
       setCustomSubjects([]);
+      setDisplayNames({});
     } finally {
       setLoading(false);
     }
@@ -93,6 +107,34 @@ export function useCustomSubjects() {
     fetchCustomSubjects();
   }, [user]);
 
+  const updateDisplayName = async (actualName: string, displayName: string) => {
+    if (!user) return false;
+
+    try {
+      const { error } = await supabase
+        .from('subject_display_names')
+        .upsert({
+          user_id: user.id,
+          actual_name: actualName,
+          display_name: displayName
+        }, {
+          onConflict: 'user_id,actual_name'
+        });
+
+      if (error) throw error;
+
+      setDisplayNames(prev => ({ ...prev, [actualName]: displayName }));
+      return true;
+    } catch (error) {
+      console.error('Error updating display name:', error);
+      return false;
+    }
+  };
+
+  const getDisplayName = (actualName: string) => {
+    return displayNames[actualName] || actualName;
+  };
+
   const allSubjects = [...defaultSubjects, ...customSubjects];
 
   return {
@@ -102,6 +144,9 @@ export function useCustomSubjects() {
     loading,
     addCustomSubject,
     deleteCustomSubject,
+    updateDisplayName,
+    getDisplayName,
+    displayNames,
     refetch: fetchCustomSubjects
   };
 }

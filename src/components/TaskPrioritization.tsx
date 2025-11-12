@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Task } from "./TaskCard";
 import { useLearningInsights } from "@/hooks/useLearningInsights";
+import { useCustomSubjects } from "@/hooks/useCustomSubjects";
 
 interface TaskPrioritizationProps {
   tasks: Task[];
@@ -21,6 +22,7 @@ interface AIRecommendation {
 export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const { getTimeEstimateForTask, getDifficultyEstimate } = useLearningInsights();
+  const { getDisplayName } = useCustomSubjects();
   
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -240,7 +242,7 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     if (userDiff !== null) {
       score += (userDiff - 5) * 4; // center around neutral 5/10
       if (task.subject) {
-        reasons.push(`Personalized: you rate ${task.subject} ~${userDiff}/10`);
+        reasons.push(`Personalized: you rate ${getDisplayName(task.subject)} ~${userDiff}/10`);
       } else {
         reasons.push("Personalized difficulty insights applied");
       }
@@ -337,7 +339,7 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     if (tasksWithSameSubject > 1 && task.subject) {
       score += 5;
       const batchMessages = [
-        `📚 Batch ${tasksWithSameSubject - 1} ${task.subject} tasks together`,
+        `📚 Batch ${tasksWithSameSubject - 1} ${getDisplayName(task.subject)} tasks together`,
         `🎯 Group subject work - ${tasksWithSameSubject} tasks total`,
         `📋 Subject clustering - ${tasksWithSameSubject - 1} related tasks`,
         `🔗 Efficient batching with ${tasksWithSameSubject - 1} similar tasks`
@@ -508,7 +510,7 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
                           
                           {rec.task.subject && (
                             <p className="text-xs text-muted-foreground mb-2">
-                              {rec.task.subject} • Est. {rec.estimatedDuration}
+                              {getDisplayName(rec.task.subject)} • Est. {rec.estimatedDuration}
                             </p>
                           )}
                         </div>

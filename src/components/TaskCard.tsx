@@ -12,6 +12,7 @@ import { cn } from "@/lib/utils";
 import { Task } from "@/hooks/useTasks";
 import { useState, useEffect } from "react";
 import { TaskCompletionFeedback } from "./TaskCompletionFeedback";
+import { useCustomSubjects } from "@/hooks/useCustomSubjects";
 
 export type { Task } from "@/hooks/useTasks";
 
@@ -38,6 +39,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [titleInput, setTitleInput] = useState(task.title);
+  const { getDisplayName } = useCustomSubjects();
 
   useEffect(() => {
     setTitleInput(task.title);
@@ -363,7 +365,7 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             {task.subject && (
               <span className="bg-primary-light text-primary px-2 py-1 rounded-md text-xs font-medium">
-                {task.subject}
+                {getDisplayName(task.subject)}
               </span>
             )}
             {task.dueDate && (

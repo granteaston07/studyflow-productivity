@@ -20,6 +20,7 @@ import { StudyCalendar } from "@/components/StudyCalendar";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { LearningInsightsDashboard } from "@/components/LearningInsightsDashboard";
 import TimerCelebration from "@/components/TimerCelebration";
+import { SubjectNameEditor } from "@/components/SubjectNameEditor";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
@@ -308,6 +309,7 @@ const Index = () => {
                 <h3 className="text-xl font-semibold text-foreground">Your Tasks</h3>
               </div>
               <div className="flex items-center gap-2">
+                <SubjectNameEditor />
                 <Button
                   variant="ghost"
                   size="sm"

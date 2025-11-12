@@ -26,7 +26,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customSubjectInput, setCustomSubjectInput] = useState('');
-  const { allSubjects, addCustomSubject } = useCustomSubjects();
+  const { allSubjects, addCustomSubject, getDisplayName } = useCustomSubjects();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,7 +114,7 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                     <SelectItem key={subject} value={subject}>
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4" />
-                        {subject}
+                        {getDisplayName(subject)}
                       </div>
                     </SelectItem>
                   ))}

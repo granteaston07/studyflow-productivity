@@ -7,6 +7,7 @@ import { Clock, Target, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useCustomSubjects } from "@/hooks/useCustomSubjects";
 
 interface TaskCompletionFeedbackProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { getDisplayName } = useCustomSubjects();
 
   console.log('TaskCompletionFeedback rendered:', { isOpen, user: !!user, task: task?.title });
 
@@ -162,7 +164,7 @@ export function TaskCompletionFeedback({ isOpen, onClose, task }: TaskCompletion
             <div className="font-medium text-sm">{task.title}</div>
             {task.subject && (
               <div className="text-xs text-muted-foreground mt-1">
-                Subject: {task.subject}
+                Subject: {getDisplayName(task.subject)}
               </div>
             )}
           </Card>
