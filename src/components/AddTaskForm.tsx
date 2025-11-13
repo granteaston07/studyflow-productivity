@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Calendar, BookOpen } from "lucide-react";
+import { Plus, Calendar, BookOpen, Pencil } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,9 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Separator } from "@/components/ui/separator";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { format } from "date-fns";
 import { Task } from "./TaskCard";
 import { useCustomSubjects } from "@/hooks/useCustomSubjects";
+import { toast } from "sonner";
 
 interface AddTaskFormProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => void;
@@ -26,7 +29,10 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
   
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customSubjectInput, setCustomSubjectInput] = useState('');
-  const { allSubjects, addCustomSubject, getDisplayName } = useCustomSubjects();
+  const [editSheetOpen, setEditSheetOpen] = useState(false);
+  const [editingSubject, setEditingSubject] = useState<string | null>(null);
+  const [newDisplayName, setNewDisplayName] = useState('');
+  const { allSubjects, addCustomSubject, getDisplayName, updateDisplayName } = useCustomSubjects();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +74,27 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
         setShowCustomInput(false);
       }
     }
+  };
+
+  const handleSaveDisplayName = async (actualName: string) => {
+    if (!newDisplayName.trim()) {
+      toast.error('Display name cannot be empty');
+      return;
+    }
+
+    const success = await updateDisplayName(actualName, newDisplayName.trim());
+    if (success) {
+      toast.success('Subject display name updated');
+      setEditingSubject(null);
+      setNewDisplayName('');
+    } else {
+      toast.error('Failed to update display name');
+    }
+  };
+
+  const startEditing = (subject: string) => {
+    setEditingSubject(subject);
+    setNewDisplayName(getDisplayName(subject));
   };
 
   return (
@@ -118,6 +145,17 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
                       </div>
                     </SelectItem>
                   ))}
+                  <Separator className="my-1" />
+                  <div 
+                    className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none hover:bg-accent hover:text-accent-foreground"
+                    onClick={() => setEditSheetOpen(true)}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Pencil className="h-4 w-4" />
+                      Edit Subject Names
+                    </div>
+                  </div>
+                  <Separator className="my-1" />
                   <SelectItem value="add-custom">
                     <div className="flex items-center gap-2">
                       <Plus className="h-4 w-4" />
@@ -232,6 +270,59 @@ export function AddTaskForm({ onAddTask }: AddTaskFormProps) {
           </Button>
         </form>
       </CardContent>
+
+      <Sheet open={editSheetOpen} onOpenChange={setEditSheetOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Edit Subject Display Names</SheetTitle>
+            <SheetDescription>
+              Change how subjects appear without affecting saved data
+            </SheetDescription>
+          </SheetHeader>
+          <div className="space-y-4 mt-6">
+            {allSubjects.map((subject) => (
+              <div key={subject} className="space-y-2">
+                <Label className="text-sm text-muted-foreground">
+                  Database: {subject}
+                </Label>
+                {editingSubject === subject ? (
+                  <div className="flex gap-2">
+                    <Input
+                      value={newDisplayName}
+                      onChange={(e) => setNewDisplayName(e.target.value)}
+                      placeholder="Display name"
+                    />
+                    <Button onClick={() => handleSaveDisplayName(subject)} size="sm">
+                      Save
+                    </Button>
+                    <Button 
+                      onClick={() => {
+                        setEditingSubject(null);
+                        setNewDisplayName('');
+                      }} 
+                      variant="outline" 
+                      size="sm"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between p-2 border rounded-md">
+                    <span className="font-medium">{getDisplayName(subject)}</span>
+                    <Button 
+                      onClick={() => startEditing(subject)} 
+                      variant="ghost" 
+                      size="sm"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </SheetContent>
+      </Sheet>
     </Card>
   );
 }
