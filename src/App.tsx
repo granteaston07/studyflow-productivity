@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { CookieConsent } from "@/components/CookieConsent";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Landing from "./pages/Landing";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          <CookieConsent />
           <Analytics />
         </TooltipProvider>
       </ThemeProvider>
