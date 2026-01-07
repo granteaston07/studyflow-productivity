@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
@@ -529,7 +529,7 @@ const Index = () => {
                   <p>
                     By using StudyFlow, you agree to our Terms of Service and Privacy Policy. 
                   </p>
-                  <p className="mt-2">
+                <p className="mt-2">
                     For help or feedback, email{' '}
                     <a 
                       href="mailto:contact.studyflow@gmail.org" 
@@ -538,6 +538,16 @@ const Index = () => {
                       contact.studyflow@gmail.org
                     </a>
                   </p>
+                </div>
+                
+                <div className="flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
+                  <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                  <span>•</span>
+                  <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                  <span>•</span>
+                  <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
+                  <span>•</span>
+                  <Link to="/data-protection" className="hover:text-foreground transition-colors">Data Protection</Link>
                 </div>
                 
                 <div className="text-xs text-muted-foreground/80">
