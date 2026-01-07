@@ -344,40 +344,16 @@ export default function Landing() {
           <p className="text-xs text-muted-foreground mb-4">
             Created by Grant Easton • Built for Students • Made in 2025
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-            <button 
-              onClick={() => navigate('/privacy')}
-              className="hover:text-foreground transition-colors"
-            >
-              Privacy Policy
-            </button>
+          <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+            <button className="hover:text-foreground transition-colors">Privacy Policy</button>
             <span>•</span>
-            <button 
-              onClick={() => navigate('/terms')}
-              className="hover:text-foreground transition-colors"
-            >
-              Terms of Service
-            </button>
-            <span>•</span>
-            <button 
-              onClick={() => navigate('/cookies')}
-              className="hover:text-foreground transition-colors"
-            >
-              Cookie Policy
-            </button>
-            <span>•</span>
-            <button 
-              onClick={() => navigate('/data-protection')}
-              className="hover:text-foreground transition-colors"
-            >
-              Data Protection
-            </button>
+            <button className="hover:text-foreground transition-colors">Terms of Service</button>
             <span>•</span>
             <button 
               onClick={() => navigate('/auth')}
               className="hover:text-foreground transition-colors"
             >
-              Sign In
+              Sign In to StudyFlow
             </button>
           </div>
         </div>
