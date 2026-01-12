@@ -1,93 +1,61 @@
-import { Settings } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { Settings, ChevronDown } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useWidgetPreferences, WidgetPreferences } from '@/hooks/useWidgetPreferences';
+import { cn } from '@/lib/utils';
 
-const widgetLabels: Record<keyof WidgetPreferences, { label: string; description: string }> = {
-  show_ai_prioritization: {
-    label: 'AI Task Prioritization',
-    description: 'Smart AI recommendations for task ordering',
-  },
-  show_progress_tracker: {
-    label: 'Progress Tracker',
-    description: 'Visual task completion statistics',
-  },
-  show_study_links: {
-    label: 'Study Links',
-    description: 'Quick access to your study resources',
-  },
-  show_quick_notes: {
-    label: 'Quick Notes',
-    description: 'Jot down quick notes and thoughts',
-  },
-  show_focus_timer: {
-    label: 'Focus Timer',
-    description: 'Pomodoro-style study timer',
-  },
-  show_analytics_dashboard: {
-    label: 'Analytics Dashboard',
-    description: 'Study performance analytics',
-  },
-  show_learning_insights: {
-    label: 'Learning Insights',
-    description: 'Personalized learning recommendations',
-  },
-  show_study_calendar: {
-    label: 'Study Calendar',
-    description: 'Calendar with study goals',
-  },
-  show_floating_status: {
-    label: 'Floating Status',
-    description: 'Compact task and timer status window',
-  },
+const widgetLabels: Record<keyof WidgetPreferences, { label: string }> = {
+  show_ai_prioritization: { label: 'AI Prioritization' },
+  show_progress_tracker: { label: 'Progress Tracker' },
+  show_study_links: { label: 'Study Links' },
+  show_quick_notes: { label: 'Quick Notes' },
+  show_focus_timer: { label: 'Focus Timer' },
+  show_analytics_dashboard: { label: 'Analytics' },
+  show_learning_insights: { label: 'Learning Insights' },
+  show_study_calendar: { label: 'Study Calendar' },
+  show_floating_status: { label: 'Floating Status' },
 };
 
 export function WidgetSettings() {
   const { preferences, loading, updatePreference } = useWidgetPreferences();
+  const [isOpen, setIsOpen] = useState(false);
 
-  if (loading) {
-    return null;
-  }
+  if (loading) return null;
 
   return (
-    <Card className="border-border/50">
-      <CardHeader className="pb-4">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Settings className="h-5 w-5 text-primary" />
-          Widget Preferences
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Toggle widgets on or off to customize your dashboard
-        </p>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {(Object.keys(widgetLabels) as Array<keyof WidgetPreferences>).map((key) => (
-            <div
-              key={key}
-              className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border border-border/30"
-            >
-              <div className="flex-1 min-w-0 mr-3">
-                <Label
-                  htmlFor={key}
-                  className="text-sm font-medium cursor-pointer"
-                >
+    <div className="flex flex-col items-center">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setIsOpen(!isOpen)}
+        className="text-muted-foreground hover:text-foreground text-xs gap-1.5"
+      >
+        <Settings className="h-3.5 w-3.5" />
+        Widget Preferences
+        <ChevronDown className={cn("h-3 w-3 transition-transform", isOpen && "rotate-180")} />
+      </Button>
+      
+      {isOpen && (
+        <div className="mt-3 p-4 rounded-lg bg-card border border-border shadow-lg z-50 w-full max-w-2xl">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {(Object.keys(widgetLabels) as Array<keyof WidgetPreferences>).map((key) => (
+              <div key={key} className="flex items-center justify-between gap-2 text-sm">
+                <Label htmlFor={key} className="text-xs cursor-pointer">
                   {widgetLabels[key].label}
                 </Label>
-                <p className="text-xs text-muted-foreground truncate">
-                  {widgetLabels[key].description}
-                </p>
+                <Switch
+                  id={key}
+                  checked={preferences[key]}
+                  onCheckedChange={(checked) => updatePreference(key, checked)}
+                  className="scale-75"
+                />
               </div>
-              <Switch
-                id={key}
-                checked={preferences[key]}
-                onCheckedChange={(checked) => updatePreference(key, checked)}
-              />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+    </div>
   );
 }
