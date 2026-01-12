@@ -531,6 +531,54 @@ export type Database = {
         }
         Relationships: []
       }
+      widget_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          show_ai_prioritization: boolean
+          show_analytics_dashboard: boolean
+          show_floating_status: boolean
+          show_focus_timer: boolean
+          show_learning_insights: boolean
+          show_progress_tracker: boolean
+          show_quick_notes: boolean
+          show_study_calendar: boolean
+          show_study_links: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          show_ai_prioritization?: boolean
+          show_analytics_dashboard?: boolean
+          show_floating_status?: boolean
+          show_focus_timer?: boolean
+          show_learning_insights?: boolean
+          show_progress_tracker?: boolean
+          show_quick_notes?: boolean
+          show_study_calendar?: boolean
+          show_study_links?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          show_ai_prioritization?: boolean
+          show_analytics_dashboard?: boolean
+          show_floating_status?: boolean
+          show_focus_timer?: boolean
+          show_learning_insights?: boolean
+          show_progress_tracker?: boolean
+          show_quick_notes?: boolean
+          show_study_calendar?: boolean
+          show_study_links?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

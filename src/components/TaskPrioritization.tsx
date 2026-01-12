@@ -46,11 +46,13 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
     const currentHour = now.getHours();
     const dayOfWeek = now.getDay(); // 0 = Sunday, 6 = Saturday
     
-    // Advanced due date analysis with exponential urgency curve and varied messaging
+    // Advanced due date analysis with day-level comparison (not overdue if same day)
     if (task.dueDate) {
       const dueDate = new Date(task.dueDate);
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const dueDateDay = new Date(dueDate.getFullYear(), dueDate.getMonth(), dueDate.getDate());
       const hoursUntilDue = (dueDate.getTime() - now.getTime()) / (1000 * 60 * 60);
-      const daysUntilDue = hoursUntilDue / 24;
+      const daysUntilDue = (dueDateDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24);
       
       const overdueMessages = [
         "🚨 Critical overdue task needs immediate attention",
@@ -61,8 +63,8 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
       
       const todayMessages = [
         "🔥 Due today - schedule immediately",
-        "⭐ Today's deadline approaching fast",
-        "🎯 Critical task due before midnight",
+        "⭐ Today's deadline approaching",
+        "🎯 Complete this task today",
         "⚡ Deadline today - high focus needed"
       ];
       
@@ -73,24 +75,28 @@ export function TaskPrioritization({ tasks }: TaskPrioritizationProps) {
         "⏳ 24-hour deadline window"
       ];
       
-      if (hoursUntilDue < 0) {
-        const hoursOverdue = Math.abs(hoursUntilDue);
-        score += 100 + Math.min(hoursOverdue * 2, 50);
+      // Only mark as overdue if the due date is BEFORE today (day-level comparison)
+      if (daysUntilDue < 0) {
+        const daysOverdue = Math.abs(daysUntilDue);
+        score += 100 + Math.min(daysOverdue * 10, 50);
         const messageIndex = Math.floor(Math.random() * overdueMessages.length);
         reasons.push(overdueMessages[messageIndex]);
-      } else if (hoursUntilDue < 6) {
-        score += 95;
-        reasons.push("🚨 Critical: Less than 6 hours remaining");
-      } else if (hoursUntilDue < 24) {
-        score += 85;
-        const messageIndex = Math.floor(Math.random() * todayMessages.length);
-        reasons.push(todayMessages[messageIndex]);
-      } else if (daysUntilDue < 2) {
+      } else if (daysUntilDue === 0) {
+        // Due today - not overdue, but high priority
+        if (hoursUntilDue < 6 && hoursUntilDue > 0) {
+          score += 95;
+          reasons.push("🚨 Critical: Less than 6 hours remaining today");
+        } else {
+          score += 85;
+          const messageIndex = Math.floor(Math.random() * todayMessages.length);
+          reasons.push(todayMessages[messageIndex]);
+        }
+      } else if (daysUntilDue === 1) {
         score += 70;
         const messageIndex = Math.floor(Math.random() * tomorrowMessages.length);
         reasons.push(tomorrowMessages[messageIndex]);
       } else if (daysUntilDue < 7) {
-        score += Math.max(50 - (daysUntilDue - 2) * 8, 20);
+        score += Math.max(50 - (daysUntilDue - 1) * 8, 20);
         const weekdayMessages = [
           `📅 Due in ${Math.ceil(daysUntilDue)} days - good planning window`,
           `🗓️ ${Math.ceil(daysUntilDue)}-day deadline - moderate urgency`,
