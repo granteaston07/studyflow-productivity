@@ -19,13 +19,14 @@ import { StudyMode } from "@/components/StudyMode";
 import { StudyCalendar } from "@/components/StudyCalendar";
 import { AnalyticsDashboard } from "@/components/AnalyticsDashboard";
 import { LearningInsightsDashboard } from "@/components/LearningInsightsDashboard";
+import { WidgetSettings } from "@/components/WidgetSettings";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
 import { useBackgroundTimer } from "@/hooks/useBackgroundTimer";
-// import { useStudyGoals } from "@/hooks/useStudyGoals";
+import { useWidgetPreferences } from "@/hooks/useWidgetPreferences";
 
 const Index = () => {
   // Allow both authenticated users and guest mode (no redirect for guest users)
@@ -33,7 +34,7 @@ const Index = () => {
   const navigate = useNavigate();
   
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
-  // const { goals: studyGoals } = useStudyGoals();
+  const { preferences: widgetPrefs } = useWidgetPreferences();
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   
@@ -436,40 +437,50 @@ const Index = () => {
           </section>
 
           {/* AI Task Prioritization */}
-          <section>
-            <TaskPrioritization tasks={tasks} />
-          </section>
+          {widgetPrefs.show_ai_prioritization && (
+            <section>
+              <TaskPrioritization tasks={tasks} />
+            </section>
+          )}
 
 
           {/* Two Column Layout for Progress and Study Links */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Progress Tracker */}
-            <div id="progress-tracker">
-              <ProgressTracker tasks={tasks} />
+          {(widgetPrefs.show_progress_tracker || widgetPrefs.show_study_links || widgetPrefs.show_quick_notes) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Progress Tracker */}
+              {widgetPrefs.show_progress_tracker && (
+                <div id="progress-tracker">
+                  <ProgressTracker tasks={tasks} />
+                </div>
+              )}
+              
+              {/* Study Links and Quick Notes Column */}
+              {(widgetPrefs.show_study_links || widgetPrefs.show_quick_notes) && (
+                <div className="space-y-8">
+                  {widgetPrefs.show_study_links && <StudyLinks />}
+                  {widgetPrefs.show_quick_notes && <QuickNotes />}
+                </div>
+              )}
             </div>
-            
-            {/* Study Links and Quick Notes Column */}
-            <div className="space-y-8">
-              <StudyLinks />
-              <QuickNotes />
-            </div>
-          </div>
+          )}
 
           {/* Focus Timer */}
-          <section id="focus-timer">
-            <FocusTimer 
-              timerActive={timerActive}
-              timeRemaining={timeRemaining}
-              timerPaused={timerPaused}
-              onStartTimer={startTimer}
-              onUpdateDuration={updateTimerDuration}
-              onPauseTimer={pauseTimer}
-              onResetTimer={resetTimer}
-              selectedSession={selectedSession}
-              onSessionChange={setSelectedSession}
-              selectedTask={selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined}
-            />
-          </section>
+          {widgetPrefs.show_focus_timer && (
+            <section id="focus-timer">
+              <FocusTimer 
+                timerActive={timerActive}
+                timeRemaining={timeRemaining}
+                timerPaused={timerPaused}
+                onStartTimer={startTimer}
+                onUpdateDuration={updateTimerDuration}
+                onPauseTimer={pauseTimer}
+                onResetTimer={resetTimer}
+                selectedSession={selectedSession}
+                onSessionChange={setSelectedSession}
+                selectedTask={selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined}
+              />
+            </section>
+          )}
 
 {/* Study Calendar & Recurring Goals */}
 {/* <section id="study-calendar">
@@ -477,18 +488,27 @@ const Index = () => {
 </section> */}
 
           {/* Analytics Dashboard with Learning Insights */}
-          <section className="space-y-6">
-            <AnalyticsDashboard tasks={tasks} studyGoals={[]} />
-            <LearningInsightsDashboard />
-          </section>
+          {(widgetPrefs.show_analytics_dashboard || widgetPrefs.show_learning_insights) && (
+            <section className="space-y-6">
+              {widgetPrefs.show_analytics_dashboard && <AnalyticsDashboard tasks={tasks} studyGoals={[]} />}
+              {widgetPrefs.show_learning_insights && <LearningInsightsDashboard />}
+            </section>
+          )}
 
           {/* Study Calendar & Goals Section */}
-          <section className="space-y-6 mt-32">
-            <div className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-semibold text-foreground">Study Goals & Calendar</h2>
-            </div>
-            <StudyCalendar />
+          {widgetPrefs.show_study_calendar && (
+            <section className="space-y-6 mt-32">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-5 w-5 text-primary" />
+                <h2 className="text-xl font-semibold text-foreground">Study Goals & Calendar</h2>
+              </div>
+              <StudyCalendar />
+            </section>
+          )}
+
+          {/* Widget Settings */}
+          <section className="mt-8">
+            <WidgetSettings />
           </section>
 
           {/* Footer with Legal Info */}
@@ -561,11 +581,13 @@ const Index = () => {
       </main>
       
       {/* Floating Status Window */}
-      <FloatingStatus 
-        tasks={tasks} 
-        timerActive={timerActive} 
-        timeRemaining={timeRemaining} 
-      />
+      {widgetPrefs.show_floating_status && (
+        <FloatingStatus 
+          tasks={tasks} 
+          timerActive={timerActive} 
+          timeRemaining={timeRemaining} 
+        />
+      )}
     </div>
   );
 };
