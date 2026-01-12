@@ -528,13 +528,13 @@ const Index = () => {
               {/* Legal and Privacy Section */}
               <div className="space-y-4 pt-4 border-t border-border/50">
                 <div className="flex flex-wrap justify-center gap-4 text-xs text-muted-foreground">
-                  <button className="hover:text-foreground transition-colors">Privacy Policy</button>
+                  <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
                   <span>•</span>
-                  <button className="hover:text-foreground transition-colors">Terms of Service</button>
+                  <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
                   <span>•</span>
-                  <button className="hover:text-foreground transition-colors">Cookie Policy</button>
+                  <Link to="/cookies" className="hover:text-foreground transition-colors">Cookie Policy</Link>
                   <span>•</span>
-                  <button className="hover:text-foreground transition-colors">Data Protection</button>
+                  <Link to="/data-protection" className="hover:text-foreground transition-colors">Data Protection</Link>
                 </div>
                 
                 <div className="text-xs text-muted-foreground leading-relaxed max-w-4xl mx-auto">
