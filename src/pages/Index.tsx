@@ -28,6 +28,8 @@ import { FloatingTimerWidget } from "@/components/FloatingTimerWidget";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { SubjectManager } from "@/components/SubjectManager";
 import { ProfileSheet } from "@/components/ProfileSheet";
+import { OnePageDashboard } from "@/components/OnePageDashboard";
+import { useLayoutMode } from "@/hooks/useLayoutMode";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -65,6 +67,7 @@ const Index = () => {
     localStorage.getItem('studyflow_guest_name') || ''
   );
   const [profileOpen, setProfileOpen] = useState(false);
+  const { layoutMode } = useLayoutMode();
   const { permission, requestPermission, notifyDueToday } = useNotifications();
 
   const {
@@ -751,13 +754,37 @@ const Index = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="px-5 py-6 pb-24 md:pb-8">
-            {renderContent()}
+          <div className={`px-5 py-6 md:pb-8 ${layoutMode === "page" ? "pb-8" : "pb-24"}`}>
+            {layoutMode === "page" ? (
+              <OnePageDashboard
+                tasks={tasks}
+                userName={userName}
+                streakCount={streakCount}
+                onAddTask={async (d) => { await addTask(d); }}
+                onToggleTask={handleToggleTask}
+                onUpdateDueDate={handleUpdateDueDate}
+                onUpdateTask={updateTask}
+                onDeleteTask={deleteTask}
+                selectedTaskId={selectedTaskId}
+                onSelectTask={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
+                timerActive={timerActive}
+                timeRemaining={timeRemaining}
+                timerPaused={timerPaused}
+                onStartTimer={startTimer}
+                onUpdateTimerDuration={updateTimerDuration}
+                onPauseTimer={pauseTimer}
+                onResetTimer={resetTimer}
+                selectedSession={selectedSession}
+                onSessionChange={setSelectedSession}
+              />
+            ) : (
+              renderContent()
+            )}
           </div>
         </main>
 
-        {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/40 z-50">
+        {/* Mobile bottom nav — hidden in one-page mode */}
+        <nav className={`md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/40 z-50 ${layoutMode === "page" ? "hidden" : ""}`}>
           <div className="flex">
             {NAV.map(({ id, icon: Icon, label }) => (
               <button key={id} onClick={() => setActiveTab(id)}

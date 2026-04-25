@@ -2,15 +2,15 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LogOut, LogIn, Sun, Moon, Bell, BellOff, Check, Pencil, X,
-  User, Shield, Palette,
+  Shield, Palette, LayoutDashboard, Layers,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useLayoutMode } from "@/hooks/useLayoutMode";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -37,6 +37,7 @@ export function ProfileSheet({
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { permission, requestPermission } = useNotifications();
+  const { layoutMode, setLayoutMode } = useLayoutMode();
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
@@ -155,6 +156,35 @@ export function ProfileSheet({
               </div>
               <span className="text-xs text-muted-foreground capitalize">{theme}</span>
             </button>
+
+            {/* Layout mode */}
+            <div className="mt-2">
+              <p className="text-xs text-muted-foreground mb-1.5 px-1">Layout</p>
+              <div className="grid grid-cols-2 gap-1.5">
+                <button
+                  onClick={() => setLayoutMode("tabs")}
+                  className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors duration-150 ${
+                    layoutMode === "tabs"
+                      ? "border-primary/40 bg-primary/8 text-primary"
+                      : "border-border/40 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <Layers className="h-4 w-4" />
+                  Tabs
+                </button>
+                <button
+                  onClick={() => setLayoutMode("page")}
+                  className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors duration-150 ${
+                    layoutMode === "page"
+                      ? "border-primary/40 bg-primary/8 text-primary"
+                      : "border-border/40 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  One Page
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-1">
