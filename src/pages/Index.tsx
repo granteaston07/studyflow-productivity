@@ -16,6 +16,11 @@ import { QuickNotes } from "@/components/QuickNotes";
 import { StudyFlowLogo } from "@/components/StudyFlowLogo";
 import { StudyMode } from "@/components/StudyMode";
 import { AmbientSounds } from "@/components/AmbientSounds";
+import { StudyLinks } from "@/components/StudyLinks";
+import { ProgressTracker } from "@/components/ProgressTracker";
+import { AIStudySuggestions } from "@/components/AIStudySuggestions";
+import { TaskPrioritization } from "@/components/TaskPrioritization";
+import { AIDailyBrief } from "@/components/AIDailyBrief";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -167,67 +172,17 @@ const Index = () => {
 
       // TODAY ──────────────────────────────────────────────────────
       case 'today': return (
-        <div className="space-y-6 animate-fade-in">
-          {/* Greeting */}
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {userName ? `Hey, ${userName} 👋` : 'Hey there 👋'}
-            </h1>
-            <p className="text-muted-foreground text-sm mt-0.5">
-              {activeTasks.length === 0
-                ? "You're all caught up. Nice work."
-                : `${activeTasks.length} task${activeTasks.length !== 1 ? 's' : ''} left today`}
-            </p>
-          </div>
-
-          {/* Stats row */}
-          <div className="grid grid-cols-3 gap-3">
-            <div className="bg-card border border-border/50 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-black text-foreground">{activeTasks.length}</div>
-              <div className="text-xs text-muted-foreground mt-0.5">Active</div>
-            </div>
-            <div className="bg-card border border-border/50 rounded-2xl p-4 text-center">
-              <div className={`text-2xl font-black ${completedTasks.length > 0 ? 'text-success' : 'text-foreground'}`}>
-                {completedTasks.length}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">Done</div>
-            </div>
-            <div className="bg-card border border-border/50 rounded-2xl p-4 text-center">
-              <div className={`text-2xl font-black ${overdueTasks.length > 0 ? 'text-error' : 'text-foreground'}`}>
-                {overdueTasks.length}
-              </div>
-              <div className="text-xs text-muted-foreground mt-0.5">Overdue</div>
-            </div>
-          </div>
-
-          {/* Alerts */}
-          {overdueTasks.length > 0 && (
-            <div className="flex items-center gap-3 p-3 bg-error/8 border border-error/20 rounded-xl text-sm">
-              <span className="text-error font-semibold">{overdueTasks.length} overdue</span>
-              <span className="text-error/70 text-xs">·</span>
-              <button onClick={() => setActiveTab('tasks')} className="text-xs text-error/80 hover:text-error underline underline-offset-2">
-                View tasks
-              </button>
-            </div>
-          )}
-          {todayTasks.length > 0 && (
-            <div className="flex items-center gap-3 p-3 bg-warning/8 border border-warning/20 rounded-xl text-sm">
-              <span className="text-warning font-semibold">{todayTasks.length} due today</span>
-              <button onClick={() => setActiveTab('tasks')} className="text-xs text-warning/80 hover:text-warning underline underline-offset-2 ml-2">
-                View tasks
-              </button>
-            </div>
-          )}
+        <div className="space-y-5 animate-fade-in">
+          {/* AI Daily Brief */}
+          <AIDailyBrief tasks={tasks} userName={userName} />
 
           {/* Quick add */}
-          <div className="flex items-center gap-2">
-            <AddTaskDialog onAddTask={async (d) => { await addTask(d); }}>
-              <button className="flex-1 flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border/50 rounded-xl text-sm text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all">
-                <Plus className="h-4 w-4" />
-                Add a task...
-              </button>
-            </AddTaskDialog>
-          </div>
+          <AddTaskDialog onAddTask={async (d) => { await addTask(d); }}>
+            <button className="w-full flex items-center gap-3 px-4 py-3 bg-muted/40 border border-border/50 rounded-xl text-sm text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-all">
+              <Plus className="h-4 w-4" />
+              Add a task...
+            </button>
+          </AddTaskDialog>
 
           {/* Recent active tasks */}
           {activeTasks.length > 0 && (
@@ -258,6 +213,12 @@ const Index = () => {
             </div>
           )}
 
+          {/* Quick links */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
+            <StudyLinks />
+          </div>
+
           {/* Quick focus */}
           <div className="bg-card border border-border/50 rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
@@ -283,7 +244,7 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Ambient sounds preview */}
+          {/* Ambient sounds */}
           <div className="bg-card border border-border/50 rounded-2xl p-4">
             <p className="text-sm font-semibold text-foreground flex items-center gap-2 mb-3">
               <Music className="h-4 w-4 text-ai-primary" /> Ambient Sounds
@@ -326,6 +287,17 @@ const Index = () => {
           {tasks.length > 0 && (
             <div className="space-y-1.5">
               <Progress value={completionRate} className="h-1.5" />
+            </div>
+          )}
+
+          {/* AI Prioritization */}
+          {activeTasks.length > 0 && (
+            <div className="bg-card border border-border/50 rounded-2xl p-4">
+              <TaskPrioritization
+                tasks={tasks}
+                onSelectTask={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
+                selectedTaskId={selectedTaskId}
+              />
             </div>
           )}
 
@@ -411,6 +383,14 @@ const Index = () => {
               )}
             </>
           )}
+
+          {/* Progress tracker */}
+          {tasks.length > 0 && (
+            <div className="bg-card border border-border/50 rounded-2xl p-4 mt-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Progress & Stats</p>
+              <ProgressTracker tasks={tasks} />
+            </div>
+          )}
         </div>
       );
 
@@ -467,6 +447,11 @@ const Index = () => {
               Ambient Sounds
             </p>
             <AmbientSounds />
+          </div>
+
+          {/* AI Study Suggestions */}
+          <div className="bg-card border border-border/50 rounded-2xl p-4">
+            <AIStudySuggestions tasks={tasks} />
           </div>
 
           {/* Study mode CTA */}

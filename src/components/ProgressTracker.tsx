@@ -1,194 +1,175 @@
-import { TrendingUp, CheckCircle, Clock, AlertTriangle } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMemo } from "react";
+import { TrendingUp, CheckCircle, AlertTriangle, Clock, Flame, Zap } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Task } from "./TaskCard";
-import { useState, useEffect } from "react";
+import { useStudyStreak } from "@/hooks/useStudyStreak";
+import { useXP } from "@/hooks/useXP";
 
 interface ProgressTrackerProps {
   tasks: Task[];
 }
 
+const CIRCUMFERENCE = 2 * Math.PI * 40;
+
 export function ProgressTracker({ tasks }: ProgressTrackerProps) {
-  const [gradientIndex, setGradientIndex] = useState(0);
-  
-  const gradientVariations = [
-    // Heavy purple start
-    { stops: [
-      { offset: "0%", color: "#8b5cf6" },
-      { offset: "40%", color: "#a855f7" },
-      { offset: "80%", color: "#6366f1" },
-      { offset: "100%", color: "#3b82f6" }
-    ]},
-    // Purple in middle
-    { stops: [
-      { offset: "0%", color: "#3b82f6" },
-      { offset: "30%", color: "#6366f1" },
-      { offset: "70%", color: "#8b5cf6" },
-      { offset: "100%", color: "#a855f7" }
-    ]},
-    // Purple at end
-    { stops: [
-      { offset: "0%", color: "#3b82f6" },
-      { offset: "50%", color: "#6366f1" },
-      { offset: "100%", color: "#8b5cf6" }
-    ]},
-    // Deep purple dominant
-    { stops: [
-      { offset: "0%", color: "#7c3aed" },
-      { offset: "25%", color: "#8b5cf6" },
-      { offset: "60%", color: "#a855f7" },
-      { offset: "100%", color: "#6366f1" }
-    ]},
-    // Balanced mix
-    { stops: [
-      { offset: "0%", color: "#6366f1" },
-      { offset: "35%", color: "#8b5cf6" },
-      { offset: "65%", color: "#a855f7" },
-      { offset: "100%", color: "#3b82f6" }
-    ]}
-  ];
+  const { streak } = useStudyStreak();
+  const { level, levelName, xpInLevel, xpToNext, progress: xpProgress } = useXP();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setGradientIndex((prev) => (prev + 1) % gradientVariations.length);
-    }, 3 * 60 * 1000); // Change every 3 minutes
+  const stats = useMemo(() => {
+    const total = tasks.length;
+    const completed = tasks.filter(t => t.completed).length;
+    const inProgress = tasks.filter(t => t.status === "in-progress").length;
+    const overdue = tasks.filter(t => t.status === "overdue" && !t.completed).length;
+    const pending = tasks.filter(t => t.status === "pending" && !t.completed).length;
+    const completionRate = total > 0 ? (completed / total) * 100 : 0;
 
-    return () => clearInterval(interval);
-  }, [gradientVariations.length]);
+    // Subject breakdown
+    const subjectMap = new Map<string, { total: number; completed: number }>();
+    tasks.forEach(t => {
+      const subj = t.subject || "General";
+      const cur = subjectMap.get(subj) || { total: 0, completed: 0 };
+      subjectMap.set(subj, {
+        total: cur.total + 1,
+        completed: cur.completed + (t.completed ? 1 : 0),
+      });
+    });
+    const subjects = Array.from(subjectMap.entries())
+      .map(([name, data]) => ({ name, ...data, rate: data.total > 0 ? (data.completed / data.total) * 100 : 0 }))
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 4);
 
-  const totalTasks = tasks.length;
-  const completedTasks = tasks.filter(task => task.completed).length;
-  const inProgressTasks = tasks.filter(task => task.status === 'in-progress').length;
-  const overdueTasks = tasks.filter(task => task.status === 'overdue').length;
-  
-  const completionPercentage = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+    // Priority breakdown
+    const highTasks = tasks.filter(t => t.priority === "high" && !t.completed).length;
+    const medTasks = tasks.filter(t => t.priority === "medium" && !t.completed).length;
+    const lowTasks = tasks.filter(t => t.priority === "low" && !t.completed).length;
 
-  const stats = [
-    {
-      label: 'Completed',
-      value: completedTasks,
-      icon: CheckCircle,
-      color: 'text-success',
-      bgColor: 'bg-success-light'
-    },
-    {
-      label: 'In Progress',
-      value: inProgressTasks,
-      icon: Clock,
-      color: 'text-warning',
-      bgColor: 'bg-warning-light'
-    },
-    {
-      label: 'Overdue',
-      value: overdueTasks,
-      icon: AlertTriangle,
-      color: 'text-error',
-      bgColor: 'bg-error-light'
-    }
-  ];
+    // Productivity score: completion rate + streak bonus
+    const streakBonus = Math.min((streak?.current_streak || 0) * 3, 20);
+    const productivityScore = Math.min(100, Math.round(completionRate * 0.8 + streakBonus));
+
+    return { total, completed, inProgress, overdue, pending, completionRate, subjects, highTasks, medTasks, lowTasks, productivityScore };
+  }, [tasks, streak]);
+
+  const dashOffset = CIRCUMFERENCE * (1 - stats.completionRate / 100);
+  const streakCount = streak?.current_streak || 0;
+  const longestStreak = streak?.longest_streak || 0;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <TrendingUp className="h-5 w-5 text-primary" />
-          Progress Tracker
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Overall Progress Circle */}
-        <div className="text-center">
-          <div className="relative inline-flex items-center justify-center w-32 h-32 mb-4">
-            <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 100 100">
-              {/* Background circle */}
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="hsl(var(--muted))"
-                strokeWidth="8"
-                fill="transparent"
-              />
-              {/* Dynamic progress circle gradient */}
-              <defs>
-                <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  {gradientVariations[gradientIndex].stops.map((stop, index) => (
-                    <stop 
-                      key={index} 
-                      offset={stop.offset} 
-                      stopColor={stop.color}
-                      className="transition-all duration-2000 ease-in-out"
-                    />
-                  ))}
-                </linearGradient>
-              </defs>
-              <circle
-                cx="50"
-                cy="50"
-                r="40"
-                stroke="url(#progressGradient)"
-                strokeWidth="8"
-                fill="transparent"
-                strokeDasharray={`${2 * Math.PI * 40}`}
-                strokeDashoffset={`${2 * Math.PI * 40 * (1 - completionPercentage / 100)}`}
-                strokeLinecap="round"
-                className="transition-all duration-1000 ease-out drop-shadow-sm"
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-primary">
-                {Math.round(completionPercentage)}%
-              </span>
-              <span className="text-xs text-muted-foreground">Complete</span>
+    <div className="space-y-5">
+
+      {/* Top row: circle + key numbers */}
+      <div className="flex items-center gap-6">
+        {/* Circle */}
+        <div className="relative flex-shrink-0">
+          <svg width="96" height="96" viewBox="0 0 96 96" className="-rotate-90">
+            <circle cx="48" cy="48" r="40" fill="none" strokeWidth="7" className="stroke-muted" />
+            <circle cx="48" cy="48" r="40" fill="none" strokeWidth="7"
+              stroke="hsl(var(--primary))" strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE} strokeDashoffset={dashOffset}
+              style={{ transition: "stroke-dashoffset 0.8s ease" }} />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl font-black text-foreground">{Math.round(stats.completionRate)}%</span>
+            <span className="text-xs text-muted-foreground">done</span>
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div className="flex-1 grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+            <div>
+              <div className="text-lg font-bold text-foreground leading-none">{stats.completed}</div>
+              <div className="text-xs text-muted-foreground">Completed</div>
             </div>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {completedTasks} of {totalTasks} tasks completed
-          </p>
-        </div>
-
-        {/* Progress Bar */}
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Task Completion</span>
-            <span className="text-primary font-medium">{Math.round(completionPercentage)}%</span>
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-warning flex-shrink-0" />
+            <div>
+              <div className="text-lg font-bold text-foreground leading-none">{stats.inProgress}</div>
+              <div className="text-xs text-muted-foreground">In progress</div>
+            </div>
           </div>
-          <Progress value={completionPercentage} className="h-3" />
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-error flex-shrink-0" />
+            <div>
+              <div className="text-lg font-bold text-foreground leading-none">{stats.overdue}</div>
+              <div className="text-xs text-muted-foreground">Overdue</div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-primary flex-shrink-0" />
+            <div>
+              <div className="text-lg font-bold text-foreground leading-none">{stats.productivityScore}</div>
+              <div className="text-xs text-muted-foreground">Score</div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-3 gap-4">
-          {stats.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <div key={stat.label} className="text-center">
-                <div className={`inline-flex items-center justify-center w-12 h-12 rounded-full ${stat.bgColor} mb-2 shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl`}>
-                  <Icon className={`h-6 w-6 ${stat.color} drop-shadow-sm`} />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
+      {/* Subject breakdown */}
+      {stats.subjects.length > 0 && (
+        <div className="space-y-2.5">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">By Subject</p>
+          {stats.subjects.map(s => (
+            <div key={s.name} className="space-y-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-medium text-foreground truncate max-w-[140px]">{s.name}</span>
+                <span className="text-muted-foreground ml-2 flex-shrink-0">{s.completed}/{s.total}</span>
               </div>
-            );
-          })}
+              <Progress value={s.rate} className="h-1.5" />
+            </div>
+          ))}
         </div>
+      )}
 
-        {/* Weekly Overview */}
-        <div className="pt-4 border-t border-border">
-          <h4 className="text-sm font-medium text-foreground mb-3">This Week</h4>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Tasks completed</span>
-            <span className="font-medium text-success">{completedTasks}</span>
-          </div>
-          <div className="flex justify-between items-center text-sm mt-1">
-            <span className="text-muted-foreground">Productivity score</span>
-            <span className="font-medium text-primary">
-              {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
-            </span>
+      {/* Priority breakdown */}
+      {(stats.highTasks + stats.medTasks + stats.lowTasks) > 0 && (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Priority Queue</p>
+          <div className="flex gap-2">
+            {stats.highTasks > 0 && (
+              <div className="flex-1 bg-error/10 border border-error/20 rounded-xl p-2.5 text-center">
+                <div className="text-lg font-bold text-error">{stats.highTasks}</div>
+                <div className="text-xs text-error/70">High</div>
+              </div>
+            )}
+            {stats.medTasks > 0 && (
+              <div className="flex-1 bg-warning/10 border border-warning/20 rounded-xl p-2.5 text-center">
+                <div className="text-lg font-bold text-warning">{stats.medTasks}</div>
+                <div className="text-xs text-warning/70">Med</div>
+              </div>
+            )}
+            {stats.lowTasks > 0 && (
+              <div className="flex-1 bg-success/10 border border-success/20 rounded-xl p-2.5 text-center">
+                <div className="text-lg font-bold text-success">{stats.lowTasks}</div>
+                <div className="text-xs text-success/70">Low</div>
+              </div>
+            )}
           </div>
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Streak + XP row */}
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-warning/8 border border-warning/20 rounded-xl p-3">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Flame className="h-3.5 w-3.5 text-warning" />
+            <span className="text-xs font-semibold text-warning">Streak</span>
+          </div>
+          <div className="text-2xl font-black text-foreground">{streakCount}</div>
+          <div className="text-xs text-muted-foreground">day{streakCount !== 1 ? "s" : ""} · best {longestStreak}</div>
+        </div>
+        <div className="bg-primary/8 border border-primary/20 rounded-xl p-3">
+          <div className="flex items-center gap-1.5 mb-1">
+            <Zap className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold text-primary">Level</span>
+          </div>
+          <div className="text-2xl font-black text-foreground">{level}</div>
+          <div className="text-xs text-muted-foreground">{levelName} · {xpInLevel}/{xpToNext} XP</div>
+        </div>
+      </div>
+
+    </div>
   );
 }
