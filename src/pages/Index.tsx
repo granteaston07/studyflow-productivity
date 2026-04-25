@@ -27,6 +27,7 @@ import { WelcomeHeader } from "@/components/WelcomeHeader";
 import { FloatingTimerWidget } from "@/components/FloatingTimerWidget";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { SubjectManager } from "@/components/SubjectManager";
+import { ProfileSheet } from "@/components/ProfileSheet";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -63,6 +64,7 @@ const Index = () => {
   const [guestName, setGuestName] = useState(() =>
     localStorage.getItem('studyflow_guest_name') || ''
   );
+  const [profileOpen, setProfileOpen] = useState(false);
   const { permission, requestPermission, notifyDueToday } = useNotifications();
 
   const {
@@ -636,8 +638,14 @@ const Index = () => {
       {/* ── Sidebar (desktop) ─────────────────────────────────── */}
       <aside className="hidden md:flex w-60 flex-col border-r border-border/50 bg-card/40 backdrop-blur-sm flex-shrink-0">
         <div className="h-14 flex items-center px-4 border-b border-border/40">
-          <StudyFlowLogo size={28} />
-          <span className="ml-2 font-bold text-foreground text-sm tracking-tight">StudyFlow</span>
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+            title="Profile & Settings"
+          >
+            <StudyFlowLogo size={28} />
+            <span className="font-bold text-foreground text-sm tracking-tight">StudyFlow</span>
+          </button>
         </div>
 
         <nav className="flex-1 p-3 space-y-1">
@@ -710,10 +718,14 @@ const Index = () => {
 
         {/* Mobile header */}
         <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border/40 bg-card/40 backdrop-blur-sm flex-shrink-0">
-          <div className="flex items-center gap-2">
+          <button
+            onClick={() => setProfileOpen(true)}
+            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+            title="Profile & Settings"
+          >
             <StudyFlowLogo size={24} />
             <span className="font-bold text-foreground text-sm">StudyFlow</span>
-          </div>
+          </button>
           <div className="flex items-center gap-1.5">
             {streakCount > 0 && (
               <div className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 rounded-full px-2.5 py-1">
@@ -772,6 +784,21 @@ const Index = () => {
       {showOnboarding && (
         <OnboardingFlow onComplete={handleOnboardingComplete} />
       )}
+
+      <ProfileSheet
+        open={profileOpen}
+        onOpenChange={setProfileOpen}
+        userName={userName}
+        guestName={guestName}
+        onGuestNameChange={setGuestName}
+        streakCount={streakCount}
+        level={level}
+        levelName={levelName}
+        xpInLevel={xpInLevel}
+        xpToNext={xpToNext}
+        xpProgress={xpProgress}
+        completedCount={completedTasks.length}
+      />
 
       {timerActive && activeTab !== 'focus' && (
         <FloatingTimerWidget
