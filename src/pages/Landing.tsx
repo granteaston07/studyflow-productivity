@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight, Flame, Timer, CheckSquare, Music, Zap, Star, ChevronRight,
-  CalendarDays, Sparkles
+  CalendarDays, Sparkles, Smartphone, Monitor, Share2, Download
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StudyFlowLogo } from '@/components/StudyFlowLogo';
@@ -380,6 +380,82 @@ export default function Landing() {
             <div className="flex justify-between mt-2 text-xs text-muted-foreground">
               <span>+50 XP per task</span>
               <span>160 XP to next level</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Install / Get the app */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">
+              Add it to your devices
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              StudyFlow works like a native app on Mac and iPhone — no App Store required.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Mac */}
+            <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-xl shadow-black/5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                  <Monitor className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground">Mac</p>
+                  <p className="text-xs text-muted-foreground">Chrome or Edge</p>
+                </div>
+              </div>
+              <ol className="space-y-3">
+                {[
+                  { n: '1', text: 'Open studyflow.us in Chrome or Edge' },
+                  { n: '2', text: 'Click the install icon (⊕) in the address bar — or open the browser menu and choose "Install StudyFlow"' },
+                  { n: '3', text: 'Click Install. StudyFlow lands in your Applications folder and Dock.' },
+                ].map(({ n, text }) => (
+                  <li key={n} className="flex gap-3">
+                    <span className="w-5 h-5 rounded-full bg-primary/15 text-primary text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{n}</span>
+                    <p className="text-sm text-muted-foreground leading-snug">{text}</p>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-5 p-3 rounded-xl bg-muted/40 border border-border/40">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">Safari on Mac:</span> File → Add to Dock. Works the same way.
+                </p>
+              </div>
+            </div>
+
+            {/* iPhone */}
+            <div className="bg-card border border-border/50 rounded-2xl p-6 shadow-xl shadow-black/5">
+              <div className="flex items-center gap-3 mb-5">
+                <div className="w-10 h-10 bg-success/10 rounded-xl flex items-center justify-center">
+                  <Smartphone className="h-5 w-5 text-success" />
+                </div>
+                <div>
+                  <p className="font-bold text-foreground">iPhone</p>
+                  <p className="text-xs text-muted-foreground">Safari required</p>
+                </div>
+              </div>
+              <ol className="space-y-3">
+                {[
+                  { n: '1', text: 'Open studyflow.us in Safari (must be Safari, not Chrome)' },
+                  { n: '2', text: 'Tap the Share button at the bottom of the screen (the box with an arrow pointing up)' },
+                  { n: '3', text: 'Scroll down and tap "Add to Home Screen", then tap Add.' },
+                ].map(({ n, text }) => (
+                  <li key={n} className="flex gap-3">
+                    <span className="w-5 h-5 rounded-full bg-success/15 text-success text-xs font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{n}</span>
+                    <p className="text-sm text-muted-foreground leading-snug">{text}</p>
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-5 p-3 rounded-xl bg-muted/40 border border-border/40">
+                <p className="text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">iPad works too.</span> Same steps — tap the Share icon in the top toolbar.
+                </p>
+              </div>
             </div>
           </div>
         </div>
