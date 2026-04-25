@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 export interface StudyLink {
   id: string;
@@ -17,23 +17,41 @@ const DEFAULT_LINKS: StudyLink[] = [
 ];
 
 const STORAGE_KEY = "studyflow_custom_links";
+const SYNC_EVENT = "studyflow_links_changed";
+
+function readFromStorage(): StudyLink[] {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    return stored ? JSON.parse(stored) : DEFAULT_LINKS;
+  } catch {
+    return DEFAULT_LINKS;
+  }
+}
+
+function writeToStorage(links: StudyLink[]) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
+  window.dispatchEvent(new Event(SYNC_EVENT));
+}
 
 export function useCustomLinks() {
-  const [links, setLinks] = useState<StudyLink[]>(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : DEFAULT_LINKS;
-    } catch {
-      return DEFAULT_LINKS;
-    }
-  });
+  const [links, setLinks] = useState<StudyLink[]>(readFromStorage);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(links));
-  }, [links]);
+    const onSync = () => setLinks(readFromStorage());
+    window.addEventListener(SYNC_EVENT, onSync);
+    return () => window.removeEventListener(SYNC_EVENT, onSync);
+  }, []);
+
+  const setAndSync = useCallback((updater: (prev: StudyLink[]) => StudyLink[]) => {
+    setLinks(prev => {
+      const next = updater(prev);
+      writeToStorage(next);
+      return next;
+    });
+  }, []);
 
   const updateLink = (id: string, updates: Partial<StudyLink>) => {
-    setLinks(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
+    setAndSync(prev => prev.map(l => l.id === id ? { ...l, ...updates } : l));
   };
 
   const addLink = () => {
@@ -43,16 +61,16 @@ export function useCustomLinks() {
       url: "https://",
       icon: "Globe",
     };
-    setLinks(prev => [...prev, newLink]);
+    setAndSync(prev => [...prev, newLink]);
     return newLink.id;
   };
 
   const deleteLink = (id: string) => {
-    setLinks(prev => prev.filter(l => l.id !== id));
+    setAndSync(prev => prev.filter(l => l.id !== id));
   };
 
   const resetToDefault = () => {
-    setLinks(DEFAULT_LINKS);
+    setAndSync(() => DEFAULT_LINKS);
   };
 
   return { links, updateLink, addLink, deleteLink, resetToDefault };

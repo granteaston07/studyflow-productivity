@@ -38,7 +38,7 @@ export function ProfileSheet({
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
-  const { permission, requestPermission } = useNotifications();
+  const { permission, requestPermission, settings, updateSettings } = useNotifications();
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
@@ -164,15 +164,8 @@ export function ProfileSheet({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
               <Bell className="h-3.5 w-3.5" /> Notifications
             </p>
-            {permission === "granted" ? (
-              <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40">
-                <div className="flex items-center gap-2.5">
-                  <Bell className="h-4 w-4 text-success" />
-                  <span className="text-sm text-foreground font-medium">Reminders</span>
-                </div>
-                <span className="text-xs text-success font-medium">On</span>
-              </div>
-            ) : permission === "denied" ? (
+
+            {permission === "denied" ? (
               <div className="flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40">
                 <div className="flex items-center gap-2.5">
                   <BellOff className="h-4 w-4 text-muted-foreground" />
@@ -180,7 +173,7 @@ export function ProfileSheet({
                 </div>
                 <span className="text-xs text-muted-foreground">Blocked in browser</span>
               </div>
-            ) : (
+            ) : permission === "default" ? (
               <button
                 onClick={requestPermission}
                 className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors duration-150"
@@ -191,6 +184,56 @@ export function ProfileSheet({
                 </div>
                 <span className="text-xs text-primary font-semibold">Enable</span>
               </button>
+            ) : (
+              /* permission === "granted" — show settings */
+              <div className="rounded-xl bg-muted/30 border border-border/40 divide-y divide-border/30 overflow-hidden">
+                <NotifRow
+                  label="Due today"
+                  description="When you have tasks due"
+                  enabled={settings.dueTodayEnabled}
+                  onToggle={() => updateSettings({ dueTodayEnabled: !settings.dueTodayEnabled })}
+                />
+                <NotifRow
+                  label="Due tomorrow"
+                  description="Evening reminder the night before"
+                  enabled={settings.dueTomorrowEnabled}
+                  onToggle={() => updateSettings({ dueTomorrowEnabled: !settings.dueTomorrowEnabled })}
+                />
+                <NotifRow
+                  label="Overdue alerts"
+                  description="When tasks are past their due date"
+                  enabled={settings.overdueEnabled}
+                  onToggle={() => updateSettings({ overdueEnabled: !settings.overdueEnabled })}
+                />
+                <div className="flex items-center justify-between px-3 py-2.5">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-foreground">Streak reminder</p>
+                    <p className="text-xs text-muted-foreground">Daily nudge to keep your streak</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {settings.streakEnabled && (
+                      <select
+                        value={settings.streakReminderTime}
+                        onChange={e => updateSettings({ streakReminderTime: e.target.value })}
+                        className="text-xs text-muted-foreground bg-muted/60 border border-border/40 rounded-lg px-1.5 py-1 focus:outline-none"
+                      >
+                        {["07:00","08:00","09:00","16:00","17:00","18:00","19:00","20:00","21:00","22:00"].map(t => (
+                          <option key={t} value={t}>{
+                            (() => {
+                              const [h] = t.split(":").map(Number);
+                              return h < 12 ? `${h}:00 AM` : h === 12 ? "12:00 PM" : `${h - 12}:00 PM`;
+                            })()
+                          }</option>
+                        ))}
+                      </select>
+                    )}
+                    <Toggle
+                      enabled={settings.streakEnabled}
+                      onToggle={() => updateSettings({ streakEnabled: !settings.streakEnabled })}
+                    />
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 
@@ -252,5 +295,36 @@ export function ProfileSheet({
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) {
+  return (
+    <button
+      onClick={onToggle}
+      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+        enabled ? "bg-primary" : "bg-muted-foreground/30"
+      }`}
+    >
+      <span
+        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform duration-200 ${
+          enabled ? "translate-x-[18px]" : "translate-x-[2px]"
+        }`}
+      />
+    </button>
+  );
+}
+
+function NotifRow({
+  label, description, enabled, onToggle,
+}: { label: string; description: string; enabled: boolean; onToggle: () => void }) {
+  return (
+    <div className="flex items-center justify-between px-3 py-2.5">
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-foreground">{label}</p>
+        <p className="text-xs text-muted-foreground">{description}</p>
+      </div>
+      <Toggle enabled={enabled} onToggle={onToggle} />
+    </div>
   );
 }

@@ -53,17 +53,6 @@ export function StudyLinks({ open: externalOpen, onOpenChange: externalSetOpen, 
               );
             })}
           </div>
-          {/* Hidden edit trigger only shown when not controlled externally */}
-          {!externalSetOpen && (
-            <button
-              onClick={() => setEditOpen(true)}
-              className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-150"
-              title="Customize links"
-            >
-              <Settings className="h-2.5 w-2.5" />
-              edit
-            </button>
-          )}
         </>
       )}
 

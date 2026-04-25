@@ -67,7 +67,7 @@ const Index = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [linksOpen, setLinksOpen] = useState(false);
-  const { permission, requestPermission, notifyDueToday } = useNotifications();
+  const { permission, requestPermission, scheduleNotifications } = useNotifications();
 
   const {
     timerActive, timeRemaining, timerPaused, selectedSessionDuration,
@@ -90,8 +90,8 @@ const Index = () => {
 
   // Must be before any early returns to satisfy Rules of Hooks
   useEffect(() => {
-    if (!tasksLoading && tasks.length > 0) notifyDueToday(tasks);
-  }, [tasksLoading]);
+    if (!tasksLoading) scheduleNotifications(tasks, streak?.current_streak ?? 0);
+  }, [tasksLoading, streak]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
