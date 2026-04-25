@@ -9,9 +9,10 @@ import { ICON_MAP, ICON_OPTIONS } from "@/lib/linkIcons";
 interface StudyLinksProps {
   open?: boolean;
   onOpenChange?: (v: boolean) => void;
+  sheetOnly?: boolean;
 }
 
-export function StudyLinks({ open: externalOpen, onOpenChange: externalSetOpen }: StudyLinksProps = {}) {
+export function StudyLinks({ open: externalOpen, onOpenChange: externalSetOpen, sheetOnly = false }: StudyLinksProps = {}) {
   const { links, updateLink, addLink, deleteLink, resetToDefault } = useCustomLinks();
   const [internalOpen, setInternalOpen] = useState(false);
   const editOpen = externalOpen !== undefined ? externalOpen : internalOpen;
@@ -31,35 +32,39 @@ export function StudyLinks({ open: externalOpen, onOpenChange: externalSetOpen }
 
   return (
     <>
-      <div className="grid grid-cols-3 gap-2">
-        {links.map(({ id, name, url, icon }) => {
-          const Icon = ICON_MAP[icon] ?? ICON_MAP["Globe"];
-          return (
-            <a
-              key={id}
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border transition-all duration-150 group"
+      {!sheetOnly && (
+        <>
+          <div className="grid grid-cols-3 gap-2">
+            {links.map(({ id, name, url, icon }) => {
+              const Icon = ICON_MAP[icon] ?? ICON_MAP["Globe"];
+              return (
+                <a
+                  key={id}
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border transition-all duration-150 group"
+                >
+                  <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground text-center leading-tight transition-colors line-clamp-1">
+                    {name}
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+          {/* Hidden edit trigger only shown when not controlled externally */}
+          {!externalSetOpen && (
+            <button
+              onClick={() => setEditOpen(true)}
+              className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-150"
+              title="Customize links"
             >
-              <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground text-center leading-tight transition-colors line-clamp-1">
-                {name}
-              </span>
-            </a>
-          );
-        })}
-      </div>
-      {/* Hidden edit trigger only shown when not controlled externally */}
-      {!externalSetOpen && (
-        <button
-          onClick={() => setEditOpen(true)}
-          className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-150"
-          title="Customize links"
-        >
-          <Settings className="h-2.5 w-2.5" />
-          edit
-        </button>
+              <Settings className="h-2.5 w-2.5" />
+              edit
+            </button>
+          )}
+        </>
       )}
 
       <Sheet open={editOpen} onOpenChange={setEditOpen}>

@@ -275,7 +275,7 @@ const Index = () => {
           {/* Quick links */}
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
-            <StudyLinks open={linksOpen} onOpenChange={setLinksOpen} />
+            <StudyLinks />
           </div>
 
           {/* Ambient sounds */}
@@ -821,6 +821,9 @@ const Index = () => {
         onManageLinks={() => setLinksOpen(true)}
         onManageSubjects={() => setSubjectsOpen(true)}
       />
+
+      {/* Root-level quick links editor — triggered from ProfileSheet on any tab */}
+      <StudyLinks sheetOnly open={linksOpen} onOpenChange={setLinksOpen} />
 
       <Sheet open={subjectsOpen} onOpenChange={setSubjectsOpen}>
         <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
