@@ -504,7 +504,8 @@ const Index = () => {
 
       // FOCUS ──────────────────────────────────────────────────────
       case 'focus': return (
-        <div className="space-y-5 animate-fade-in">
+        <div className="space-y-5">
+          <div className="animate-slide-up" style={{ animationDelay: '0s' }}>
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">Focus</h1>
@@ -547,6 +548,9 @@ const Index = () => {
             </div>
           </div>
 
+          </div>
+
+          <div className="animate-slide-up" style={{ animationDelay: '0.06s' }}>
           <div className="bg-card border border-border/50 rounded-2xl p-6">
             <FocusTimer
               timerActive={timerActive}
@@ -561,10 +565,11 @@ const Index = () => {
               selectedTask={selectedTask}
             />
           </div>
+          </div>
 
           {/* Task selector */}
           {activeTasks.length > 0 && (
-            <div className="space-y-2">
+            <div className="animate-slide-up space-y-2" style={{ animationDelay: '0.1s' }}>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Focus on a task</p>
               <div className="space-y-1.5">
                 {activeTasks.slice(0, 5).map(task => (
@@ -592,7 +597,7 @@ const Index = () => {
           )}
 
           {/* Ambient sounds */}
-          <div className="space-y-2">
+          <div className="animate-slide-up space-y-2" style={{ animationDelay: '0.14s' }}>
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ambient Sounds</p>
             <AmbientSounds />
           </div>
@@ -601,23 +606,28 @@ const Index = () => {
 
       // NOTES ──────────────────────────────────────────────────────
       case 'notes': return (
-        <div className="space-y-6 animate-fade-in">
-          <div>
+        <div className="space-y-6">
+          <div className="animate-slide-up" style={{ animationDelay: '0s' }}>
             <h1 className="text-2xl font-bold text-foreground">Notes</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Quick captures, ideas, anything.</p>
           </div>
-          <QuickNotes />
+          <div className="animate-slide-up" style={{ animationDelay: '0.06s' }}>
+            <QuickNotes />
+          </div>
         </div>
       );
 
       // STATS ──────────────────────────────────────────────────────
       case 'stats': return (
-        <div className="space-y-5 animate-fade-in">
-          <div>
+        <div className="space-y-5">
+          <div className="animate-slide-up" style={{ animationDelay: '0s' }}>
             <h1 className="text-2xl font-bold text-foreground">Stats</h1>
             <p className="text-sm text-muted-foreground mt-0.5">Your progress at a glance.</p>
           </div>
-          <AIDailyBrief tasks={tasks} userName={userName} />
+          <div className="animate-slide-up" style={{ animationDelay: '0.06s' }}>
+            <AIDailyBrief tasks={tasks} userName={userName} />
+          </div>
+          <div className="animate-slide-up" style={{ animationDelay: '0.1s' }}>
           {tasks.length > 0 ? (
             <ProgressTracker tasks={tasks} />
           ) : (
@@ -627,7 +637,8 @@ const Index = () => {
               <p className="text-xs mt-1">Complete some tasks to see your stats</p>
             </div>
           )}
-          <div className="rounded-xl border border-border/50 overflow-hidden">
+          </div>
+          <div className="animate-slide-up rounded-xl border border-border/50 overflow-hidden" style={{ animationDelay: '0.14s' }}>
             <button
               onClick={() => setSubjectsOpen(v => !v)}
               className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
