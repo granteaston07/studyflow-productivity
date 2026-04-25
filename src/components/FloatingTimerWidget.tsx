@@ -33,7 +33,7 @@ export function FloatingTimerWidget({
   return (
     <button
       onClick={onGoToFocus}
-      className="fixed bottom-20 right-3 md:bottom-6 md:right-4 z-40 flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-card border border-border/60 shadow-lg hover:shadow-xl hover:border-primary/30 transition-all duration-200 group"
+      className="fixed bottom-20 right-3 md:bottom-6 md:right-4 z-40 flex items-center gap-2.5 px-3 py-2.5 rounded-2xl bg-card border border-border/60 shadow-md hover:border-primary/30 transition-colors duration-150 group animate-slide-up"
       title="Go to Focus timer"
     >
       {/* Mini ring */}
@@ -47,7 +47,7 @@ export function FloatingTimerWidget({
             strokeLinecap="round"
             strokeDasharray={RING_CIRC}
             strokeDashoffset={dashOffset}
-            style={{ transition: 'stroke-dashoffset 1s linear' }}
+            style={{ transition: 'stroke-dashoffset 1s cubic-bezier(0, 0, 0.2, 1)' }}
           />
         </svg>
         <div className="absolute inset-0 flex items-center justify-center">

@@ -93,7 +93,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
         <div className="flex flex-col sm:flex-row gap-4 animate-fade-in" style={{ animationDelay: '0.6s' }}>
           <Button 
             onClick={onReset}
-            className="flex-1 h-12 text-lg font-semibold hover:scale-105 transition-all duration-300"
+            className="flex-1 h-12 text-lg font-semibold transition-colors duration-150"
           >
             <RotateCcw className="w-5 h-5 mr-2" />
             Continue Study Session
@@ -101,7 +101,7 @@ const TimerCelebration = ({ isVisible, onDismiss, onReset }: TimerCelebrationPro
           <Button 
             variant="outline" 
             onClick={onDismiss}
-            className="flex-1 h-12 text-lg font-semibold hover:scale-105 transition-all duration-300"
+            className="flex-1 h-12 text-lg font-semibold transition-colors duration-150"
           >
             Take a Break
           </Button>

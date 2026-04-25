@@ -190,7 +190,7 @@ export function TaskCard({
     <>
       <Card className={cn(
         "border border-border/50 bg-card/50 backdrop-blur-sm animate-fade-in overflow-hidden",
-        !isReorderMode && "transition-all duration-200 hover:shadow-md hover:border-primary/20",
+        !isReorderMode && "transition-colors duration-150 hover:border-primary/20",
         selected && "border-primary/40 bg-primary/5",
         isCompleting && "animate-task-complete",
         isDeleting && "animate-task-poof",
@@ -202,7 +202,7 @@ export function TaskCard({
             checked={task.completed}
             onCheckedChange={handleToggle}
             className={cn(
-              "w-5 h-5 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all duration-300",
+              "w-5 h-5 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success transition-colors duration-150",
               isCompleting && "animate-checkbox-check"
             )}
           />

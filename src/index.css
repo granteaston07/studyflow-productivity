@@ -153,47 +153,43 @@
   }
 
   .hover-lift {
-    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
+    @apply transition-all duration-150 hover:opacity-80;
   }
 
   .animate-slide-up {
-    animation: slide-up 0.35s ease-out forwards;
+    animation: slide-up 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .animate-fade-in {
-    animation: fade-in 0.3s ease-out forwards;
+    animation: fade-in 0.22s cubic-bezier(0, 0, 0.2, 1) both;
   }
 
   .animate-scale-in {
-    animation: scale-in 0.25s ease-out forwards;
+    animation: scale-in 0.18s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .animate-pulse-glow {
     animation: pulse-glow 2.5s ease-in-out infinite;
   }
 
-  .animate-bounce-gentle {
-    animation: bounce-gentle 2s ease-in-out infinite;
-  }
-
   .animate-task-complete {
-    animation: task-complete 0.7s ease-out forwards;
+    animation: task-complete 0.4s cubic-bezier(0.4, 0, 1, 1) forwards;
   }
 
   .animate-task-poof {
-    animation: task-poof 0.45s ease-out forwards;
+    animation: task-poof 0.3s cubic-bezier(0.4, 0, 1, 1) forwards;
   }
 
   .animate-task-undo {
-    animation: task-undo 0.35s ease-out;
+    animation: task-undo 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .animate-checkbox-check {
-    animation: checkbox-check 0.25s ease-out;
+    animation: checkbox-check 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .nav-item {
-    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-accent hover:text-accent-foreground cursor-pointer select-none;
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground transition-colors duration-150 hover:bg-muted/60 hover:text-foreground cursor-pointer select-none;
   }
 
   .nav-item-active {
@@ -206,71 +202,53 @@
 }
 
 @keyframes slide-up {
-  from { transform: translateY(16px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(10px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0);   }
 }
 
 @keyframes scale-in {
-  from { transform: scale(0.94); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from { transform: scale(0.97); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
-  50% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
-}
-
-@keyframes bounce-gentle {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
 }
 
 @keyframes task-complete {
-  0% { transform: translateY(0); opacity: 1; }
-  40% { transform: translateY(0); opacity: 1; }
-  100% { transform: translateY(80px); opacity: 0; }
+  0%   { transform: translateY(0);    opacity: 1; }
+  30%  { transform: translateY(0);    opacity: 1; }
+  100% { transform: translateY(12px); opacity: 0; }
 }
 
 @keyframes checkbox-check {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.25); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1);    }
+  40%  { transform: scale(1.18); }
+  100% { transform: scale(1);    }
 }
 
 @keyframes task-poof {
-  0% { transform: scale(1) rotate(0deg); opacity: 1; }
-  35% { transform: scale(1.08) rotate(1.5deg); opacity: 0.8; }
-  65% { transform: scale(0.92) rotate(-1.5deg); opacity: 0.4; }
-  100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
+  0%   { transform: scale(1);    opacity: 1; }
+  100% { transform: scale(0.94); opacity: 0; }
 }
 
 @keyframes task-undo {
-  0% { transform: translateY(-16px) scale(0.96); opacity: 0; }
-  60% { transform: translateY(-3px) scale(1.01); opacity: 0.8; }
-  100% { transform: translateY(0) scale(1); opacity: 1; }
+  0%   { transform: translateY(-8px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
 }
 
 @keyframes accordion-down {
   from { height: 0; }
-  to { height: var(--radix-accordion-content-height); }
+  to   { height: var(--radix-accordion-content-height); }
 }
 
 @keyframes accordion-up {
   from { height: var(--radix-accordion-content-height); }
-  to { height: 0; }
-}
-
-@keyframes wiggle {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(3deg); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
+  to   { height: 0; }
 }

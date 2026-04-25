@@ -207,7 +207,7 @@ const Index = () => {
               </div>
               <div className="space-y-2">
                 {activeTasks.slice(0, 3).map((task, i) => (
-                  <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.06}s` }}>
+                  <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
                     <TaskCard
                       task={task}
                       onToggle={handleToggleTask}
@@ -360,7 +360,7 @@ const Index = () => {
                   ) : (
                     <div className="space-y-2">
                       {activeTasks.sort((a, b) => a.sortOrder - b.sortOrder).map((task, i) => (
-                        <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.05}s` }}>
+                        <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
                           <TaskCard
                             task={task}
                             onToggle={handleToggleTask}
@@ -389,7 +389,7 @@ const Index = () => {
                     {completedTasks
                       .sort((a, b) => (b.completedAt || b.updatedAt).getTime() - (a.completedAt || a.updatedAt).getTime())
                       .map((task, i) => (
-                        <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.04}s` }}>
+                        <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
                           <TaskCard
                             task={task}
                             onToggle={handleToggleTask}
