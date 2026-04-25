@@ -270,3 +270,21 @@
   from { height: var(--radix-accordion-content-height); }
   to   { height: 0; }
 }
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior-y: none;
+  }
+}
+
+@layer utilities {
+  .scroll-ios {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
