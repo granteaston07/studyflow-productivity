@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { Play, Pause, RotateCcw, Coffee, Brain, Plus } from "lucide-react";
 import { SmartFocusTimer } from "@/components/SmartFocusTimer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 interface TimerSession {
   type: 'work' | 'break';
-  duration: number; // in minutes
+  duration: number;
   label: string;
 }
 
@@ -29,243 +27,190 @@ interface FocusTimerProps {
   selectedTask?: any;
 }
 
-const AI_SUGGESTED_SESSIONS: TimerSession[] = [
-  { type: 'work', duration: 25, label: 'Homework' },
-  { type: 'work', duration: 45, label: 'Lock In' },
-  { type: 'work', duration: 15, label: 'Quick Task' },
+const SESSIONS: TimerSession[] = [
+  { type: 'work', duration: 25, label: 'Focus' },
+  { type: 'work', duration: 45, label: 'Deep Work' },
+  { type: 'work', duration: 15, label: 'Quick' },
   { type: 'break', duration: 5, label: 'Short Break' },
   { type: 'break', duration: 15, label: 'Long Break' },
 ];
 
-export function FocusTimer({ timerActive, timeRemaining, timerPaused, onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer, selectedSession: parentSelectedSession, onSessionChange, selectedTask }: FocusTimerProps) {
-  const [selectedSession, setSelectedSession] = useState<TimerSession>(parentSelectedSession || AI_SUGGESTED_SESSIONS[0]);
+const CIRCUMFERENCE = 2 * Math.PI * 54; // r=54
+
+export function FocusTimer({
+  timerActive, timeRemaining, timerPaused,
+  onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer,
+  selectedSession: parentSelectedSession, onSessionChange, selectedTask
+}: FocusTimerProps) {
+  const [selectedSession, setSelectedSession] = useState<TimerSession>(parentSelectedSession || SESSIONS[0]);
   const [customMinutes, setCustomMinutes] = useState(25);
   const [customType, setCustomType] = useState<'work' | 'break'>('work');
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  // Update local state when parent session changes
   useEffect(() => {
-    if (parentSelectedSession) {
-      setSelectedSession(parentSelectedSession);
-    }
+    if (parentSelectedSession) setSelectedSession(parentSelectedSession);
   }, [parentSelectedSession]);
 
-  // Update parent timer when session changes (only if timer is not active)
   useEffect(() => {
     if (!timerActive || timerPaused) {
       onUpdateDuration(selectedSession.duration * 60);
       onSessionChange?.(selectedSession);
     }
-  }, [selectedSession, onUpdateDuration, onSessionChange, timerActive, timerPaused]);
+  }, [selectedSession]);
 
   const toggleTimer = () => {
-    if (!timerActive) {
-      onStartTimer(selectedSession.duration * 60);
-    } else {
-      onPauseTimer();
-    }
-  };
-
-  const resetTimer = () => {
-    onResetTimer();
+    if (!timerActive) onStartTimer(selectedSession.duration * 60);
+    else onPauseTimer();
   };
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  const getProgress = () => {
-    const totalSeconds = selectedSession.duration * 60;
-    return ((totalSeconds - timeRemaining) / totalSeconds) * 100;
-  };
+  const total = selectedSession.duration * 60;
+  const elapsed = total - timeRemaining;
+  const progress = Math.max(0, Math.min(1, elapsed / total));
+  const dashOffset = CIRCUMFERENCE * (1 - progress);
 
-  const getSessionIcon = (type: 'work' | 'break') => {
-    return type === 'work' ? Brain : Coffee;
-  };
-
-  const getSessionColor = (type: 'work' | 'break') => {
-    return type === 'work' ? 'text-primary bg-primary-light' : 'text-success bg-success-light';
-  };
+  const isWork = selectedSession.type === 'work';
 
   const handleCustomTimer = () => {
-    const customSession: TimerSession = {
+    const s: TimerSession = {
       type: customType,
       duration: customMinutes,
       label: `Custom ${customType === 'work' ? 'Focus' : 'Break'}`
     };
-    setSelectedSession(customSession);
+    setSelectedSession(s);
     setDialogOpen(false);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Brain className="h-5 w-5 text-primary" />
-          Focus Timer
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* AI Suggested Sessions */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium"><span className="ai-gradient-text-subtle">AI Suggested Sessions</span></p>
-            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
-                  Custom
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Create Custom Timer</DialogTitle>
-                  <DialogDescription>
-                    Set up a custom timer with your preferred duration and type.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="timer-type">Timer Type</Label>
-                    <Select value={customType} onValueChange={(value) => setCustomType(value as 'work' | 'break')}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="work">Focus Session</SelectItem>
-                        <SelectItem value="break">Break Time</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="timer-minutes">Duration (minutes)</Label>
-                    <Input
-                      id="timer-minutes"
-                      type="number"
-                      min="1"
-                      max="180"
-                      value={customMinutes}
-                      onChange={(e) => setCustomMinutes(parseInt(e.target.value) || 1)}
-                    />
-                  </div>
-                  <Button onClick={handleCustomTimer} className="w-full">
-                    Create Timer
-                  </Button>
+    <div className="space-y-6">
+      {/* Session picker */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Session</p>
+          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground hover:text-foreground">
+                <Plus className="h-3 w-3" /> Custom
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Custom Timer</DialogTitle>
+                <DialogDescription>Set a custom duration and session type.</DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label>Type</Label>
+                  <Select value={customType} onValueChange={(v) => setCustomType(v as 'work' | 'break')}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="work">Focus Session</SelectItem>
+                      <SelectItem value="break">Break Time</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </DialogContent>
-            </Dialog>
-          </div>
-          <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
-            <SmartFocusTimer
-              selectedTask={selectedTask}
-              onSelectSession={(session) => {
-                setSelectedSession(session);
-                onUpdateDuration(session.duration * 60);
-              }}
-              selectedSession={selectedSession}
-              timerActive={timerActive}
-              timerPaused={timerPaused}
-            />
-            
-            {AI_SUGGESTED_SESSIONS.map((session, index) => {
-              const Icon = getSessionIcon(session.type);
-              return (
-                <Button
-                  key={index}
-                  variant={selectedSession === session ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => {
-                    if (!timerActive || timerPaused) {
-                      setSelectedSession(session);
-                      onUpdateDuration(session.duration * 60);
-                    }
-                  }}
-                  disabled={timerActive && !timerPaused}
-                  className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm p-2 sm:p-3"
-                >
-                  <Icon className="h-3 w-3 sm:h-4 sm:w-4" />
-                  <span className="truncate">{session.label}</span>
-                  <Badge 
-                    variant="secondary" 
-                    className={`text-xs ${getSessionColor(session.type)} px-1 sm:px-2`}
-                  >
-                    {session.duration}m
-                  </Badge>
-                </Button>
-              );
-            })}
-          </div>
+                <div className="space-y-2">
+                  <Label>Duration (minutes)</Label>
+                  <Input type="number" min="1" max="180" value={customMinutes}
+                    onChange={(e) => setCustomMinutes(parseInt(e.target.value) || 1)} />
+                </div>
+                <Button onClick={handleCustomTimer} className="w-full">Set Timer</Button>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        {/* Timer Display */}
-        <div className="text-center space-y-3 sm:space-y-4">
-          <div className="space-y-2">
-            <Badge 
-              variant="secondary" 
-              className={`${getSessionColor(selectedSession.type)} px-2 sm:px-3 py-1 text-xs sm:text-sm`}
-            >
-              {selectedSession.label}
-            </Badge>
-            <div className="text-4xl sm:text-6xl font-bold text-primary tabular-nums">
+        <div className="flex flex-wrap gap-2">
+          <SmartFocusTimer
+            selectedTask={selectedTask}
+            onSelectSession={(s) => { setSelectedSession(s); onUpdateDuration(s.duration * 60); }}
+            selectedSession={selectedSession}
+            timerActive={timerActive}
+            timerPaused={timerPaused}
+          />
+          {SESSIONS.map((s, i) => {
+            const Icon = s.type === 'work' ? Brain : Coffee;
+            const active = selectedSession === s || (selectedSession.label === s.label && selectedSession.duration === s.duration);
+            return (
+              <button key={i}
+                onClick={() => {
+                  if (!timerActive || timerPaused) {
+                    setSelectedSession(s);
+                    onUpdateDuration(s.duration * 60);
+                  }
+                }}
+                disabled={timerActive && !timerPaused}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all duration-150 ${
+                  active
+                    ? 'bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/20'
+                    : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground disabled:opacity-40'
+                }`}>
+                <Icon className="h-3 w-3" />
+                {s.label}
+                <span className="opacity-70">{s.duration}m</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Circular timer */}
+      <div className="flex flex-col items-center gap-5">
+        <div className="relative">
+          <svg width="140" height="140" viewBox="0 0 128 128" className="-rotate-90">
+            <circle cx="64" cy="64" r="54" fill="none" strokeWidth="8" className="stroke-muted" />
+            <circle cx="64" cy="64" r="54" fill="none" strokeWidth="8"
+              stroke={isWork ? 'hsl(var(--primary))' : 'hsl(var(--success))'}
+              strokeLinecap="round"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+              style={{ transition: 'stroke-dashoffset 0.5s ease' }}
+            />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <div className="text-3xl font-black text-foreground tabular-nums tracking-tight">
               {formatTime(timeRemaining)}
             </div>
-          </div>
-          
-          {/* Progress Bar */}
-          <div className="space-y-1 sm:space-y-2">
-            <Progress value={getProgress()} className="h-1.5 sm:h-2" />
-            <p className="text-xs sm:text-sm text-muted-foreground">
-              {Math.round(getProgress())}% complete
-            </p>
+            <div className="text-xs text-muted-foreground mt-0.5">
+              {Math.round(progress * 100)}%
+            </div>
           </div>
         </div>
+
+        <Badge variant="secondary"
+          className={`${isWork ? 'bg-primary/10 text-primary border-primary/20' : 'bg-success/10 text-success border-success/20'} border px-3 py-1`}>
+          {isWork ? <Brain className="h-3 w-3 mr-1.5" /> : <Coffee className="h-3 w-3 mr-1.5" />}
+          {selectedSession.label}
+        </Badge>
+
+        {selectedTask && (
+          <p className="text-xs text-muted-foreground text-center max-w-[180px] truncate">
+            Working on: <span className="text-foreground font-medium">{selectedTask.title}</span>
+          </p>
+        )}
 
         {/* Controls */}
-        <div className="flex justify-center gap-2 sm:gap-3">
-          <Button
-            onClick={toggleTimer}
-            size="lg"
-            className="flex items-center gap-1 sm:gap-2 px-4 sm:px-8 text-sm sm:text-base"
-          >
-            {!timerActive || timerPaused ? (
-              <>
-                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
-                Start
-              </>
-            ) : (
-              <>
-                <Pause className="h-4 w-4 sm:h-5 sm:w-5" />
-                Pause
-              </>
-            )}
+        <div className="flex items-center gap-3">
+          <Button onClick={toggleTimer} size="lg"
+            className={`h-12 px-8 font-semibold gap-2 shadow-md ${
+              isWork ? 'bg-primary hover:bg-primary/90 shadow-primary/20' : 'bg-success hover:bg-success/90 shadow-success/20'
+            } text-primary-foreground`}>
+            {!timerActive || timerPaused ? <><Play className="h-4 w-4" /> Start</> : <><Pause className="h-4 w-4" /> Pause</>}
           </Button>
-          
-          <Button
-            onClick={resetTimer}
-            variant="outline"
-            size="lg"
-            className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 text-sm sm:text-base"
-          >
-            <RotateCcw className="h-3 w-3 sm:h-4 sm:w-4" />
-            Reset
+          <Button onClick={onResetTimer} variant="outline" size="icon" className="h-12 w-12 rounded-xl border-border/60">
+            <RotateCcw className="h-4 w-4" />
           </Button>
         </div>
 
-        {/* Session Info */}
-        <div className="p-3 sm:p-4 bg-muted/50 rounded-lg text-center">
-          <p className="text-xs sm:text-sm text-muted-foreground mb-1">
-            {selectedSession.type === 'work' ? 'Focus Session' : 'Break Time'}
-          </p>
-          <p className="text-xs text-muted-foreground hidden sm:block">
-            {selectedSession.type === 'work' 
-              ? 'Stay focused and minimize distractions'
-              : 'Take a break and recharge your mind'
-            }
-          </p>
-        </div>
-      </CardContent>
-    </Card>
+        <p className="text-xs text-muted-foreground text-center">
+          {isWork ? 'Stay focused. Minimize distractions.' : 'Take a real break. Step away.'}
+        </p>
+      </div>
+    </div>
   );
 }

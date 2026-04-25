@@ -1,4 +1,5 @@
 import { useState } from "react";
+import React from "react";
 import { Plus, Calendar, BookOpen, Pencil } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,10 @@ import { toast } from "sonner";
 
 interface AddTaskDialogProps {
   onAddTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'sortOrder'>) => void;
+  children?: React.ReactNode;
 }
 
-export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
+export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
   const [open, setOpen] = useState(false);
   const [taskData, setTaskData] = useState({
     title: '',
@@ -100,12 +102,18 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg flex items-center gap-2">
-          <Plus className="h-4 w-4" />
-          Add Task
-        </Button>
-      </DialogTrigger>
+      {children ? (
+        <DialogTrigger asChild>
+          {React.isValidElement(children) ? children : <span>{children}</span>}
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <Button className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Task
+          </Button>
+        </DialogTrigger>
+      )}
       
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

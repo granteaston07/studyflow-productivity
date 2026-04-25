@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { X } from "lucide-react";
+import { X, Pause, Play, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { Task } from "@/components/TaskCard";
+import { AmbientSounds } from "@/components/AmbientSounds";
 
 interface StudyModeProps {
   tasks: Task[];
@@ -15,202 +15,155 @@ interface StudyModeProps {
   selectedTaskTitle?: string;
 }
 
-const encouragingMessages = [
-  "You're doing amazing! Keep going! 🌟",
-  "Every small step counts towards your goals 📚",
-  "Focus brings clarity, clarity brings success ✨",
-  "You've got this! Stay strong and focused 💪",
-  "Learning is a journey, not a destination 🚀",
-  "Your future self will thank you for this effort 🎯",
-  "Great things never come from comfort zones 🔥",
-  "Progress over perfection, always 📈",
-  "You're building something incredible today 🏗️",
-  "Stay curious, stay focused, stay brilliant 🧠",
-  "Every expert was once a beginner 🌱",
-  "Your dedication is your superpower 💫",
-  "Consistency is the key to mastery 🔑",
-  "Small daily improvements lead to massive results 🌊",
-  "Your hard work is an investment in your future 💎",
-  "Knowledge grows when shared, keep learning 🌳",
-  "Challenges are opportunities in disguise 🎭",
-  "You're stronger than you think you are 💪",
-  "Every moment of struggle is building character 🏔️",
-  "Success is the sum of small efforts repeated 🔄",
-  "Your potential is unlimited, keep pushing 🚀",
-  "Today's effort is tomorrow's strength 💪",
-  "Focus on the process, not just the outcome 🎯",
-  "You're writing your success story right now ✍️",
-  "Persistence beats resistance every time 🏃‍♂️",
-  "Your mind is your most powerful tool 🧠",
-  "Every study session makes you smarter 📖",
-  "You're investing in the best version of yourself 💫",
-  "Knowledge is power, and you're gaining it 🔋",
-  "Your effort today shapes your tomorrow 🌅",
-  "Stay focused, stay determined, stay amazing 🔥",
-  "You're capable of more than you realize 🌟",
-  "Learning never stops, and neither do you 🔄",
-  "Your dedication inspires others around you 👥",
-  "Every challenge overcome makes you stronger 💪",
-  "You're building habits that will last a lifetime 🏗️"
+const MESSAGES = [
+  "Stay locked in. You've got this.",
+  "Every minute counts. Keep going.",
+  "Focus beats talent when talent doesn't focus.",
+  "Your future self is watching. Don't let them down.",
+  "Progress over perfection.",
+  "One task at a time. That's all it takes.",
+  "The work you do now is the version of you later.",
+  "Hard work now. Results later.",
+  "You're building something real right now.",
+  "Keep the momentum going.",
 ];
 
-export const StudyMode = ({ tasks, timerActive, timeRemaining, timerPaused, onExit, onPauseTimer, onResetTimer, selectedTaskTitle }: StudyModeProps) => {
-  const [currentMessage, setCurrentMessage] = useState(Math.floor(Math.random() * encouragingMessages.length));
+const CIRCUMFERENCE = 2 * Math.PI * 54;
+
+export const StudyMode = ({
+  tasks, timerActive, timeRemaining, timerPaused,
+  onExit, onPauseTimer, onResetTimer, selectedTaskTitle
+}: StudyModeProps) => {
+  const [msgIdx, setMsgIdx] = useState(Math.floor(Math.random() * MESSAGES.length));
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [sessionDuration] = useState(timeRemaining);
+  const [showSounds, setShowSounds] = useState(false);
 
-  // Rotate messages every 1 minute - pick random message
   useEffect(() => {
-    const messageInterval = setInterval(() => {
-      setCurrentMessage(Math.floor(Math.random() * encouragingMessages.length));
-    }, 60000);
-
-    return () => clearInterval(messageInterval);
+    const id = setInterval(() => setMsgIdx(Math.floor(Math.random() * MESSAGES.length)), 60000);
+    return () => clearInterval(id);
   }, []);
 
-  // Update current time every second
   useEffect(() => {
-    const timeInterval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timeInterval);
+    const id = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(id);
   }, []);
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true 
-    });
+  const formatClock = (d: Date) =>
+    d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  const formatTimer = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
   };
 
-  const formatTimerTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
+  const progress = sessionDuration > 0 ? Math.max(0, Math.min(1, (sessionDuration - timeRemaining) / sessionDuration)) : 0;
+  const dashOffset = CIRCUMFERENCE * (1 - progress);
+
+  const completedCount = tasks.filter(t => t.completed).length;
+  const completionPct = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with exit and theme toggle */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border/50">
-        <div className="flex items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium text-muted-foreground">Study Mode Active</span>
-          </div>
-          
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={onExit}
-              className="hover:bg-error/10 hover:text-error hover:border-error/30"
-            >
-              <X className="h-4 w-4 mr-2" />
-              Exit Study Mode
-            </Button>
-          </div>
+      {/* Subtle gradient overlay */}
+      <div className="fixed inset-0 bg-gradient-to-br from-primary/3 to-ai-primary/3 pointer-events-none" />
+
+      {/* Header */}
+      <header className="fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-6 border-b border-border/30 bg-background/80 backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-success rounded-full animate-pulse" />
+          <span className="text-sm font-medium text-muted-foreground">Study Mode</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <button onClick={() => setShowSounds(!showSounds)}
+            className="text-xs text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-lg hover:bg-muted/60 transition-all">
+            🎵 Sounds
+          </button>
+          <Button variant="ghost" size="sm" onClick={onExit}
+            className="text-muted-foreground hover:text-foreground h-8 gap-1.5 text-xs">
+            <X className="h-3.5 w-3.5" /> Exit
+          </Button>
         </div>
       </header>
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-6">
-        <div className="max-w-4xl w-full text-center space-y-8">
-          
-          {/* Current Time - Large Display */}
-          <div className="space-y-1">
-            <div className="text-7xl md:text-8xl font-bold text-foreground tracking-tight">
-              {formatTime(currentTime)}
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {currentTime.toLocaleDateString([], { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </div>
-          </div>
+      {/* Main */}
+      <main className="flex-1 flex flex-col items-center justify-center px-6 pt-20 pb-8 relative">
+        <div className="max-w-lg w-full text-center space-y-8">
 
-          {/* Encouraging Message */}
-          <div className="animate-fade-in">
-            <p className="text-xl md:text-2xl font-medium text-foreground leading-relaxed">
-              {encouragingMessages[currentMessage]}
+          {/* Clock */}
+          <div>
+            <div className="text-6xl md:text-8xl font-black text-foreground tabular-nums tracking-tight">
+              {formatClock(currentTime)}
+            </div>
+            <p className="text-sm text-muted-foreground mt-2">
+              {currentTime.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}
             </p>
           </div>
 
-          {/* Focused Task Name */}
+          {/* Message */}
+          <p className="text-lg md:text-xl font-medium text-muted-foreground leading-relaxed animate-fade-in" key={msgIdx}>
+            {MESSAGES[msgIdx]}
+          </p>
+
+          {/* Focused task */}
           {selectedTaskTitle && (
-            <div className="animate-fade-in">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">Focusing on</p>
-              <h2 className="text-2xl md:text-3xl font-semibold text-primary">{selectedTaskTitle}</h2>
+            <div className="animate-scale-in">
+              <p className="text-xs uppercase tracking-wider text-muted-foreground mb-1">Working on</p>
+              <h2 className="text-xl md:text-2xl font-bold text-foreground">{selectedTaskTitle}</h2>
             </div>
           )}
 
-          {/* Timer Display (if active) */}
+          {/* Timer ring (when active) */}
           {timerActive && (
-            <div className="space-y-3">
-              <div className="text-primary text-xs font-medium uppercase tracking-wide">
-                Focus Session Active
+            <div className="flex flex-col items-center gap-4 animate-scale-in">
+              <div className="relative">
+                <svg width="140" height="140" viewBox="0 0 128 128" className="-rotate-90">
+                  <circle cx="64" cy="64" r="54" fill="none" strokeWidth="6" className="stroke-muted" />
+                  <circle cx="64" cy="64" r="54" fill="none" strokeWidth="6"
+                    stroke="hsl(var(--primary))"
+                    strokeLinecap="round"
+                    strokeDasharray={CIRCUMFERENCE}
+                    strokeDashoffset={dashOffset}
+                    style={{ transition: 'stroke-dashoffset 1s linear' }}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="text-2xl font-black text-foreground tabular-nums">{formatTimer(timeRemaining)}</div>
+                  <div className="text-xs text-muted-foreground">remaining</div>
+                </div>
               </div>
-              <div className="text-5xl md:text-6xl font-bold text-primary">
-                {formatTimerTime(timeRemaining)}
-              </div>
-              <div className="flex justify-center gap-3">
-                <Button
-                  onClick={onPauseTimer}
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-primary/10 hover:text-primary hover:border-primary/30"
-                >
-                  {timerPaused ? 'Resume' : 'Pause'}
+              <div className="flex gap-2">
+                <Button onClick={onPauseTimer} variant="outline" size="sm" className="gap-1.5 h-9">
+                  {timerPaused ? <><Play className="h-3.5 w-3.5" /> Resume</> : <><Pause className="h-3.5 w-3.5" /> Pause</>}
                 </Button>
-                <Button
-                  onClick={onResetTimer}
-                  variant="outline"
-                  size="sm"
-                  className="hover:bg-error/10 hover:text-error hover:border-error/30"
-                >
-                  Reset
+                <Button onClick={onResetTimer} variant="ghost" size="sm" className="h-9">
+                  <RotateCcw className="h-3.5 w-3.5" />
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Simple Progress Percentage */}
-          <div className="space-y-2">
-            <div className="text-5xl md:text-6xl font-bold text-primary">
-              {tasks.length > 0 ? Math.round((tasks.filter(t => t.completed).length / tasks.length) * 100) : 0}%
-            </div>
-            <div className="text-xs text-muted-foreground">
-              {tasks.filter(t => t.completed).length} of {tasks.length} tasks completed
-            </div>
-          </div>
-
-          {/* Minimal task summary */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-primary">{tasks.length}</div>
-              <div className="text-xs text-muted-foreground">Total Tasks</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-success">{tasks.filter(t => t.completed).length}</div>
-              <div className="text-xs text-muted-foreground">Completed</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-warning">{tasks.filter(t => t.status === 'in-progress').length}</div>
-              <div className="text-xs text-muted-foreground">In Progress</div>
-            </div>
-            <div className="space-y-1">
-              <div className="text-2xl font-bold text-error">{tasks.filter(t => t.status === 'overdue').length}</div>
-              <div className="text-xs text-muted-foreground">Overdue</div>
-            </div>
+          {/* Progress */}
+          <div className="text-center">
+            <div className="text-4xl font-black text-primary">{completionPct}%</div>
+            <p className="text-sm text-muted-foreground mt-1">
+              {completedCount} of {tasks.length} tasks done
+            </p>
           </div>
 
         </div>
       </main>
+
+      {/* Ambient sounds panel */}
+      {showSounds && (
+        <div className="fixed bottom-0 inset-x-0 bg-card/90 backdrop-blur-xl border-t border-border/50 p-4 z-50 animate-slide-up">
+          <div className="max-w-lg mx-auto">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Ambient Sounds</p>
+            <AmbientSounds />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,135 +2,117 @@
 @tailwind components;
 @tailwind utilities;
 
-/* StudyFlow Design System - Dark Mode AI-Powered Student Productivity
-All colors MUST be HSL for consistency */
-
 @layer base {
   :root {
-    /* Light mode core backgrounds - WHITE */
     --background: 0 0% 100%;
-    --foreground: 222 84% 5%;
-    --surface: 0 0% 98%;
+    --foreground: 240 10% 8%;
+    --surface: 240 5% 97%;
 
-    /* Card components */
     --card: 0 0% 100%;
-    --card-foreground: 222 84% 5%;
+    --card-foreground: 240 10% 8%;
 
-    /* Interactive elements */
     --popover: 0 0% 100%;
-    --popover-foreground: 222 84% 5%;
+    --popover-foreground: 240 10% 8%;
 
-    /* Primary brand - Electric Blue */
-    --primary: 217 91% 55%;
+    --primary: 263 70% 58%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 217 91% 85%;
-    --primary-dark: 217 91% 35%;
+    --primary-light: 263 70% 92%;
+    --primary-dark: 263 70% 42%;
 
-    /* Task status colors - Light mode optimized */
-    --success: 142 69% 45%;
+    --success: 152 60% 42%;
     --success-foreground: 0 0% 100%;
-    --success-light: 142 69% 90%;
-    
-    --warning: 38 92% 50%;
-    --warning-foreground: 0 0% 100%; 
-    --warning-light: 38 92% 90%;
-    
+    --success-light: 152 60% 92%;
+
+    --warning: 38 90% 50%;
+    --warning-foreground: 0 0% 100%;
+    --warning-light: 38 90% 92%;
+
     --error: 0 84% 55%;
     --error-foreground: 0 0% 100%;
-    --error-light: 0 84% 95%;
+    --error-light: 0 84% 94%;
 
-    /* Secondary elements */
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 15%;
+    --secondary: 240 5% 94%;
+    --secondary-foreground: 240 10% 20%;
 
-    /* Muted elements */
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 240 5% 94%;
+    --muted-foreground: 240 5% 48%;
 
-    /* Accent for highlights */
-    --accent: 210 40% 96%;
-    --accent-foreground: 222 47% 15%;
+    --accent: 263 70% 92%;
+    --accent-foreground: 263 70% 35%;
 
-    /* Borders and inputs */
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 217 91% 55%;
+    --border: 240 5% 88%;
+    --input: 240 5% 88%;
+    --ring: 263 70% 58%;
 
-    /* AI Theme colors */
-    --ai-primary: 280 100% 70%;
-    --ai-secondary: 260 100% 80%;
-    --ai-accent: 300 100% 75%;
+    --ai-primary: 280 90% 65%;
+    --ai-secondary: 263 80% 72%;
+    --ai-accent: 300 80% 70%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 263 70% 58%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 93%;
+    --sidebar-accent-foreground: 240 10% 10%;
+    --sidebar-border: 240 5% 90%;
+    --sidebar-ring: 263 70% 58%;
   }
 
   .dark {
-    /* Dark mode core backgrounds */
-    --background: 222 47% 8%;
-    --foreground: 210 40% 95%;
-    --surface: 222 47% 11%;
+    --background: 240 8% 6%;
+    --foreground: 240 5% 95%;
+    --surface: 240 7% 9%;
 
-    /* Card components */
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 95%;
+    --card: 240 7% 10%;
+    --card-foreground: 240 5% 95%;
 
-    /* Interactive elements */
-    --popover: 222 47% 11%;
-    --popover-foreground: 210 40% 95%;
+    --popover: 240 7% 10%;
+    --popover-foreground: 240 5% 95%;
 
-    /* Primary brand - Electric Blue for dark */
-    --primary: 217 91% 65%;
-    --primary-foreground: 222 47% 8%;
-    --primary-light: 217 91% 25%;
-    --primary-dark: 217 91% 45%;
+    --primary: 263 75% 65%;
+    --primary-foreground: 240 8% 6%;
+    --primary-light: 263 40% 18%;
+    --primary-dark: 263 75% 48%;
 
-    /* Task status colors - Dark mode optimized */
-    --success: 142 69% 58%;
-    --success-foreground: 222 47% 8%;
-    --success-light: 142 69% 15%;
-    
-    --warning: 38 100% 67%;
-    --warning-foreground: 222 47% 8%; 
-    --warning-light: 38 100% 15%;
-    
-    --error: 0 91% 71%;
-    --error-foreground: 222 47% 8%;
-    --error-light: 0 91% 15%;
+    --success: 152 60% 55%;
+    --success-foreground: 240 8% 6%;
+    --success-light: 152 40% 12%;
 
-    /* Secondary elements */
-    --secondary: 217 32% 17%;
-    --secondary-foreground: 210 40% 95%;
+    --warning: 38 90% 60%;
+    --warning-foreground: 240 8% 6%;
+    --warning-light: 38 60% 12%;
 
-    /* Muted elements */
-    --muted: 217 32% 17%;
-    --muted-foreground: 215 20% 65%;
+    --error: 0 84% 65%;
+    --error-foreground: 240 8% 6%;
+    --error-light: 0 60% 12%;
 
-    /* Accent for highlights */
-    --accent: 217 32% 17%;
-    --accent-foreground: 210 40% 95%;
+    --secondary: 240 6% 15%;
+    --secondary-foreground: 240 5% 85%;
 
-    /* Borders and inputs */
-    --border: 217 32% 17%;
-    --input: 217 32% 17%;
-    --ring: 217 91% 65%;
+    --muted: 240 6% 14%;
+    --muted-foreground: 240 5% 55%;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --accent: 263 40% 18%;
+    --accent-foreground: 263 75% 75%;
+
+    --border: 240 6% 15%;
+    --input: 240 6% 15%;
+    --ring: 263 75% 65%;
+
+    --ai-primary: 280 90% 72%;
+    --ai-secondary: 263 80% 78%;
+    --ai-accent: 300 80% 74%;
+
+    --sidebar-background: 240 7% 8%;
+    --sidebar-foreground: 240 5% 90%;
+    --sidebar-primary: 263 75% 65%;
+    --sidebar-primary-foreground: 240 8% 6%;
+    --sidebar-accent: 240 6% 14%;
+    --sidebar-accent-foreground: 240 5% 90%;
+    --sidebar-border: 240 6% 14%;
+    --sidebar-ring: 263 75% 65%;
   }
 }
 
@@ -140,161 +122,155 @@ All colors MUST be HSL for consistency */
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
   }
 }
 
 @layer utilities {
-  /* AI Gradient Text Effects */
   .ai-gradient-text {
     @apply bg-gradient-to-r from-ai-primary via-ai-secondary to-ai-accent bg-clip-text text-transparent font-medium;
   }
-  
+
   .ai-gradient-text-subtle {
     @apply bg-gradient-to-r from-ai-primary/80 via-ai-secondary/70 to-ai-accent/80 bg-clip-text text-transparent;
   }
-  
+
   .ai-gradient-text-accent {
     @apply bg-gradient-to-r from-ai-accent via-ai-primary to-ai-secondary bg-clip-text text-transparent font-semibold;
   }
 
-  /* Enhanced animations and effects */
-  .animate-bounce-gentle {
-    animation: bounce-gentle 2s infinite;
+  .primary-gradient-text {
+    @apply bg-gradient-to-r from-primary to-ai-primary bg-clip-text text-transparent;
   }
-  
-  .animate-pulse-glow {
-    animation: pulse-glow 2s infinite;
+
+  .glass {
+    @apply bg-card/70 backdrop-blur-xl border border-border/50;
   }
-  
-  .animate-scale-in {
-    animation: scale-in 0.3s ease-out;
-  }
-  
-  .animate-slide-up {
-    animation: slide-up 0.4s ease-out;
-  }
-  
+
   .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-lg;
-  }
-  
-  .gradient-button {
-    @apply bg-gradient-to-r from-primary to-ai-primary hover:from-primary-dark hover:to-ai-primary/90 text-white font-medium transition-all duration-300 hover:shadow-lg hover:scale-105;
-  }
-  
-  .stats-card {
-    @apply bg-gradient-to-br p-4 rounded-lg text-center transition-all duration-300 hover:scale-105 hover:shadow-lg;
-  }
-  
-  .stats-card-primary {
-    @apply stats-card from-primary/20 to-primary/10 text-primary border border-primary/20;
-  }
-  
-  .stats-card-success {
-    @apply stats-card from-success/20 to-success/10 text-success border border-success/20;
-  }
-  
-  .stats-card-warning {
-    @apply stats-card from-warning/20 to-warning/10 text-warning border border-warning/20;
-  }
-  
-  .stats-card-error {
-    @apply stats-card from-error/20 to-error/10 text-error border border-error/20;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
   }
 
-  /* Task completion animation */
+  .animate-slide-up {
+    animation: slide-up 0.35s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fade-in 0.3s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.25s ease-out forwards;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2.5s ease-in-out infinite;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounce-gentle 2s ease-in-out infinite;
+  }
+
   .animate-task-complete {
-    animation: task-complete 0.8s ease-out forwards;
+    animation: task-complete 0.7s ease-out forwards;
   }
 
-  /* Checkbox check animation */
-  .animate-checkbox-check {
-    animation: checkbox-check 0.3s ease-out;
-  }
-
-  /* Task deletion poof animation */
   .animate-task-poof {
-    animation: task-poof 0.5s ease-out forwards;
+    animation: task-poof 0.45s ease-out forwards;
   }
 
-  /* Task undo animation */
   .animate-task-undo {
-    animation: task-undo 0.4s ease-out;
+    animation: task-undo 0.35s ease-out;
   }
+
+  .animate-checkbox-check {
+    animation: checkbox-check 0.25s ease-out;
+  }
+
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground transition-all duration-150 hover:bg-accent hover:text-accent-foreground cursor-pointer select-none;
+  }
+
+  .nav-item-active {
+    @apply bg-primary/10 text-primary font-semibold;
+  }
+
+  .streak-fire {
+    filter: drop-shadow(0 0 8px hsl(38 90% 60% / 0.6));
+  }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { transform: scale(0.94); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--primary) / 0); }
+  50% { box-shadow: 0 0 0 8px hsl(var(--primary) / 0); }
 }
 
 @keyframes bounce-gentle {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-3px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px currentColor; }
-  50% { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
-}
-
-@keyframes scale-in {
-  0% { transform: scale(0.95); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes slide-up {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-4px); }
 }
 
 @keyframes task-complete {
-  0% { 
-    transform: translateY(0);
-    opacity: 1;
-  }
-  30% { 
-    transform: translateY(0);
-    opacity: 1;
-  }
-  100% { 
-    transform: translateY(100px);
-    opacity: 0;
-  }
+  0% { transform: translateY(0); opacity: 1; }
+  40% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(80px); opacity: 0; }
 }
 
 @keyframes checkbox-check {
   0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
+  50% { transform: scale(1.25); }
   100% { transform: scale(1); }
 }
 
 @keyframes task-poof {
-  0% { 
-    transform: scale(1) rotate(0deg);
-    opacity: 1;
-  }
-  30% { 
-    transform: scale(1.1) rotate(2deg);
-    opacity: 0.8;
-  }
-  60% { 
-    transform: scale(0.9) rotate(-2deg);
-    opacity: 0.4;
-  }
-  100% { 
-    transform: scale(0.3) rotate(0deg);
-    opacity: 0;
-  }
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  35% { transform: scale(1.08) rotate(1.5deg); opacity: 0.8; }
+  65% { transform: scale(0.92) rotate(-1.5deg); opacity: 0.4; }
+  100% { transform: scale(0.2) rotate(0deg); opacity: 0; }
 }
 
 @keyframes task-undo {
-  0% { 
-    transform: translateY(-20px) scale(0.95);
-    opacity: 0;
-  }
-  50% { 
-    transform: translateY(-5px) scale(1.02);
-    opacity: 0.7;
-  }
-  100% { 
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
+  0% { transform: translateY(-16px) scale(0.96); opacity: 0; }
+  60% { transform: translateY(-3px) scale(1.01); opacity: 0.8; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
 }
