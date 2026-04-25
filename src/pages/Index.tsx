@@ -86,6 +86,11 @@ const Index = () => {
     }
   }, [tasks, selectedTaskId]);
 
+  // Must be before any early returns to satisfy Rules of Hooks
+  useEffect(() => {
+    if (!tasksLoading && tasks.length > 0) notifyDueToday(tasks);
+  }, [tasksLoading]);
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
     if (over && active.id !== over.id) {
@@ -187,11 +192,6 @@ const Index = () => {
   }
 
   const userName = user?.user_metadata?.display_name?.split(' ')[0] || guestName || undefined;
-
-  // Fire due-today notifications once tasks load
-  useEffect(() => {
-    if (!tasksLoading && tasks.length > 0) notifyDueToday(tasks);
-  }, [tasksLoading]);
   const streakCount = streak?.current_streak ?? 0;
   const selectedTask = selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined;
 
