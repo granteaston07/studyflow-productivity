@@ -765,51 +765,51 @@ const Index = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Mobile header */}
-        <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border/40 bg-card/40 backdrop-blur-sm flex-shrink-0">
+        <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border/40 bg-card/60 backdrop-blur-sm flex-shrink-0 pt-safe">
           <button
             onClick={() => setProfileOpen(true)}
-            className="flex items-center gap-2 hover:opacity-75 transition-opacity"
+            className="flex items-center gap-2 active:opacity-60 transition-opacity min-h-[44px] pr-2"
             title="Profile & Settings"
           >
-            <StudyFlowLogo size={24} />
-            <span className="font-bold text-foreground text-sm">StudyFlow</span>
+            <StudyFlowLogo size={26} />
+            <span className="font-bold text-foreground text-base">StudyFlow</span>
           </button>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1">
             {streakCount > 0 && (
-              <div className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 rounded-full px-2.5 py-1">
+              <div className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 rounded-full px-2.5 py-1.5">
                 <span className="streak-fire">🔥</span>
                 {streakCount}
               </div>
             )}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60 transition-all">
+              className="w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-muted/60 active:bg-muted/80 transition-all">
               {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
             {user ? (
               <button onClick={() => signOut()}
-                className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-error/10 hover:text-error transition-all">
+                className="w-10 h-10 flex items-center justify-center rounded-xl text-muted-foreground hover:bg-error/10 hover:text-error active:bg-error/20 transition-all">
                 <LogOut className="h-4 w-4" />
               </button>
             ) : (
               <Button size="sm" variant="ghost" onClick={() => navigate('/auth')}
-                className="h-8 px-3 text-xs text-primary">Sign in</Button>
+                className="h-10 px-3 text-sm text-primary">Sign in</Button>
             )}
           </div>
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="px-5 py-6 pb-24 md:pb-8">
+          <div className="px-4 py-5 pb-32 md:px-5 md:py-6 md:pb-8">
             {renderContent()}
           </div>
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/40 z-50">
+        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/90 backdrop-blur-xl border-t border-border/40 z-50 nav-safe">
           <div className="flex">
             {NAV.map(({ id, icon: Icon, label }) => (
               <button key={id} onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-3 text-xs font-medium transition-colors relative ${
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-3 min-h-[56px] text-xs font-medium transition-colors relative ${
                   activeTab === id ? 'text-primary' : 'text-muted-foreground'
                 }`}>
                 <Icon className="h-5 w-5" />

@@ -69,7 +69,7 @@ export function ProfileSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-80 flex flex-col gap-0 p-0 overflow-y-auto">
+      <SheetContent side="left" className="w-full sm:w-80 flex flex-col gap-0 p-0 overflow-y-auto">
         <SheetHeader className="px-5 pt-6 pb-4 border-b border-border/40">
           <SheetTitle className="text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Profile & Settings
@@ -90,21 +90,21 @@ export function ProfileSheet({
                     value={nameInput}
                     onChange={e => setNameInput(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") saveName(); if (e.key === "Escape") setEditingName(false); }}
-                    className="h-7 text-sm"
+                    className="h-9 text-sm"
                     autoFocus
                   />
-                  <button onClick={saveName} className="w-6 h-6 flex items-center justify-center rounded text-success hover:bg-success/10">
-                    <Check className="h-3.5 w-3.5" />
+                  <button onClick={saveName} className="w-9 h-9 flex items-center justify-center rounded-lg text-success hover:bg-success/10 active:bg-success/20 flex-shrink-0">
+                    <Check className="h-4 w-4" />
                   </button>
-                  <button onClick={() => setEditingName(false)} className="w-6 h-6 flex items-center justify-center rounded text-muted-foreground hover:bg-muted/60">
-                    <X className="h-3.5 w-3.5" />
+                  <button onClick={() => setEditingName(false)} className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60 active:bg-muted/80 flex-shrink-0">
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               ) : (
                 <div className="flex items-center gap-1.5">
                   <p className="text-sm font-semibold text-foreground truncate">{displayName}</p>
-                  <button onClick={startEditName} className="w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
-                    <Pencil className="h-3 w-3" />
+                  <button onClick={startEditName} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground active:bg-muted/60 transition-colors flex-shrink-0">
+                    <Pencil className="h-3.5 w-3.5" />
                   </button>
                 </div>
               )}
@@ -146,7 +146,7 @@ export function ProfileSheet({
             </p>
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 transition-colors duration-150"
+              className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 active:bg-muted/70 transition-colors duration-150"
             >
               <div className="flex items-center gap-2.5">
                 {theme === "dark" ? <Moon className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-muted-foreground" />}

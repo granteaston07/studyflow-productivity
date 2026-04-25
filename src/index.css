@@ -199,6 +199,24 @@
   .streak-fire {
     filter: drop-shadow(0 0 8px hsl(38 90% 60% / 0.6));
   }
+
+  /* Safe-area helpers for notched phones */
+  .pb-safe {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+  .nav-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Always-visible touch targets — no hover-only visibility */
+  @media (hover: none) {
+    .touch-visible {
+      opacity: 1 !important;
+    }
+  }
 }
 
 @keyframes slide-up {

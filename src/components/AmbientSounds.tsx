@@ -136,17 +136,17 @@ export function AmbientSounds() {
 
   return (
     <div className="space-y-3">
-      <div className="grid grid-cols-5 gap-2">
+      <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
         {SOUNDS.map((sound) => {
           const isActive = activeId === sound.id;
           return (
             <button
               key={sound.id}
               onClick={() => toggle(sound)}
-              className={`flex flex-col items-center gap-1.5 p-2.5 rounded-xl border transition-all duration-150 text-center group ${
+              className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-all duration-150 text-center min-h-[64px] ${
                 isActive
                   ? 'border-primary/40 bg-primary/10 shadow-sm shadow-primary/10'
-                  : 'border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border'
+                  : 'border-border/50 bg-muted/30 hover:bg-muted/60 hover:border-border active:bg-muted/80'
               }`}
             >
               <span className="text-xl leading-none">{sound.emoji}</span>

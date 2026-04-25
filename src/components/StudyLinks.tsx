@@ -80,7 +80,7 @@ export function StudyLinks() {
 
             <button
               onClick={handleAddLink}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-border/60 text-xs font-medium text-muted-foreground hover:text-foreground hover:border-border transition-colors duration-150"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-border/60 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-border active:bg-muted/40 transition-colors duration-150 min-h-[44px]"
             >
               <Plus className="h-3.5 w-3.5" />
               Add link
@@ -125,7 +125,7 @@ function LinkRow({ link, isEditing, iconPickerOpen, onEdit, onSave, onCancel, on
         </div>
         <button
           onClick={onEdit}
-          className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors flex-shrink-0"
+          className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted/80 transition-colors flex-shrink-0"
         >
           <Settings className="h-3.5 w-3.5" />
         </button>
@@ -155,14 +155,14 @@ function LinkRow({ link, isEditing, iconPickerOpen, onEdit, onSave, onCancel, on
 
         {/* Icon picker */}
         {iconPickerOpen && (
-          <div className="grid grid-cols-8 gap-1 p-2 rounded-lg bg-background border border-border/50">
+          <div className="grid grid-cols-6 sm:grid-cols-8 gap-1.5 p-2 rounded-lg bg-background border border-border/50">
             {ICON_OPTIONS.map(({ key, Icon: Ic, label }) => (
               <button
                 key={key}
                 onClick={() => { onUpdate({ icon: key }); onToggleIconPicker(); }}
                 title={label}
-                className={`w-8 h-8 flex items-center justify-center rounded-lg transition-colors ${
-                  link.icon === key ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                className={`w-full aspect-square min-h-[40px] flex items-center justify-center rounded-lg transition-colors ${
+                  link.icon === key ? 'bg-primary/15 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted/80'
                 }`}
               >
                 <Ic className="h-4 w-4" />

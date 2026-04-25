@@ -228,7 +228,7 @@ export function FocusTimer({
             <button
               onClick={startAutoPomodoro}
               disabled={timerActive && !timerPaused}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all duration-150 border-ai-primary/40 text-ai-primary hover:bg-ai-primary/10 disabled:opacity-40">
+              className="flex items-center gap-1.5 px-3 py-2 rounded-full border text-xs font-medium transition-all duration-150 border-ai-primary/40 text-ai-primary hover:bg-ai-primary/10 active:bg-ai-primary/20 disabled:opacity-40 min-h-[36px]">
               <Repeat className="h-3 w-3" />
               Auto Pomodoro
               <span className="opacity-70">{POMODORO_FOCUS}/{POMODORO_BREAK}m</span>
@@ -245,7 +245,7 @@ export function FocusTimer({
                   }
                 }}
                 disabled={timerActive && !timerPaused}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors duration-150 ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-full border text-xs font-medium transition-colors duration-150 min-h-[36px] ${
                   selectedSession.label === 'AI Suggested'
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground disabled:opacity-40'
@@ -272,7 +272,7 @@ export function FocusTimer({
                     }
                   }}
                   disabled={timerActive && !timerPaused}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all duration-150 ${
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-full border text-xs font-medium transition-all duration-150 min-h-[36px] ${
                     active
                       ? 'bg-primary text-primary-foreground border-primary shadow-sm shadow-primary/20'
                       : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground disabled:opacity-40'

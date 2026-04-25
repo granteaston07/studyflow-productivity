@@ -202,7 +202,7 @@ export function TaskCard({
         isUndoing && "animate-task-undo"
       )}>
         {/* Main row */}
-        <div className="flex items-center gap-3 px-4 py-4">
+        <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4 min-h-[56px]">
           <Checkbox
             checked={task.completed}
             onCheckedChange={handleToggle}
@@ -276,7 +276,7 @@ export function TaskCard({
             <button
               onClick={e => { e.stopPropagation(); setSubtasksOpen(v => !v); }}
               className={cn(
-                "flex items-center gap-0.5 px-1.5 h-7 rounded-lg flex-shrink-0 text-xs transition-all",
+                "flex items-center gap-0.5 px-2 min-h-[40px] rounded-lg flex-shrink-0 text-xs transition-all",
                 subtasksOpen || subtasks.length > 0
                   ? "text-primary/80 hover:bg-primary/10"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
@@ -295,8 +295,8 @@ export function TaskCard({
             <button
               onClick={openEdit}
               className={cn(
-                "w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 transition-all",
-                isEditing ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                "w-9 h-9 flex items-center justify-center rounded-lg flex-shrink-0 transition-all",
+                isEditing ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted/80"
               )}
             >
               <Pencil className="h-3.5 w-3.5" />
@@ -305,7 +305,7 @@ export function TaskCard({
           {!isReorderMode && (
             <button
               onClick={handleDelete}
-              className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-error hover:bg-error/10 transition-all flex-shrink-0"
+              className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-error hover:bg-error/10 active:bg-error/20 transition-all flex-shrink-0"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -325,15 +325,15 @@ export function TaskCard({
                     <Checkbox
                       checked={sub.completed}
                       onCheckedChange={() => toggleSubtask(sub.id)}
-                      className="w-4 h-4 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success"
+                      className="w-5 h-5 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success"
                     />
                     <span className={cn(
-                      "flex-1 text-xs leading-snug",
+                      "flex-1 text-sm leading-snug",
                       sub.completed ? "line-through text-muted-foreground" : "text-foreground"
                     )}>{sub.title}</span>
                     <button
                       onClick={() => deleteSubtask(sub.id)}
-                      className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-error transition-all"
+                      className="touch-visible w-7 h-7 flex items-center justify-center rounded text-muted-foreground opacity-40 group-hover:opacity-100 hover:text-error active:text-error transition-all flex-shrink-0"
                     >
                       <X className="h-3 w-3" />
                     </button>
@@ -388,7 +388,7 @@ export function TaskCard({
             </div>
 
             {/* Subject + Priority */}
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground font-medium">Subject</label>
                 <Input

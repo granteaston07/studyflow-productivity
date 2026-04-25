@@ -118,7 +118,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
         </DialogTrigger>
       )}
       
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" />
@@ -140,7 +140,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
           </div>
 
           {/* Subject and Priority Row */}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label>Subject</Label>
               <div className="space-y-2">
