@@ -1,4 +1,4 @@
-import { Check, Clock, AlertTriangle, Calendar, Trash2, Pencil, X, Save, Ban, Eye } from "lucide-react";
+import { Calendar, Trash2, Pencil, X, Save } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -31,27 +31,31 @@ interface TaskCardProps {
   isReorderMode?: boolean;
 }
 
-const STATUS_OPTIONS: { value: Task['status']; label: string; color: string }[] = [
-  { value: 'pending',     label: 'To Do',       color: 'bg-muted text-muted-foreground border-border' },
-  { value: 'in-progress', label: 'In Progress',  color: 'bg-warning/15 text-warning border-warning/25' },
-  { value: 'review',      label: 'Review',       color: 'bg-primary/15 text-primary border-primary/25' },
-  { value: 'blocked',     label: 'Blocked',      color: 'bg-error/15 text-error border-error/25' },
-];
+// The 4 user-settable statuses in cycle order
+const CYCLE: Task['status'][] = ['pending', 'in-progress', 'review', 'blocked'];
 
 function getStatusStyle(status: Task['status']): string {
-  const opt = STATUS_OPTIONS.find(o => o.value === status);
-  if (opt) return opt.color;
-  if (status === 'completed') return 'bg-success/15 text-success border-success/25';
-  if (status === 'overdue')   return 'bg-error/15 text-error border-error/25';
-  return 'bg-muted text-muted-foreground border-border';
+  switch (status) {
+    case 'pending':     return 'bg-muted text-muted-foreground border-border';
+    case 'in-progress': return 'bg-warning/15 text-warning border-warning/25';
+    case 'review':      return 'bg-blue-500/15 text-blue-400 border-blue-500/25';
+    case 'blocked':     return 'bg-error/15 text-error border-error/25';
+    case 'completed':   return 'bg-success/15 text-success border-success/25';
+    case 'overdue':     return 'bg-error/15 text-error border-error/25';
+    default:            return 'bg-muted text-muted-foreground border-border';
+  }
 }
 
 function getStatusLabel(status: Task['status']): string {
-  const opt = STATUS_OPTIONS.find(o => o.value === status);
-  if (opt) return opt.label;
-  if (status === 'completed') return 'Done';
-  if (status === 'overdue')   return 'Overdue';
-  return status;
+  switch (status) {
+    case 'pending':     return 'To Do';
+    case 'in-progress': return 'In Progress';
+    case 'review':      return 'Review';
+    case 'blocked':     return 'Blocked';
+    case 'completed':   return 'Done';
+    case 'overdue':     return 'Overdue';
+    default:            return status;
+  }
 }
 
 function getPriorityColor(priority: Task['priority']): string {
@@ -88,7 +92,6 @@ export function TaskCard({
   const [titleInput, setTitleInput] = useState(task.title);
   const [subjectInput, setSubjectInput] = useState(task.subject || '');
   const [priorityInput, setPriorityInput] = useState<Task['priority']>(task.priority);
-  const [statusInput, setStatusInput] = useState<Task['status']>(task.status);
   const [dateInput, setDateInput] = useState<Date | undefined>(task.dueDate);
   const { getDisplayName } = useCustomSubjects();
 
@@ -96,7 +99,6 @@ export function TaskCard({
     setTitleInput(task.title);
     setSubjectInput(task.subject || '');
     setPriorityInput(task.priority);
-    setStatusInput(task.status);
     setDateInput(task.dueDate);
   }, [task]);
 
@@ -105,7 +107,6 @@ export function TaskCard({
     setTitleInput(task.title);
     setSubjectInput(task.subject || '');
     setPriorityInput(task.priority);
-    setStatusInput(task.status);
     setDateInput(task.dueDate);
     setIsEditing(true);
   };
@@ -117,7 +118,6 @@ export function TaskCard({
     const sub = subjectInput.trim();
     if (sub !== (task.subject || '')) onUpdateSubject?.(task.id, sub || 'General');
     if (priorityInput !== task.priority) onUpdatePriority?.(task.id, priorityInput);
-    if (statusInput !== task.status) onUpdateStatus(task.id, statusInput);
     if (dateInput !== task.dueDate) onUpdateDueDate(task.id, dateInput);
     setIsEditing(false);
   };
@@ -125,6 +125,15 @@ export function TaskCard({
   const cancelEdit = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsEditing(false);
+  };
+
+  // Cycle through the 4 user statuses on badge click
+  const handleStatusClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (task.completed) return;
+    const idx = CYCLE.indexOf(displayStatus);
+    if (idx === -1) return;
+    onUpdateStatus(task.id, CYCLE[(idx + 1) % CYCLE.length]);
   };
 
   const handleToggle = async () => {
@@ -164,7 +173,6 @@ export function TaskCard({
     setTimeout(() => onDelete(task.id), 500);
   };
 
-  const dueDateText = formatDueDate(task.dueDate, task.completed);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const displayStatus: Task['status'] = (() => {
@@ -175,6 +183,8 @@ export function TaskCard({
     }
     return task.status;
   })();
+
+  const dueDateText = formatDueDate(task.dueDate, task.completed);
 
   return (
     <>
@@ -187,7 +197,7 @@ export function TaskCard({
         isUndoing && "animate-task-undo"
       )}>
         {/* Main row */}
-        <div className="flex items-center gap-3 px-4 py-3">
+        <div className="flex items-center gap-3 px-4 py-4">
           <Checkbox
             checked={task.completed}
             onCheckedChange={handleToggle}
@@ -202,7 +212,7 @@ export function TaskCard({
 
           {/* Title + meta */}
           <div
-            className="flex-1 min-w-0 cursor-pointer"
+            className="flex-1 min-w-0 cursor-pointer py-0.5"
             onClick={() => { if (!task.completed && !isEditing) onSelect?.(task.id); }}
           >
             <p className={cn(
@@ -211,7 +221,7 @@ export function TaskCard({
             )}>
               {task.title}
             </p>
-            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
               {task.subject && (
                 <span className="text-xs text-primary/80 font-medium">
                   {getDisplayName(task.subject)}
@@ -230,25 +240,34 @@ export function TaskCard({
             </div>
           </div>
 
-          {/* Status badge */}
-          <Badge
-            variant="outline"
-            className={cn("text-xs border flex-shrink-0 hidden sm:flex", getStatusStyle(displayStatus))}
-          >
-            {getStatusLabel(displayStatus)}
-          </Badge>
+          {/* Status badge — click to cycle */}
+          {!task.completed && (
+            <Badge
+              variant="outline"
+              onClick={handleStatusClick}
+              className={cn(
+                "text-xs border flex-shrink-0 cursor-pointer select-none transition-all hover:opacity-80 active:scale-95",
+                getStatusStyle(displayStatus)
+              )}
+              title="Click to change status"
+            >
+              {getStatusLabel(displayStatus)}
+            </Badge>
+          )}
+          {task.completed && (
+            <Badge variant="outline" className={cn("text-xs border flex-shrink-0", getStatusStyle('completed'))}>
+              Done
+            </Badge>
+          )}
 
-          {/* Actions */}
+          {/* Edit + Delete */}
           {!isReorderMode && !task.completed && (
             <button
               onClick={openEdit}
               className={cn(
                 "w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 transition-all",
-                isEditing
-                  ? "bg-primary/15 text-primary"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                isEditing ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               )}
-              aria-label="Edit task"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
@@ -257,7 +276,6 @@ export function TaskCard({
             <button
               onClick={handleDelete}
               className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-error hover:bg-error/10 transition-all flex-shrink-0"
-              aria-label="Delete task"
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>
@@ -282,7 +300,7 @@ export function TaskCard({
               />
             </div>
 
-            {/* Subject + Priority row */}
+            {/* Subject + Priority */}
             <div className="grid grid-cols-2 gap-2">
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground font-medium">Subject</label>
@@ -296,9 +314,7 @@ export function TaskCard({
               <div className="space-y-1">
                 <label className="text-xs text-muted-foreground font-medium">Priority</label>
                 <Select value={priorityInput} onValueChange={(v) => setPriorityInput(v as Task['priority'])}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
+                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="high">
                       <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-error" />High</div>
@@ -314,50 +330,30 @@ export function TaskCard({
               </div>
             </div>
 
-            {/* Status + Due date row */}
-            <div className="grid grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground font-medium">Status</label>
-                <Select value={statusInput} onValueChange={(v) => setStatusInput(v as Task['status'])}>
-                  <SelectTrigger className="h-8 text-sm">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {STATUS_OPTIONS.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground font-medium">Due date</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button className="h-8 w-full px-3 text-sm rounded-md border border-input bg-background text-left flex items-center gap-2 hover:bg-muted/40 transition-all">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
-                      <span className={dateInput ? "text-foreground" : "text-muted-foreground"}>
-                        {dateInput ? format(dateInput, 'MMM d') : 'Pick date'}
-                      </span>
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={dateInput}
-                      onSelect={setDateInput}
-                      initialFocus
-                    />
-                    {dateInput && (
-                      <div className="p-2 border-t">
-                        <Button variant="outline" size="sm" className="w-full text-xs"
-                          onClick={() => setDateInput(undefined)}>
-                          Remove date
-                        </Button>
-                      </div>
-                    )}
-                  </PopoverContent>
-                </Popover>
-              </div>
+            {/* Due date */}
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground font-medium">Due date</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button className="h-8 w-full px-3 text-sm rounded-md border border-input bg-background text-left flex items-center gap-2 hover:bg-muted/40 transition-all">
+                    <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                    <span className={dateInput ? "text-foreground" : "text-muted-foreground"}>
+                      {dateInput ? format(dateInput, 'MMM d, yyyy') : 'Pick a date'}
+                    </span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent mode="single" selected={dateInput} onSelect={setDateInput} initialFocus />
+                  {dateInput && (
+                    <div className="p-2 border-t">
+                      <Button variant="outline" size="sm" className="w-full text-xs"
+                        onClick={() => setDateInput(undefined)}>
+                        Remove date
+                      </Button>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
             </div>
 
             {/* Save / Cancel */}
@@ -365,8 +361,7 @@ export function TaskCard({
               <Button size="sm" className="h-7 px-3 text-xs gap-1.5" onClick={saveEdit}>
                 <Save className="h-3 w-3" /> Save
               </Button>
-              <Button size="sm" variant="ghost" className="h-7 px-3 text-xs gap-1.5 text-muted-foreground"
-                onClick={cancelEdit}>
+              <Button size="sm" variant="ghost" className="h-7 px-3 text-xs gap-1.5 text-muted-foreground" onClick={cancelEdit}>
                 <X className="h-3 w-3" /> Cancel
               </Button>
             </div>

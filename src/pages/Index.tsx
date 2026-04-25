@@ -24,6 +24,7 @@ import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { AIDailyBrief } from "@/components/AIDailyBrief";
 import { TaskAICoach } from "@/components/TaskAICoach";
 import { WelcomeHeader } from "@/components/WelcomeHeader";
+import { FloatingTimerWidget } from "@/components/FloatingTimerWidget";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -157,6 +158,20 @@ const Index = () => {
   const streakCount = streak?.current_streak ?? 0;
   const selectedTask = selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined;
 
+  const smartStatus = (() => {
+    if (overdueTasks.length >= 3) return 'Backlog piling up';
+    if (overdueTasks.length > 0) return 'Clear the overdue';
+    if (timerActive && !timerPaused) return 'In the zone';
+    if (completionRate >= 90 && tasks.length > 0) return 'Almost perfect!';
+    if (completionRate >= 70) return 'Crushing it';
+    if (streakCount >= 14) return 'Unstoppable';
+    if (streakCount >= 7) return 'On fire!';
+    if (streakCount >= 3) return 'Building momentum';
+    if (completionRate >= 50) return 'Making progress';
+    if (activeTasks.length === 0 && tasks.length > 0) return 'All done!';
+    return levelName;
+  })();
+
   const NAV = [
     { id: 'today' as Tab, icon: LayoutDashboard, label: 'Today' },
     { id: 'tasks' as Tab, icon: CheckSquare, label: 'Tasks' },
@@ -222,6 +237,12 @@ const Index = () => {
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
             <StudyLinks />
+          </div>
+
+          {/* Ambient sounds */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Ambient Sounds</p>
+            <AmbientSounds />
           </div>
 
           {/* Quick focus */}
@@ -347,6 +368,7 @@ const Index = () => {
                             onUpdateStatus={(id, s) => updateTask(id, { status: s })}
                             onUpdateTitle={(id, t) => updateTask(id, { title: t })}
                             onUpdatePriority={(id, p) => updateTask(id, { priority: p })}
+                            onUpdateSubject={(id, s) => updateTask(id, { subject: s })}
                             onDelete={(id) => deleteTask(id)}
                             selected={selectedTaskId === task.id}
                             onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
@@ -563,7 +585,7 @@ const Index = () => {
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-1.5">
                 <Zap className="h-3.5 w-3.5 text-primary" />
-                <span className="text-xs font-semibold text-foreground">{levelName}</span>
+                <span className="text-xs font-semibold text-foreground">{smartStatus}</span>
               </div>
               <span className="text-xs text-muted-foreground">{xpInLevel}/{xpToNext}</span>
             </div>
@@ -655,6 +677,17 @@ const Index = () => {
         onDismiss={() => setShowCelebration(false)}
         onReset={() => { setShowCelebration(false); resetTimer(); }}
       />
+
+      {timerActive && activeTab !== 'focus' && (
+        <FloatingTimerWidget
+          timeRemaining={timeRemaining}
+          sessionDuration={selectedSessionDuration}
+          timerPaused={timerPaused}
+          selectedTask={selectedTask}
+          tasks={tasks}
+          onGoToFocus={() => setActiveTab('focus')}
+        />
+      )}
     </div>
   );
 };

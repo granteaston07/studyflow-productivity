@@ -1,28 +1,28 @@
-import { ExternalLink } from "lucide-react";
+import { BookOpen, LayoutGrid, Brain, FileText, Cloud, Bot } from "lucide-react";
 
 const LINKS = [
-  { name: "Google Classroom", url: "https://classroom.google.com", emoji: "🎓", color: "hover:border-green-500/30 hover:bg-green-500/5" },
-  { name: "Quizlet",          url: "https://quizlet.com",          emoji: "📇", color: "hover:border-blue-500/30 hover:bg-blue-500/5" },
-  { name: "Khan Academy",     url: "https://khanacademy.org",      emoji: "🦔", color: "hover:border-teal-500/30 hover:bg-teal-500/5" },
-  { name: "Notion",           url: "https://notion.so",            emoji: "📓", color: "hover:border-gray-500/30 hover:bg-gray-500/5" },
-  { name: "Google Drive",     url: "https://drive.google.com",     emoji: "📁", color: "hover:border-yellow-500/30 hover:bg-yellow-500/5" },
-  { name: "ChatGPT",          url: "https://chat.openai.com",      emoji: "🤖", color: "hover:border-emerald-500/30 hover:bg-emerald-500/5" },
+  { name: "Classroom", url: "https://classroom.google.com", icon: LayoutGrid },
+  { name: "Quizlet",   url: "https://quizlet.com",          icon: BookOpen },
+  { name: "Claude",    url: "https://claude.ai",             icon: Brain },
+  { name: "Notion",    url: "https://notion.so",             icon: FileText },
+  { name: "Drive",     url: "https://drive.google.com",      icon: Cloud },
+  { name: "ChatGPT",   url: "https://chat.openai.com",       icon: Bot },
 ];
 
 export function StudyLinks() {
   return (
     <div className="grid grid-cols-3 gap-2">
-      {LINKS.map((link) => (
+      {LINKS.map(({ name, url, icon: Icon }) => (
         <a
-          key={link.name}
-          href={link.url}
+          key={name}
+          href={url}
           target="_blank"
           rel="noopener noreferrer"
-          className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 bg-muted/20 transition-all duration-150 group ${link.color}`}
+          className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border transition-all duration-150 group"
         >
-          <span className="text-xl leading-none">{link.emoji}</span>
-          <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground text-center leading-tight transition-colors line-clamp-1">
-            {link.name}
+          <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground text-center leading-tight transition-colors">
+            {name}
           </span>
         </a>
       ))}
