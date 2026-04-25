@@ -95,7 +95,7 @@ export function WelcomeHeader({ tasks, userName }: WelcomeHeaderProps) {
 
   return (
     <div className="py-2">
-      <h1 className="text-2xl font-bold bg-gradient-to-r from-[#6ea8fe] to-[#a78bfa] bg-clip-text text-transparent">{headline}</h1>
+      <h1 className="text-2xl font-bold primary-gradient-text">{headline}</h1>
       <p className={`text-sm mt-0.5 ${overdue > 0 ? "text-error" : "text-muted-foreground"}`}>
         {subtitle}
       </p>
