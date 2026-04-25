@@ -7,7 +7,7 @@ import {
   CheckSquare, Timer, Plus, LogOut, LogIn,
   ArrowUpDown, Check, NotebookPen, Flame,
   Zap, LayoutDashboard, GraduationCap, Sun, Moon,
-  BarChart2, Sparkles, X
+  BarChart2, Sparkles, X, Search, Bell
 } from "lucide-react";
 import { TaskCard, Task } from "@/components/TaskCard";
 import { DraggableTaskCard } from "@/components/DraggableTaskCard";
@@ -25,9 +25,12 @@ import { AIDailyBrief } from "@/components/AIDailyBrief";
 import { TaskAICoach } from "@/components/TaskAICoach";
 import { WelcomeHeader } from "@/components/WelcomeHeader";
 import { FloatingTimerWidget } from "@/components/FloatingTimerWidget";
+import { OnboardingFlow } from "@/components/OnboardingFlow";
+import { SubjectManager } from "@/components/SubjectManager";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useTasks } from "@/hooks/useTasks";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +38,7 @@ import { useBackgroundTimer } from "@/hooks/useBackgroundTimer";
 import { useStudyStreak } from "@/hooks/useStudyStreak";
 import { useXP } from "@/hooks/useXP";
 import { useTheme } from "@/hooks/useTheme";
+import { useNotifications } from "@/hooks/useNotifications";
 
 type Tab = 'today' | 'tasks' | 'focus' | 'notes' | 'stats';
 
@@ -51,6 +55,15 @@ const Index = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [studyMode, setStudyMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [taskSearch, setTaskSearch] = useState('');
+  const [taskFilter, setTaskFilter] = useState<'all' | 'active' | 'overdue'>('all');
+  const [showOnboarding, setShowOnboarding] = useState(() =>
+    !localStorage.getItem('studyflow_onboarded')
+  );
+  const [guestName, setGuestName] = useState(() =>
+    localStorage.getItem('studyflow_guest_name') || ''
+  );
+  const { permission, requestPermission, notifyDueToday } = useNotifications();
 
   const {
     timerActive, timeRemaining, timerPaused, selectedSessionDuration,
@@ -80,6 +93,15 @@ const Index = () => {
       const newIndex = tasks.findIndex(t => t.id === over.id);
       reorderTasks(arrayMove(tasks, oldIndex, newIndex));
     }
+  };
+
+  const handleOnboardingComplete = (name: string) => {
+    if (name) {
+      localStorage.setItem('studyflow_guest_name', name);
+      setGuestName(name);
+    }
+    localStorage.setItem('studyflow_onboarded', 'true');
+    setShowOnboarding(false);
   };
 
   const handleToggleTask = async (taskId: string, showFeedback = false) => {
@@ -131,6 +153,16 @@ const Index = () => {
   const completedTasks = tasks.filter(t => t.completed);
   const completionRate = tasks.length > 0 ? Math.round((completedTasks.length / tasks.length) * 100) : 0;
 
+  const filteredActiveTasks = activeTasks.filter(t => {
+    const q = taskSearch.toLowerCase();
+    const matchesSearch = !q || t.title.toLowerCase().includes(q) || (t.subject || '').toLowerCase().includes(q);
+    const matchesFilter =
+      taskFilter === 'all' ||
+      (taskFilter === 'active' && t.status !== 'overdue') ||
+      (taskFilter === 'overdue' && t.status === 'overdue');
+    return matchesSearch && matchesFilter;
+  });
+
   if (studyMode) {
     const selectedTaskTitle = selectedTaskId ? tasks.find(t => t.id === selectedTaskId)?.title : undefined;
     return (
@@ -154,7 +186,12 @@ const Index = () => {
     );
   }
 
-  const userName = user?.user_metadata?.display_name?.split(' ')[0];
+  const userName = user?.user_metadata?.display_name?.split(' ')[0] || guestName || undefined;
+
+  // Fire due-today notifications once tasks load
+  useEffect(() => {
+    if (!tasksLoading && tasks.length > 0) notifyDueToday(tasks);
+  }, [tasksLoading]);
   const streakCount = streak?.current_streak ?? 0;
   const selectedTask = selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined;
 
@@ -268,6 +305,23 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Notification permission banner */}
+          {permission === 'default' && (
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/50">
+              <Bell className="h-4 w-4 text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-foreground leading-none">Enable reminders</p>
+                <p className="text-xs text-muted-foreground mt-0.5">Get notified when tasks are due.</p>
+              </div>
+              <button
+                onClick={() => requestPermission()}
+                className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex-shrink-0"
+              >
+                Allow
+              </button>
+            </div>
+          )}
+
           {!user && (
             <div className="bg-primary/8 border border-primary/20 rounded-xl p-4 text-sm">
               <p className="text-foreground font-medium mb-1">Guest mode — tasks won't be saved</p>
@@ -291,11 +345,10 @@ const Index = () => {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {/* AI prioritization popup */}
               {activeTasks.length > 0 && (
                 <Sheet>
                   <SheetTrigger asChild>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-ai-primary/30 text-xs font-semibold text-ai-primary hover:bg-ai-primary/8 transition-all">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-ai-primary/30 text-xs font-semibold text-ai-primary hover:bg-ai-primary/8 transition-colors duration-150">
                       <Sparkles className="h-3.5 w-3.5" />
                       AI
                     </button>
@@ -322,6 +375,38 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Search + filter */}
+          {tasks.length > 0 && (
+            <div className="space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+                <Input
+                  placeholder="Search tasks..."
+                  value={taskSearch}
+                  onChange={e => setTaskSearch(e.target.value)}
+                  className="pl-9 h-9 text-sm"
+                />
+                {taskSearch && (
+                  <button onClick={() => setTaskSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-1.5">
+                {(['all', 'active', 'overdue'] as const).map(f => (
+                  <button key={f} onClick={() => setTaskFilter(f)}
+                    className={`px-3 py-1 rounded-full text-xs font-medium transition-colors duration-150 capitalize ${
+                      taskFilter === f
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted/40 text-muted-foreground hover:text-foreground border border-border/50'
+                    }`}>
+                    {f}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {tasks.length > 0 && (
             <Progress value={completionRate} className="h-1.5" />
           )}
@@ -334,7 +419,7 @@ const Index = () => {
             </div>
           ) : (
             <>
-              {activeTasks.length > 0 && (
+              {filteredActiveTasks.length > 0 && (
                 <div className="space-y-2">
                   {isReorderMode ? (
                     <DndContext sensors={sensors} collisionDetection={closestCenter}
@@ -359,7 +444,7 @@ const Index = () => {
                     </DndContext>
                   ) : (
                     <div className="space-y-2">
-                      {activeTasks.sort((a, b) => a.sortOrder - b.sortOrder).map((task, i) => (
+                      {filteredActiveTasks.sort((a, b) => a.sortOrder - b.sortOrder).map((task, i) => (
                         <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
                           <TaskCard
                             task={task}
@@ -378,6 +463,9 @@ const Index = () => {
                     </div>
                   )}
                 </div>
+              )}
+              {filteredActiveTasks.length === 0 && activeTasks.length > 0 && (
+                <p className="text-sm text-muted-foreground text-center py-8">No tasks match your search.</p>
               )}
 
               {completedTasks.length > 0 && (
@@ -536,6 +624,7 @@ const Index = () => {
               <p className="text-xs mt-1">Complete some tasks to see your stats</p>
             </div>
           )}
+          <SubjectManager tasks={tasks} />
         </div>
       );
     }
@@ -679,6 +768,10 @@ const Index = () => {
         onDismiss={() => setShowCelebration(false)}
         onReset={() => { setShowCelebration(false); resetTimer(); }}
       />
+
+      {showOnboarding && (
+        <OnboardingFlow onComplete={handleOnboardingComplete} />
+      )}
 
       {timerActive && activeTab !== 'focus' && (
         <FloatingTimerWidget

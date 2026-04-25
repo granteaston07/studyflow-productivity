@@ -1,4 +1,4 @@
-import { Calendar, Trash2, Pencil, X, Save } from "lucide-react";
+import { Calendar, Trash2, Pencil, X, Save, Repeat } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -235,6 +235,12 @@ export function TaskCard({
                 )}>
                   <Calendar className="h-3 w-3" />
                   {dueDateText}
+                </span>
+              )}
+              {task.recurring && task.recurring !== 'none' && (
+                <span className="text-xs flex items-center gap-1 text-primary/70">
+                  <Repeat className="h-3 w-3" />
+                  {task.recurring}
                 </span>
               )}
             </div>

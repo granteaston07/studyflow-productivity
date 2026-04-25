@@ -1,6 +1,6 @@
 import { useState } from "react";
 import React from "react";
-import { Plus, Calendar, BookOpen, Pencil } from "lucide-react";
+import { Plus, Calendar, BookOpen, Pencil, Repeat } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,8 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
     title: '',
     subject: '',
     priority: 'medium' as Task['priority'],
-    dueDate: undefined as Date | undefined
+    dueDate: undefined as Date | undefined,
+    recurring: 'none' as 'none' | 'daily' | 'weekly',
   });
   
   const [showCustomInput, setShowCustomInput] = useState(false);
@@ -55,7 +56,8 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
           const d = new Date(taskData.dueDate.getFullYear(), taskData.dueDate.getMonth(), taskData.dueDate.getDate());
           return d < today ? 'overdue' : 'pending';
         })(),
-        completedAt: undefined
+        completedAt: undefined,
+        recurring: taskData.recurring,
       });
     
     // Reset form and close dialog
@@ -63,7 +65,8 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
       title: '',
       subject: '',
       priority: 'medium',
-      dueDate: undefined
+      dueDate: undefined,
+      recurring: 'none',
     });
     setOpen(false);
   };
@@ -280,6 +283,27 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
                 />
               </PopoverContent>
             </Popover>
+          </div>
+
+          {/* Repeat */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-1.5"><Repeat className="h-3.5 w-3.5" />Repeat</Label>
+            <div className="flex gap-2">
+              {(['none', 'daily', 'weekly'] as const).map(opt => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setTaskData({ ...taskData, recurring: opt })}
+                  className={`flex-1 py-1.5 rounded-lg border text-xs font-medium transition-colors duration-150 capitalize ${
+                    taskData.recurring === opt
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground'
+                  }`}
+                >
+                  {opt === 'none' ? 'No repeat' : opt}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Submit Button */}

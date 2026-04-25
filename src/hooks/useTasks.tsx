@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
 import { toast } from 'sonner';
+import { addDays, addWeeks } from 'date-fns';
 
 export interface Task {
   id: string;
@@ -16,6 +17,7 @@ export interface Task {
   createdAt: Date;
   updatedAt: Date;
   sortOrder: number;
+  recurring: 'none' | 'daily' | 'weekly';
 }
 
 export function useTasks() {
@@ -75,7 +77,8 @@ export function useTasks() {
           completedAt: task.completed_at ? new Date(task.completed_at) : undefined,
           createdAt: new Date(task.created_at),
           updatedAt: new Date(task.updated_at),
-          sortOrder: task.sort_order || 0
+          sortOrder: task.sort_order || 0,
+          recurring: (task.recurring as Task['recurring']) || 'none',
         };
       });
 
@@ -110,7 +113,8 @@ export function useTasks() {
         completedAt: taskData.completedAt,
         createdAt: new Date(),
         updatedAt: new Date(),
-        sortOrder: 0
+        sortOrder: 0,
+        recurring: taskData.recurring || 'none',
       };
 
       setTasks(prev => [guestTask, ...prev]);
@@ -152,7 +156,8 @@ export function useTasks() {
           status: taskData.status,
           completed: taskData.completed,
           completed_at: taskData.completedAt?.toISOString(),
-          sort_order: sortOrder
+          sort_order: sortOrder,
+          recurring: taskData.recurring || 'none',
         })
         .select()
         .single();
@@ -171,7 +176,8 @@ export function useTasks() {
         completedAt: data.completed_at ? new Date(data.completed_at) : undefined,
         createdAt: new Date(data.created_at),
         updatedAt: new Date(data.updated_at),
-        sortOrder: data.sort_order || 0
+        sortOrder: data.sort_order || 0,
+        recurring: (data.recurring as Task['recurring']) || 'none',
       };
 
       // Refresh tasks to get updated sort order
@@ -211,6 +217,7 @@ export function useTasks() {
       if (updates.dueDate !== undefined) updateData.due_date = updates.dueDate?.toISOString();
       if (updates.priority !== undefined) updateData.priority = updates.priority;
       if (updates.status !== undefined) updateData.status = updates.status;
+      if (updates.recurring !== undefined) updateData.recurring = updates.recurring;
       if (updates.completed !== undefined) {
         updateData.completed = updates.completed;
         updateData.completed_at = updates.completed ? new Date().toISOString() : null;
@@ -275,15 +282,35 @@ export function useTasks() {
     const newCompleted = !task.completed;
     const newStatus = newCompleted ? 'completed' : 'pending';
 
-    await updateTask(taskId, { 
-      completed: newCompleted, 
+    await updateTask(taskId, {
+      completed: newCompleted,
       status: newStatus,
       completedAt: newCompleted ? new Date() : undefined
     });
 
-    return { 
-      task: { ...task, completed: newCompleted }, 
-      shouldShowFeedback: newCompleted && showFeedback 
+    // Auto-create next instance for recurring tasks
+    if (newCompleted && task.recurring && task.recurring !== 'none') {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const base = task.dueDate ?? today;
+      const nextDate = task.recurring === 'daily' ? addDays(base, 1) : addWeeks(base, 1);
+      const nextDateNorm = new Date(nextDate.getFullYear(), nextDate.getMonth(), nextDate.getDate());
+      await addTask({
+        title: task.title,
+        subject: task.subject,
+        description: task.description,
+        dueDate: nextDate,
+        completed: false,
+        priority: task.priority,
+        status: nextDateNorm < today ? 'overdue' : 'pending',
+        completedAt: undefined,
+        recurring: task.recurring,
+      });
+    }
+
+    return {
+      task: { ...task, completed: newCompleted },
+      shouldShowFeedback: newCompleted && showFeedback
     };
   };
 
