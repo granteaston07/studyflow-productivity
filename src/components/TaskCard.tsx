@@ -1,4 +1,4 @@
-import { Calendar, Trash2, Pencil, X, Save, Repeat, ChevronDown, Plus, GraduationCap } from "lucide-react";
+import { Calendar, Trash2, Pencil, X, Save, Repeat, ChevronDown, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -227,11 +227,6 @@ export function TaskCard({
               {task.title}
             </p>
             <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
-              {task.source === 'google_classroom' && (
-                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground/70 font-medium">
-                  <GraduationCap className="h-3 w-3" /> GC
-                </span>
-              )}
               {task.subject && (
                 <span className="text-xs text-primary/80 font-medium">
                   {getDisplayName(task.subject)}

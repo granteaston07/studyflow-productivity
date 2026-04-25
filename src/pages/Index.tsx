@@ -48,7 +48,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
 
-  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks, refreshTasks } = useTasks();
+  const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
   const { streak } = useStudyStreak();
   const { level, levelName, xpInLevel, xpToNext, progress: xpProgress, awardTask } = useXP();
   const [activeTab, setActiveTab] = useState<Tab>('today');
@@ -820,7 +820,6 @@ const Index = () => {
         completedCount={completedTasks.length}
         onManageLinks={() => setLinksOpen(true)}
         onManageSubjects={() => setSubjectsOpen(true)}
-        onSyncComplete={refreshTasks}
       />
 
       <Sheet open={subjectsOpen} onOpenChange={setSubjectsOpen}>

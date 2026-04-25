@@ -18,8 +18,6 @@ export interface Task {
   updatedAt: Date;
   sortOrder: number;
   recurring: 'none' | 'daily' | 'weekly';
-  source?: string;
-  googleClassroomId?: string;
 }
 
 export function useTasks() {
@@ -81,8 +79,6 @@ export function useTasks() {
           updatedAt: new Date(task.updated_at),
           sortOrder: task.sort_order || 0,
           recurring: (task.recurring as Task['recurring']) || 'none',
-          source: task.source ?? undefined,
-          googleClassroomId: task.google_classroom_id ?? undefined,
         };
       });
 
