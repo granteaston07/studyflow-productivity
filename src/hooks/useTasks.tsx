@@ -194,6 +194,15 @@ export function useTasks() {
       return;
     }
 
+    // Capture original before optimistic update so we can revert on failure
+    let originalTask: Task | undefined;
+    setTasks(prev => {
+      originalTask = prev.find(t => t.id === taskId);
+      return prev.map(task =>
+        task.id === taskId ? { ...task, ...updates, updatedAt: new Date() } : task
+      );
+    });
+
     try {
       const updateData: any = {};
       if (updates.title !== undefined) updateData.title = updates.title;
@@ -213,14 +222,22 @@ export function useTasks() {
         .eq('id', taskId)
         .eq('user_id', user.id);
 
-      if (error) throw error;
-
-      setTasks(prev => prev.map(task => 
-        task.id === taskId 
-          ? { ...task, ...updates, updatedAt: new Date() }
-          : task
-      ));
+      if (error) {
+        if (originalTask) {
+          setTasks(prev => prev.map(t => t.id === taskId ? originalTask! : t));
+        }
+        // Constraint violation on status — tell the user what's needed
+        if (error.code === '23514' && updates.status !== undefined) {
+          toast.error('Run the DB migration in Supabase dashboard to enable Review/Blocked statuses.');
+        } else {
+          toast.error('Failed to update task');
+        }
+        console.error('Error updating task:', error);
+      }
     } catch (error: any) {
+      if (originalTask) {
+        setTasks(prev => prev.map(t => t.id === taskId ? originalTask! : t));
+      }
       toast.error('Failed to update task');
       console.error('Error updating task:', error);
     }
