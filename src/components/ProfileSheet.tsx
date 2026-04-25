@@ -10,7 +10,6 @@ import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
-import { useLayoutMode } from "@/hooks/useLayoutMode";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -27,17 +26,19 @@ interface ProfileSheetProps {
   xpToNext: number;
   xpProgress: number;
   completedCount: number;
+  layoutMode: "tabs" | "page";
+  onLayoutModeChange: (mode: "tabs" | "page") => void;
 }
 
 export function ProfileSheet({
   open, onOpenChange, userName, guestName, onGuestNameChange,
   streakCount, level, levelName, xpInLevel, xpToNext, xpProgress, completedCount,
+  layoutMode, onLayoutModeChange,
 }: ProfileSheetProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { permission, requestPermission } = useNotifications();
-  const { layoutMode, setLayoutMode } = useLayoutMode();
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
@@ -162,7 +163,7 @@ export function ProfileSheet({
               <p className="text-xs text-muted-foreground mb-1.5 px-1">Layout</p>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
-                  onClick={() => setLayoutMode("tabs")}
+                  onClick={() => onLayoutModeChange("tabs")}
                   className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors duration-150 ${
                     layoutMode === "tabs"
                       ? "border-primary/40 bg-primary/8 text-primary"
@@ -173,7 +174,7 @@ export function ProfileSheet({
                   Tabs
                 </button>
                 <button
-                  onClick={() => setLayoutMode("page")}
+                  onClick={() => onLayoutModeChange("page")}
                   className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors duration-150 ${
                     layoutMode === "page"
                       ? "border-primary/40 bg-primary/8 text-primary"

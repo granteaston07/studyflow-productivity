@@ -1,12 +1,11 @@
-import { useMemo, useState } from "react";
-import { CheckCircle2, AlertTriangle, Clock, Flame, Zap, ChevronDown, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { useMemo } from "react";
+import { CheckCircle2, AlertTriangle, Clock, Flame, Zap, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Task } from "./TaskCard";
 import { useStudyStreak } from "@/hooks/useStudyStreak";
 import { useXP } from "@/hooks/useXP";
 import { useSubjectInsights } from "@/hooks/useSubjectInsights";
 import { useAuth } from "@/hooks/useAuth";
 import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 
 interface ProgressTrackerProps {
   tasks: Task[];
@@ -40,9 +39,6 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
   const { level, levelName, xpInLevel, xpToNext, progress: xpProgress } = useXP();
   const { insights } = useSubjectInsights();
   const { user } = useAuth();
-
-  const [subjectsOpen, setSubjectsOpen] = useState(false);
-  const [insightsOpen, setInsightsOpen] = useState(false);
 
   const stats = useMemo(() => {
     const total = tasks.length;
@@ -103,82 +99,65 @@ export function ProgressTracker({ tasks }: ProgressTrackerProps) {
         </div>
       </div>
 
-      {/* Subject breakdown — collapsible */}
-      {stats.subjects.length > 0 && (
-        <div className="rounded-xl border border-border/50 overflow-hidden">
-          <button
-            onClick={() => setSubjectsOpen(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
-          >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">By Subject</p>
-            <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform duration-200", subjectsOpen && "rotate-180")} />
-          </button>
-          {subjectsOpen && (
-            <div className="px-4 py-3 space-y-3 bg-card">
-              {stats.subjects.map(s => (
-                <div key={s.name} className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-foreground truncate max-w-[180px]">{s.name}</span>
-                    <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{s.completed}/{s.total}</span>
+      {/* Subject insights from feedback — always visible, right after overview */}
+      {user && insights.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subject Insights</p>
+          <div className="space-y-4">
+            {insights.map(ins => (
+              <div key={ins.subject} className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-foreground">{ins.subject}</span>
+                  <div className="flex items-center gap-1.5">
+                    {ins.trend === "harder" && (
+                      <span className="flex items-center gap-0.5 text-xs text-error">
+                        <TrendingUp className="h-3 w-3" /> Getting harder
+                      </span>
+                    )}
+                    {ins.trend === "easier" && (
+                      <span className="flex items-center gap-0.5 text-xs text-success">
+                        <TrendingDown className="h-3 w-3" /> Getting easier
+                      </span>
+                    )}
+                    {ins.trend === "stable" && (
+                      <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
+                        <Minus className="h-3 w-3" /> Stable
+                      </span>
+                    )}
+                    <span className="text-xs text-muted-foreground">· {ins.count} tasks</span>
                   </div>
-                  <Progress value={s.rate} className="h-1.5" />
                 </div>
-              ))}
-            </div>
-          )}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="p-2 rounded-lg bg-muted/40">
+                    <p className="text-muted-foreground mb-1">Avg difficulty</p>
+                    <DifficultyBar value={ins.avgDifficulty} />
+                  </div>
+                  <div className="p-2 rounded-lg bg-muted/40">
+                    <p className="text-muted-foreground mb-1">Avg time</p>
+                    <p className="font-semibold text-foreground">{formatMinutes(ins.avgTimeMinutes)}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
-      {/* Subject insights from feedback — collapsible */}
-      {user && insights.length > 0 && (
-        <div className="rounded-xl border border-border/50 overflow-hidden">
-          <button
-            onClick={() => setInsightsOpen(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
-          >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subject Insights</p>
-            <ChevronDown className={cn("h-3.5 w-3.5 text-muted-foreground transition-transform duration-200", insightsOpen && "rotate-180")} />
-          </button>
-          {insightsOpen && (
-            <div className="px-4 py-3 space-y-4 bg-card">
-              <p className="text-xs text-muted-foreground">Based on your completion feedback.</p>
-              {insights.map(ins => (
-                <div key={ins.subject} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-foreground">{ins.subject}</span>
-                    <div className="flex items-center gap-1.5">
-                      {ins.trend === "harder" && (
-                        <span className="flex items-center gap-0.5 text-xs text-error">
-                          <TrendingUp className="h-3 w-3" /> Getting harder
-                        </span>
-                      )}
-                      {ins.trend === "easier" && (
-                        <span className="flex items-center gap-0.5 text-xs text-success">
-                          <TrendingDown className="h-3 w-3" /> Getting easier
-                        </span>
-                      )}
-                      {ins.trend === "stable" && (
-                        <span className="flex items-center gap-0.5 text-xs text-muted-foreground">
-                          <Minus className="h-3 w-3" /> Stable
-                        </span>
-                      )}
-                      <span className="text-xs text-muted-foreground">· {ins.count} tasks</span>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="p-2 rounded-lg bg-muted/40">
-                      <p className="text-muted-foreground mb-1">Avg difficulty</p>
-                      <DifficultyBar value={ins.avgDifficulty} />
-                    </div>
-                    <div className="p-2 rounded-lg bg-muted/40">
-                      <p className="text-muted-foreground mb-1">Avg time</p>
-                      <p className="font-semibold text-foreground">{formatMinutes(ins.avgTimeMinutes)}</p>
-                    </div>
-                  </div>
+      {/* Subject breakdown — always visible */}
+      {stats.subjects.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">By Subject</p>
+          <div className="space-y-3">
+            {stats.subjects.map(s => (
+              <div key={s.name} className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground truncate max-w-[180px]">{s.name}</span>
+                  <span className="text-xs text-muted-foreground ml-2 flex-shrink-0">{s.completed}/{s.total}</span>
                 </div>
-              ))}
-            </div>
-          )}
+                <Progress value={s.rate} className="h-1.5" />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

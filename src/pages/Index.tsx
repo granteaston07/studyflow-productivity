@@ -67,7 +67,7 @@ const Index = () => {
     localStorage.getItem('studyflow_guest_name') || ''
   );
   const [profileOpen, setProfileOpen] = useState(false);
-  const { layoutMode } = useLayoutMode();
+  const { layoutMode, setLayoutMode } = useLayoutMode();
   const { permission, requestPermission, notifyDueToday } = useNotifications();
 
   const {
@@ -221,6 +221,43 @@ const Index = () => {
     { id: 'notes' as Tab, icon: NotebookPen, label: 'Notes' },
     { id: 'stats' as Tab, icon: BarChart2, label: 'Stats' },
   ];
+
+  const StatsTab = ({ tasks, userName }: { tasks: typeof tasks; userName?: string }) => {
+    const [subjectsOpen, setSubjectsOpen] = useState(false);
+    return (
+      <div className="space-y-5 animate-fade-in">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Stats</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">Your progress at a glance.</p>
+        </div>
+        <AIDailyBrief tasks={tasks} userName={userName} />
+        {tasks.length > 0 ? (
+          <ProgressTracker tasks={tasks} />
+        ) : (
+          <div className="text-center py-16 text-muted-foreground">
+            <BarChart2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
+            <p className="font-medium">No data yet</p>
+            <p className="text-xs mt-1">Complete some tasks to see your stats</p>
+          </div>
+        )}
+        {/* Subject management — collapsible */}
+        <div className="rounded-xl border border-border/50 overflow-hidden">
+          <button
+            onClick={() => setSubjectsOpen(v => !v)}
+            className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
+          >
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manage Subjects</p>
+            <X className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${subjectsOpen ? "rotate-0" : "rotate-45"}`} />
+          </button>
+          {subjectsOpen && (
+            <div className="px-4 py-4 bg-card">
+              <SubjectManager tasks={tasks} />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -614,23 +651,7 @@ const Index = () => {
 
       // STATS ──────────────────────────────────────────────────────
       case 'stats': return (
-        <div className="space-y-5 animate-fade-in">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Stats</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Your progress at a glance.</p>
-          </div>
-          <AIDailyBrief tasks={tasks} userName={userName} />
-          {tasks.length > 0 ? (
-            <ProgressTracker tasks={tasks} />
-          ) : (
-            <div className="text-center py-16 text-muted-foreground">
-              <BarChart2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">No data yet</p>
-              <p className="text-xs mt-1">Complete some tasks to see your stats</p>
-            </div>
-          )}
-          <SubjectManager tasks={tasks} />
-        </div>
+        <StatsTab tasks={tasks} userName={userName} />
       );
     }
   };
@@ -825,6 +846,8 @@ const Index = () => {
         xpToNext={xpToNext}
         xpProgress={xpProgress}
         completedCount={completedTasks.length}
+        layoutMode={layoutMode}
+        onLayoutModeChange={setLayoutMode}
       />
 
       {timerActive && activeTab !== 'focus' && (
