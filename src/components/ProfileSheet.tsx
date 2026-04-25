@@ -12,6 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { GoogleClassroomSync } from "@/components/GoogleClassroomSync";
 
 interface ProfileSheetProps {
   open: boolean;
@@ -28,11 +29,13 @@ interface ProfileSheetProps {
   completedCount: number;
   onManageSubjects?: () => void;
   onManageLinks?: () => void;
+  onSyncComplete?: () => void;
 }
 
 export function ProfileSheet({
   open, onOpenChange, userName, guestName, onGuestNameChange,
   streakCount, level, levelName, xpInLevel, xpToNext, xpProgress, completedCount,
+  onManageSubjects, onManageLinks, onSyncComplete,
 }: ProfileSheetProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -219,6 +222,16 @@ export function ProfileSheet({
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
+
+          {/* Integrations */}
+          {user && (
+            <div className="space-y-1">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
+                <BookOpen className="h-3.5 w-3.5" /> Integrations
+              </p>
+              <GoogleClassroomSync onSyncComplete={onSyncComplete} />
+            </div>
+          )}
 
           {/* Account */}
           <div className="space-y-1">

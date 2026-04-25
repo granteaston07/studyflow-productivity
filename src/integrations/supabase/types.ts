@@ -41,30 +41,42 @@ export type Database = {
       google_classroom_connections: {
         Row: {
           access_token: string
+          access_token_encrypted: string | null
           created_at: string
           expires_at: string
+          google_email: string | null
           id: string
+          last_synced_at: string | null
           refresh_token: string
+          refresh_token_encrypted: string | null
           scope: string
           updated_at: string
           user_id: string
         }
         Insert: {
           access_token: string
+          access_token_encrypted?: string | null
           created_at?: string
           expires_at: string
+          google_email?: string | null
           id?: string
+          last_synced_at?: string | null
           refresh_token: string
+          refresh_token_encrypted?: string | null
           scope: string
           updated_at?: string
           user_id: string
         }
         Update: {
           access_token?: string
+          access_token_encrypted?: string | null
           created_at?: string
           expires_at?: string
+          google_email?: string | null
           id?: string
+          last_synced_at?: string | null
           refresh_token?: string
+          refresh_token_encrypted?: string | null
           scope?: string
           updated_at?: string
           user_id?: string
