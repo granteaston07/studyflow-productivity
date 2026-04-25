@@ -1,7 +1,7 @@
-import { Brain, Clock, Lightbulb, ChevronRight, Timer } from "lucide-react";
+import { Brain, Lightbulb, ChevronRight, Timer, AlertTriangle } from "lucide-react";
 import { Task } from "./TaskCard";
 import { Badge } from "@/components/ui/badge";
-import { isToday, isTomorrow, isPast, differenceInDays } from "date-fns";
+import { differenceInDays } from "date-fns";
 
 interface TaskAICoachProps {
   task: Task;
@@ -11,13 +11,12 @@ interface CoachAdvice {
   headline: string;
   approach: string;
   steps: string[];
+  avoid: string;
   technique: string;
   techniqueWhy: string;
   timer: number;
-  timerLabel: string;
 }
 
-// ─── Detect what kind of task this is ────────────────────────────
 function detectType(title: string, subject: string) {
   const t = (title + " " + subject).toLowerCase();
   if (/essay|write|draft|paper|report|paragraph|writing|response/i.test(t)) return "writing";
@@ -31,7 +30,6 @@ function detectType(title: string, subject: string) {
   if (/science|biology|chemistry|physics|reaction|cell|atom|force|energy/i.test(t)) return "science";
   if (/present|slide|speech|talk|pitch/i.test(t)) return "presentation";
   if (/research|find|source|bibliograph|cite|notes/i.test(t)) return "research";
-  if (/listen|podcast|lecture|watch/i.test(t)) return "passive";
   return "general";
 }
 
@@ -51,193 +49,192 @@ function getUrgency(task: Task): "overdue" | "today" | "tomorrow" | "soon" | "no
 function buildAdvice(task: Task): CoachAdvice {
   const type = detectType(task.title, task.subject || "");
   const urgency = getUrgency(task);
-  const isHigh = task.priority === "high";
-  const title = task.title;
+  const urgent = urgency === "overdue" || urgency === "today" || urgency === "tomorrow";
 
   const urgencyPrefix =
-    urgency === "overdue" ? "This is overdue — " :
-    urgency === "today"   ? "Due today — " :
+    urgency === "overdue"  ? "Overdue — " :
+    urgency === "today"    ? "Due today — " :
     urgency === "tomorrow" ? "Due tomorrow — " : "";
 
   switch (type) {
     case "writing":
       return {
-        headline: urgencyPrefix + "Writing task detected",
-        approach: `Start with a 10-minute brain dump — write everything you know about "${title}" without editing. Then structure it.`,
+        headline: urgencyPrefix + "Writing task",
+        approach: `Set a 10-minute timer and write everything you know about "${task.title}" without stopping. No editing. No deleting. Just get it out. Structure comes after.`,
         steps: [
-          "Set a 10-min timer. Write non-stop — no editing, no deleting.",
-          "Outline: hook → context → 3 main points → conclusion.",
-          "Write the body first. Introduction last (you'll know what to introduce).",
+          "10-min brain dump: write non-stop, no corrections.",
+          "Outline from your dump: hook → context → 3 points → conclusion.",
+          "Write the body sections first. Write the intro last — you'll know what to introduce.",
         ],
+        avoid: "Don't start with the intro. Don't edit while writing. Both kill momentum.",
         technique: "Free-write first, structure second",
-        techniqueWhy: "Editing while writing kills momentum. Get it all out, then shape it.",
-        timer: urgency === "today" || urgency === "overdue" ? 45 : 30,
-        timerLabel: "45 min writing block",
+        techniqueWhy: "Trying to write perfectly the first time is the #1 reason people get stuck. Volume first, quality second.",
+        timer: urgent ? 45 : 45,
       };
 
     case "math":
       return {
-        headline: urgencyPrefix + "Math / calculation work",
-        approach: `For "${title}", work 2 example problems fully before doing your own. Write every step — no skipping.`,
+        headline: urgencyPrefix + "Maths / calculation",
+        approach: `Before doing your own problems for "${task.title}", find 2 worked examples and copy the full solution step by step. Then cover it and redo it from scratch.`,
         steps: [
-          "Find 2 worked examples (textbook or notes) and copy the steps.",
-          "Cover the solution, try the problem yourself. Check step-by-step.",
-          "Do your assigned problems — if stuck, re-read the example, not the answer.",
+          "Find 2 worked examples (textbook, notes, or online). Copy every step.",
+          "Cover the solution. Attempt each problem yourself from scratch.",
+          "If stuck, re-read the example step — not the answer.",
         ],
+        avoid: "Don't skip steps when writing. Don't check the answer before trying fully.",
         technique: "Worked examples → independent practice",
-        techniqueWhy: "Pattern recognition builds faster when you study solved problems before attempting your own.",
+        techniqueWhy: "Your brain learns maths through pattern recognition. Studying solved problems builds that pattern faster than trial and error.",
         timer: 45,
-        timerLabel: "45 min focus block",
       };
 
     case "reading":
       return {
-        headline: urgencyPrefix + "Reading / comprehension task",
-        approach: `Before reading "${title}": skim all headings and bolded terms (takes 2 min). This primes your brain to absorb faster.`,
+        headline: urgencyPrefix + "Reading / comprehension",
+        approach: `Before reading "${task.title}", spend 2 minutes skimming: headings, subheadings, bold terms, and the last paragraph. This primes your brain to absorb.`,
         steps: [
-          "Skim: read only headings, subheadings, and the first sentence of each paragraph.",
-          "Write 2–3 questions you expect the reading to answer.",
-          "Read actively — when you find the answer, underline and note it.",
+          "Skim first: headings, first sentence of each paragraph. Takes 2 min.",
+          "Write 2–3 questions you expect the text to answer.",
+          "Read actively — when you find an answer, underline and note it in the margin.",
         ],
-        technique: "SQ3R (Survey → Question → Read → Recite → Review)",
-        techniqueWhy: "Active reading retains 40% more than passive. You should be writing while you read.",
+        avoid: "Don't read passively. If you finish a page and can't say what it was about, reread it.",
+        technique: "Survey → Question → Read (SQ3R)",
+        techniqueWhy: "Passive reading has near-zero retention. Active reading — where you're hunting for answers — retains 3x more.",
         timer: 30,
-        timerLabel: "30 min reading block",
       };
 
     case "coding":
       return {
-        headline: urgencyPrefix + "Programming / coding project",
-        approach: `For "${title}", define what done looks like before writing a single line. Build the smallest thing that works, then improve it.`,
+        headline: urgencyPrefix + "Programming / coding",
+        approach: `For "${task.title}", define what done looks like before writing a single line. Then write pseudocode. Then code the smallest thing that works.`,
         steps: [
-          "Write out in plain English what the function/feature should do.",
-          "Pseudocode first — no syntax, just logic steps.",
-          "Code one small piece. Run it. Fix it. Then expand.",
+          "Write in plain English: what should this function/feature actually do?",
+          "Pseudocode: map the logic in steps, no syntax.",
+          "Code one piece, run it, fix it. Then expand. Never build everything at once.",
         ],
-        technique: "Pseudocode → smallest working version → iterate",
-        techniqueWhy: "Most coding blocks happen from trying to build everything at once. Tiny steps kill procrastination.",
+        avoid: "Don't start with the hardest part. Don't write more than you can test immediately.",
+        technique: "Define → pseudocode → smallest working version",
+        techniqueWhy: "Coding blocks almost always come from scope creep. Tiny, testable steps eliminate the wall.",
         timer: 45,
-        timerLabel: "45 min deep work",
       };
 
     case "revision":
       return {
         headline: urgencyPrefix + "Revision / exam prep",
-        approach: `For "${title}", don't re-read notes. Test yourself instead — look away and recall everything you know.`,
+        approach: `For "${task.title}" — don't re-read your notes. Close them and recall everything you know. Then check. Re-reading feels productive but isn't.`,
         steps: [
-          "Close your notes. Write down everything you remember about the topic.",
-          "Check what you missed. Focus only on those gaps.",
-          "Quiz yourself again in 10 minutes without looking.",
+          "Close all notes. Write down everything you remember on the topic.",
+          "Check what you missed or got wrong. Focus only on those gaps.",
+          "Test yourself again in 10 minutes without looking at anything.",
         ],
-        technique: "Active recall — not re-reading",
-        techniqueWhy: "Re-reading creates an illusion of knowing. Testing yourself shows what you actually know.",
+        avoid: "Don't re-read your notes and call it studying. That's not revision, it's reading.",
+        technique: "Active recall — not passive review",
+        techniqueWhy: "Re-reading creates an illusion of knowing. Retrieval practice — actually testing yourself — builds real memory.",
         timer: 25,
-        timerLabel: "25 min recall sprint",
       };
 
     case "language":
       return {
-        headline: urgencyPrefix + "Language / vocabulary work",
-        approach: `For "${title}", use spaced repetition — don't cram everything at once. Short sessions beat marathon sessions.`,
+        headline: urgencyPrefix + "Language / vocabulary",
+        approach: `For "${task.title}", short bursts beat marathon sessions. Go through the vocab once out loud, then cover and test — don't just read.`,
         steps: [
-          "Go through new vocab once, speaking each word out loud.",
-          "Cover definitions. Test yourself on every word — mark what you missed.",
+          "Read each word and definition out loud once.",
+          "Cover the definition. Test yourself on every item — mark what you miss.",
           "Review only the missed ones. Repeat until you get them all.",
         ],
-        technique: "Spaced repetition + active recall",
-        techniqueWhy: "Languages are stored in procedural memory — they need repeated retrieval, not passive review.",
+        avoid: "Don't read the list top to bottom repeatedly. That's not learning — it's familiarity.",
+        technique: "Spaced retrieval — test, don't read",
+        techniqueWhy: "Languages require retrieval practice to stick. Passive reading creates recognition, not recall.",
         timer: 20,
-        timerLabel: "20 min vocab sprint",
       };
 
     case "science":
       return {
-        headline: urgencyPrefix + "Science concept or assignment",
-        approach: `For "${title}", use the Feynman method: explain the concept in your own words as if teaching a 12-year-old.`,
+        headline: urgencyPrefix + "Science concept",
+        approach: `For "${task.title}", use the Feynman method: read once, close the book, and explain the concept out loud as if teaching someone who knows nothing.`,
         steps: [
-          "Read the concept once. Close the textbook.",
-          "Explain it out loud in simple language. Note where you get stuck.",
-          "Go back and re-read only the parts where you got stuck. Repeat.",
+          "Read the concept or topic once. Then close the book.",
+          "Explain it out loud in simple language. Note every point where you hesitate.",
+          "Go back and reread only the parts where you got stuck.",
         ],
+        avoid: "Don't re-read the same section 3 times. Identify the specific gap and fix that.",
         technique: "Feynman method — teach to understand",
-        techniqueWhy: "If you can't explain it simply, you don't understand it yet. This exposes every gap fast.",
+        techniqueWhy: "If you can't explain it simply, you don't understand it. Teaching exposes every gap instantly.",
         timer: 35,
-        timerLabel: "35 min focused study",
       };
 
     case "history":
       return {
-        headline: urgencyPrefix + "History or social studies work",
-        approach: `For "${title}", build a simple timeline or cause-effect map before writing or studying details.`,
+        headline: urgencyPrefix + "History / social studies",
+        approach: `For "${task.title}", build a simple timeline or cause-effect chain from memory first. Then fill in the detail around that structure.`,
         steps: [
-          "Write out the key events in chronological order (5 min, from memory first).",
-          "For each event: write one cause and one effect.",
-          "Use this as your framework — fill in details around the structure.",
+          "Write the key events in chronological order from memory (5 min).",
+          "For each event: one cause, one effect. No more.",
+          "Use the timeline as your framework — add detail and evidence around it.",
         ],
+        avoid: "Don't try to memorise isolated facts. Dates and names without context won't stick.",
         technique: "Timeline + cause-effect mapping",
-        techniqueWhy: "History makes sense as a story. Mapping events spatially makes arguments easier to write and recall.",
+        techniqueWhy: "History makes sense as a story. Spatial mapping locks in the narrative before you add detail.",
         timer: 30,
-        timerLabel: "30 min study block",
       };
 
     case "lab":
       return {
-        headline: urgencyPrefix + "Lab or practical work",
-        approach: `For "${title}", read the method fully before starting. Know what you're measuring and why, before touching anything.`,
+        headline: urgencyPrefix + "Lab / practical",
+        approach: `For "${task.title}", read the full method before starting. Know exactly what you're measuring, why, and what your results table looks like — before you touch anything.`,
         steps: [
-          "Read the entire procedure. Note any safety steps and what data to record.",
-          "Prepare your results table before you start the experiment.",
-          "During: record everything, even unexpected results — they matter.",
+          "Read the entire procedure. Note every safety step and what data to record.",
+          "Draw your results table before starting the experiment.",
+          "Record everything during — including unexpected results. They're marked.",
         ],
-        technique: "Preparation → systematic recording",
-        techniqueWhy: "Most lab marks are lost in the write-up. Recording properly during the experiment makes it effortless after.",
+        avoid: "Don't start without reading the method fully. One skipped step can invalidate the whole thing.",
+        technique: "Prepare → record → analyse",
+        techniqueWhy: "Most lab marks are lost in the write-up. Recording properly during the experiment makes analysis effortless.",
         timer: 60,
-        timerLabel: "60 min lab block",
       };
 
     case "presentation":
       return {
-        headline: urgencyPrefix + "Presentation or speech prep",
-        approach: `For "${title}", don't memorise a script — know 3–5 key points and practice talking through them naturally.`,
+        headline: urgencyPrefix + "Presentation / speech",
+        approach: `For "${task.title}", don't memorise a script. Know 3–5 key points and practise talking through them naturally. Record yourself once.`,
         steps: [
-          "Write down 3–5 bullet points, not full sentences.",
-          "Record yourself presenting once — watch it back to spot unclear sections.",
-          "Practice the opening line until it's smooth. First 15 seconds matter most.",
+          "Write 3–5 bullet points — not sentences, just concepts.",
+          "Record a practice run on your phone. Watch it back once.",
+          "Practise your opening line until it comes out smooth. First 20 seconds matter most.",
         ],
-        technique: "Key points + verbal rehearsal (not memorisation)",
-        techniqueWhy: "Scripted presentations fall apart when you lose your place. Knowing the ideas lets you recover easily.",
+        avoid: "Don't memorise word-for-word. Scripted presentations fall apart the moment you lose your place.",
+        technique: "Key points + verbal rehearsal",
+        techniqueWhy: "Knowing the ideas — not the words — means you can recover from any disruption naturally.",
         timer: 30,
-        timerLabel: "30 min prep session",
       };
 
     case "research":
       return {
         headline: urgencyPrefix + "Research task",
-        approach: `For "${title}", start with your thesis or central question. Every source you find should answer that question — if it doesn't, skip it.`,
+        approach: `For "${task.title}", write your research question at the top of the doc before opening a single tab. Every source must answer that question — if it doesn't, skip it.`,
         steps: [
-          "Write your research question at the top of your doc before opening any tabs.",
-          "Find 3 credible sources. For each: note the key claim and page number.",
+          "Write your central question or thesis before searching anything.",
+          "Find 3 credible sources. For each: one key claim + page/URL.",
           "Summarise each source in one sentence in your own words.",
         ],
+        avoid: "Don't open sources and hope a thesis emerges. That wastes hours. Question first, evidence second.",
         technique: "Question-first research",
-        techniqueWhy: "Starting with sources and hoping to find a thesis is backwards. Know the question first, find the evidence second.",
+        techniqueWhy: "Starting with sources and working backwards is the most common research time-waster. Know what you're looking for.",
         timer: 45,
-        timerLabel: "45 min research block",
       };
 
     default:
       return {
         headline: urgencyPrefix + "Let's break this down",
-        approach: `For "${title}", spend the first 5 minutes planning — what exactly does done look like for this task?`,
+        approach: `Before starting "${task.title}", spend 5 minutes getting clear: what does the finished result actually look like? Write it down.`,
         steps: [
-          "Write down what the finished result should look like (1 min).",
-          "Break it into 3 smaller steps you can actually do.",
-          "Start with the easiest step to build momentum.",
+          "Write what done looks like — specific, not vague.",
+          "Break it into 3 smaller actions you can actually do right now.",
+          "Start with the easiest one to build momentum.",
         ],
+        avoid: "Don't start without knowing what done looks like. Vagueness is the #1 cause of procrastination.",
         technique: "Define done → break it down → start small",
-        techniqueWhy: "Most procrastination comes from vagueness. Once you know exactly what to do, starting is easy.",
+        techniqueWhy: "Most procrastination is ambiguity in disguise. Clarity about the next action removes the block.",
         timer: 25,
-        timerLabel: "25 min focus block",
       };
   }
 }
@@ -253,12 +250,12 @@ export function TaskAICoach({ task }: TaskAICoachProps) {
           <Brain className="h-4 w-4 text-ai-primary" />
           <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 bg-ai-secondary rounded-full animate-pulse" />
         </div>
-        <span className="text-xs font-semibold text-ai-primary uppercase tracking-wider">AI Study Coach</span>
+        <span className="text-xs font-semibold text-ai-primary uppercase tracking-wider">AI Coach</span>
       </div>
 
       {/* Task being analysed */}
       <div className="p-3 rounded-xl bg-muted/40 border border-border/50">
-        <p className="text-xs text-muted-foreground mb-0.5">Analysing</p>
+        <p className="text-xs text-muted-foreground mb-0.5">Coaching for</p>
         <p className="text-sm font-semibold text-foreground truncate">{task.title}</p>
         {task.subject && <p className="text-xs text-muted-foreground mt-0.5">{task.subject}</p>}
       </div>
@@ -282,6 +279,15 @@ export function TaskAICoach({ task }: TaskAICoachProps) {
         ))}
       </div>
 
+      {/* What to avoid */}
+      <div className="flex items-start gap-2 p-3 rounded-xl bg-error/5 border border-error/15">
+        <AlertTriangle className="h-3.5 w-3.5 text-error mt-0.5 flex-shrink-0" />
+        <p className="text-xs text-muted-foreground leading-relaxed">
+          <span className="text-error font-semibold">Avoid: </span>
+          {advice.avoid}
+        </p>
+      </div>
+
       {/* Technique */}
       <div className="p-3.5 rounded-xl bg-ai-primary/8 border border-ai-primary/15 space-y-1.5">
         <div className="flex items-center gap-2">
@@ -301,8 +307,8 @@ export function TaskAICoach({ task }: TaskAICoachProps) {
           <Timer className="h-4 w-4 text-primary" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-foreground">Suggested: {advice.timer} minutes</p>
-          <p className="text-xs text-muted-foreground">{advice.timerLabel}</p>
+          <p className="text-sm font-semibold text-foreground">Suggested block: {advice.timer} minutes</p>
+          <p className="text-xs text-muted-foreground">Set the timer above and start.</p>
         </div>
         <Badge variant="outline" className="ml-auto border-primary/25 text-primary bg-primary/8 text-xs">
           {advice.timer}m

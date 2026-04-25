@@ -19,7 +19,7 @@ import { StudyMode } from "@/components/StudyMode";
 import { AmbientSounds } from "@/components/AmbientSounds";
 import { StudyLinks } from "@/components/StudyLinks";
 import { ProgressTracker } from "@/components/ProgressTracker";
-import { AIStudySuggestions } from "@/components/AIStudySuggestions";
+import { AISessionPlanner } from "@/components/AISessionPlanner";
 import { TaskPrioritization } from "@/components/TaskPrioritization";
 import { AIDailyBrief } from "@/components/AIDailyBrief";
 import { TaskAICoach } from "@/components/TaskAICoach";
@@ -413,7 +413,11 @@ const Index = () => {
                   {selectedTask ? (
                     <TaskAICoach task={selectedTask} />
                   ) : (
-                    <AIStudySuggestions tasks={tasks} />
+                    <AISessionPlanner
+                      tasks={tasks}
+                      onSelectTask={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
+                      selectedTaskId={selectedTaskId}
+                    />
                   )}
                 </div>
               </SheetContent>
