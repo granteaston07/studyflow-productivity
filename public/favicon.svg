@@ -5,13 +5,12 @@
       <stop offset="100%" style="stop-color:#A855F7"/>
     </linearGradient>
   </defs>
-  <rect width="24" height="24" rx="6" ry="6" fill="url(#grad)"/>
-  <g fill="white" transform="translate(4,6)">
-    <path d="M2 2l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="7" y="1" width="6" height="1" rx="0.5"/>
-    <path d="M2 6l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="7" y="5" width="7" height="1" rx="0.5"/>
-    <path d="M2 10l2 2 4-4" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    <rect x="7" y="9" width="5" height="1" rx="0.5"/>
+  <g fill="none" transform="translate(3,3)">
+    <path d="M2 2l2 2 4-4" stroke="url(#grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="9" y="1" width="7" height="1.5" rx="0.75" fill="url(#grad)"/>
+    <path d="M2 9l2 2 4-4" stroke="url(#grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="9" y="8" width="8" height="1.5" rx="0.75" fill="url(#grad)"/>
+    <path d="M2 16l2 2 4-4" stroke="url(#grad)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="9" y="15" width="6" height="1.5" rx="0.75" fill="url(#grad)"/>
   </g>
 </svg>

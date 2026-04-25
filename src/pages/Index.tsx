@@ -66,6 +66,7 @@ const Index = () => {
   );
   const [profileOpen, setProfileOpen] = useState(false);
   const [subjectsOpen, setSubjectsOpen] = useState(false);
+  const [linksOpen, setLinksOpen] = useState(false);
   const { permission, requestPermission, notifyDueToday } = useNotifications();
 
   const {
@@ -274,7 +275,7 @@ const Index = () => {
           {/* Quick links */}
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
-            <StudyLinks />
+            <StudyLinks open={linksOpen} onOpenChange={setLinksOpen} />
           </div>
 
           {/* Ambient sounds */}
@@ -652,20 +653,6 @@ const Index = () => {
             </div>
           )}
           </div>
-          <div className="animate-slide-up rounded-xl border border-border/50 overflow-hidden" style={{ animationDelay: '0.14s' }}>
-            <button
-              onClick={() => setSubjectsOpen(v => !v)}
-              className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
-            >
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manage Subjects</p>
-              <X className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${subjectsOpen ? "rotate-0" : "rotate-45"}`} />
-            </button>
-            {subjectsOpen && (
-              <div className="px-4 py-4 bg-card">
-                <SubjectManager tasks={tasks} />
-              </div>
-            )}
-          </div>
         </div>
       );
     }
@@ -831,7 +818,22 @@ const Index = () => {
         xpToNext={xpToNext}
         xpProgress={xpProgress}
         completedCount={completedTasks.length}
+        onManageLinks={() => setLinksOpen(true)}
+        onManageSubjects={() => setSubjectsOpen(true)}
       />
+
+      <Sheet open={subjectsOpen} onOpenChange={setSubjectsOpen}>
+        <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
+          <SheetHeader className="mb-4">
+            <SheetTitle className="text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+              Manage Subjects
+            </SheetTitle>
+          </SheetHeader>
+          <div className="pb-4">
+            <SubjectManager tasks={tasks} />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {timerActive && activeTab !== 'focus' && (
         <FloatingTimerWidget

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LogOut, LogIn, Sun, Moon, Bell, BellOff, Check, Pencil, X,
-  Shield, Palette,
+  Shield, Palette, Link, BookOpen, ChevronRight,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -26,6 +26,8 @@ interface ProfileSheetProps {
   xpToNext: number;
   xpProgress: number;
   completedCount: number;
+  onManageSubjects?: () => void;
+  onManageLinks?: () => void;
 }
 
 export function ProfileSheet({
@@ -189,6 +191,33 @@ export function ProfileSheet({
                 <span className="text-xs text-primary font-semibold">Enable</span>
               </button>
             )}
+          </div>
+
+          {/* Customize */}
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
+              <Link className="h-3.5 w-3.5" /> Customize
+            </p>
+            <button
+              onClick={() => { onOpenChange(false); onManageLinks?.(); }}
+              className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 active:bg-muted/70 transition-colors duration-150"
+            >
+              <div className="flex items-center gap-2.5">
+                <Link className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-foreground font-medium">Quick Links</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
+            <button
+              onClick={() => { onOpenChange(false); onManageSubjects?.(); }}
+              className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 active:bg-muted/70 transition-colors duration-150"
+            >
+              <div className="flex items-center gap-2.5">
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-foreground font-medium">Manage Subjects</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
           </div>
 
           {/* Account */}

@@ -6,9 +6,16 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { useCustomLinks, StudyLink } from "@/hooks/useCustomLinks";
 import { ICON_MAP, ICON_OPTIONS } from "@/lib/linkIcons";
 
-export function StudyLinks() {
+interface StudyLinksProps {
+  open?: boolean;
+  onOpenChange?: (v: boolean) => void;
+}
+
+export function StudyLinks({ open: externalOpen, onOpenChange: externalSetOpen }: StudyLinksProps = {}) {
   const { links, updateLink, addLink, deleteLink, resetToDefault } = useCustomLinks();
-  const [editOpen, setEditOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const editOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setEditOpen = externalSetOpen ?? setInternalOpen;
   const [editingId, setEditingId] = useState<string | null>(null);
   const [iconPickerFor, setIconPickerFor] = useState<string | null>(null);
 
@@ -24,26 +31,27 @@ export function StudyLinks() {
 
   return (
     <>
-      <div className="space-y-2">
-        <div className="grid grid-cols-3 gap-2">
-          {links.map(({ id, name, url, icon }) => {
-            const Icon = ICON_MAP[icon] ?? ICON_MAP["Globe"];
-            return (
-              <a
-                key={id}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border transition-all duration-150 group"
-              >
-                <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground text-center leading-tight transition-colors line-clamp-1">
-                  {name}
-                </span>
-              </a>
-            );
-          })}
-        </div>
+      <div className="grid grid-cols-3 gap-2">
+        {links.map(({ id, name, url, icon }) => {
+          const Icon = ICON_MAP[icon] ?? ICON_MAP["Globe"];
+          return (
+            <a
+              key={id}
+              href={url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 bg-muted/20 hover:bg-muted/40 hover:border-border transition-all duration-150 group"
+            >
+              <Icon className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground text-center leading-tight transition-colors line-clamp-1">
+                {name}
+              </span>
+            </a>
+          );
+        })}
+      </div>
+      {/* Hidden edit trigger only shown when not controlled externally */}
+      {!externalSetOpen && (
         <button
           onClick={() => setEditOpen(true)}
           className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-150"
@@ -52,7 +60,7 @@ export function StudyLinks() {
           <Settings className="h-2.5 w-2.5" />
           edit
         </button>
-      </div>
+      )}
 
       <Sheet open={editOpen} onOpenChange={setEditOpen}>
         <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto rounded-t-2xl">
