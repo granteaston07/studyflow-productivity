@@ -1,4 +1,4 @@
-import { Calendar, Trash2, Pencil, X, Save, Repeat } from "lucide-react";
+import { Calendar, Trash2, Pencil, X, Save, Repeat, ChevronDown, Plus } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -10,9 +10,10 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Task } from "@/hooks/useTasks";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TaskCompletionFeedback } from "./TaskCompletionFeedback";
 import { useCustomSubjects } from "@/hooks/useCustomSubjects";
+import { useSubtasks } from "@/hooks/useSubtasks";
 
 export type { Task } from "@/hooks/useTasks";
 
@@ -93,7 +94,11 @@ export function TaskCard({
   const [subjectInput, setSubjectInput] = useState(task.subject || '');
   const [priorityInput, setPriorityInput] = useState<Task['priority']>(task.priority);
   const [dateInput, setDateInput] = useState<Date | undefined>(task.dueDate);
+  const [subtasksOpen, setSubtasksOpen] = useState(false);
+  const [newSubtaskInput, setNewSubtaskInput] = useState('');
+  const subtaskInputRef = useRef<HTMLInputElement>(null);
   const { getDisplayName } = useCustomSubjects();
+  const { subtasks, addSubtask, toggleSubtask, deleteSubtask, completedCount } = useSubtasks(task.id);
 
   useEffect(() => {
     setTitleInput(task.title);
@@ -266,6 +271,25 @@ export function TaskCard({
             </Badge>
           )}
 
+          {/* Subtask toggle */}
+          {!isReorderMode && !task.completed && (
+            <button
+              onClick={e => { e.stopPropagation(); setSubtasksOpen(v => !v); }}
+              className={cn(
+                "flex items-center gap-0.5 px-1.5 h-7 rounded-lg flex-shrink-0 text-xs transition-all",
+                subtasksOpen || subtasks.length > 0
+                  ? "text-primary/80 hover:bg-primary/10"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              )}
+              title="Subtasks"
+            >
+              {subtasks.length > 0 && (
+                <span className="font-medium">{completedCount}/{subtasks.length}</span>
+              )}
+              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", subtasksOpen && "rotate-180")} />
+            </button>
+          )}
+
           {/* Edit + Delete */}
           {!isReorderMode && !task.completed && (
             <button
@@ -287,6 +311,63 @@ export function TaskCard({
             </button>
           )}
         </div>
+
+        {/* Subtask panel */}
+        {subtasksOpen && !task.completed && (
+          <div
+            className="border-t border-border/30 bg-muted/10 px-4 py-3 space-y-2"
+            onClick={e => e.stopPropagation()}
+          >
+            {subtasks.length > 0 && (
+              <div className="space-y-1.5">
+                {subtasks.map(sub => (
+                  <div key={sub.id} className="flex items-center gap-2 group">
+                    <Checkbox
+                      checked={sub.completed}
+                      onCheckedChange={() => toggleSubtask(sub.id)}
+                      className="w-4 h-4 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success"
+                    />
+                    <span className={cn(
+                      "flex-1 text-xs leading-snug",
+                      sub.completed ? "line-through text-muted-foreground" : "text-foreground"
+                    )}>{sub.title}</span>
+                    <button
+                      onClick={() => deleteSubtask(sub.id)}
+                      className="opacity-0 group-hover:opacity-100 w-5 h-5 flex items-center justify-center rounded text-muted-foreground hover:text-error transition-all"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              <Plus className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+              <input
+                ref={subtaskInputRef}
+                value={newSubtaskInput}
+                onChange={e => setNewSubtaskInput(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    addSubtask(newSubtaskInput);
+                    setNewSubtaskInput('');
+                  }
+                  if (e.key === 'Escape') setSubtasksOpen(false);
+                }}
+                placeholder="Add a subtask..."
+                className="flex-1 text-xs bg-transparent border-none outline-none placeholder:text-muted-foreground/60 text-foreground"
+              />
+              {newSubtaskInput.trim() && (
+                <button
+                  onClick={() => { addSubtask(newSubtaskInput); setNewSubtaskInput(''); }}
+                  className="text-xs text-primary font-medium hover:text-primary/80 transition-colors"
+                >
+                  Add
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Edit panel */}
         {isEditing && (

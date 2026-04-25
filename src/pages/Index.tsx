@@ -28,6 +28,7 @@ import { FloatingTimerWidget } from "@/components/FloatingTimerWidget";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { SubjectManager } from "@/components/SubjectManager";
 import { ProfileSheet } from "@/components/ProfileSheet";
+import { CalendarView } from "@/components/CalendarView";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -58,6 +59,7 @@ const Index = () => {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [taskSearch, setTaskSearch] = useState('');
   const [taskFilter, setTaskFilter] = useState<'all' | 'active' | 'overdue'>('all');
+  const [calendarDay, setCalendarDay] = useState<Date | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(() =>
     !localStorage.getItem('studyflow_onboarded')
   );
@@ -168,7 +170,12 @@ const Index = () => {
       taskFilter === 'all' ||
       (taskFilter === 'active' && t.status !== 'overdue') ||
       (taskFilter === 'overdue' && t.status === 'overdue');
-    return matchesSearch && matchesFilter;
+    const matchesDay = !calendarDay || (t.dueDate && (
+      t.dueDate.getFullYear() === calendarDay.getFullYear() &&
+      t.dueDate.getMonth() === calendarDay.getMonth() &&
+      t.dueDate.getDate() === calendarDay.getDate()
+    ));
+    return matchesSearch && matchesFilter && matchesDay;
   });
 
   if (studyMode) {
@@ -499,6 +506,22 @@ const Index = () => {
               )}
             </>
           )}
+
+          {/* Calendar */}
+          <div className="pt-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Calendar</p>
+            <CalendarView
+              tasks={tasks}
+              onDayFilter={setCalendarDay}
+              activeDay={calendarDay}
+            />
+            {calendarDay && (
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                Showing tasks due {calendarDay.toLocaleDateString('default', { month: 'long', day: 'numeric' })} ·{' '}
+                <button onClick={() => setCalendarDay(null)} className="text-primary hover:underline">clear</button>
+              </p>
+            )}
+          </div>
         </div>
       );
 
