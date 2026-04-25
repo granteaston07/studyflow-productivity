@@ -17,20 +17,35 @@ interface CoachAdvice {
   timer: number;
 }
 
-function detectType(title: string, subject: string) {
-  const t = (title + " " + subject).toLowerCase();
-  if (/essay|write|draft|paper|report|paragraph|writing|response/i.test(t)) return "writing";
-  if (/math|calc|algebra|geometry|equation|problem|worksheet|trig|derivative|integral|factor/i.test(t)) return "math";
-  if (/read|chapter|textbook|pages?|article|novel|book/i.test(t)) return "reading";
-  if (/code|program|debug|implement|function|class|algorithm|project|app|build/i.test(t)) return "coding";
-  if (/study|revise|review|revision|exam|test|quiz|flashcard/i.test(t)) return "revision";
-  if (/lab|experiment|practical|dissect|data|results|hypothesis/i.test(t)) return "lab";
-  if (/vocab|grammar|translat|spanish|french|german|japanese|language/i.test(t)) return "language";
-  if (/history|timeline|source|analyze|event|cause|effect|war|revolution/i.test(t)) return "history";
-  if (/science|biology|chemistry|physics|reaction|cell|atom|force|energy/i.test(t)) return "science";
-  if (/present|slide|speech|talk|pitch/i.test(t)) return "presentation";
-  if (/research|find|source|bibliograph|cite|notes/i.test(t)) return "research";
+function detectTypeFromSubject(subject: string): string {
+  const s = subject.toLowerCase();
+  if (/\bhistory\b|social studies|civics|geography|humanities|govt|government/i.test(s)) return "history";
+  if (/\bmath\b|mathematics|calculus|algebra|geometry|statistics|arithmetic|trig/i.test(s)) return "math";
+  if (/biology|chemistry|physics|\bscience\b|environmental|earth science/i.test(s)) return "science";
+  if (/\benglish\b|literature|\bwriting\b|composition|language arts/i.test(s)) return "writing";
+  if (/comp.?sci|computer|coding|programming|software/i.test(s)) return "coding";
+  if (/spanish|french|german|japanese|mandarin|latin|\blanguage\b|linguistics/i.test(s)) return "language";
+  if (/psychology|sociology|economics|political science/i.test(s)) return "history";
+  if (/art\b|design|music theory/i.test(s)) return "presentation";
   return "general";
+}
+
+function detectType(title: string, subject: string): string {
+  const t = (title + " " + subject).toLowerCase();
+  // Title-content signals take priority (a "lab report" in any subject → lab)
+  if (/lab|experiment|practical|dissect|hypothesis/i.test(t)) return "lab";
+  if (/essay|write|draft|paper|report|paragraph|composition/i.test(t)) return "writing";
+  if (/present|slide|speech|talk|pitch/i.test(t)) return "presentation";
+  if (/research|bibliograph|cite|annotated/i.test(t)) return "research";
+  if (/exam|test\b|quiz|revision|revise|flashcard/i.test(t)) return "revision";
+  if (/read|chapter|textbook|pages?|article|novel\b/i.test(t)) return "reading";
+  if (/code|program|debug|implement|function|class|algorithm|app\b|build/i.test(t)) return "coding";
+  if (/vocab|translat|grammar/i.test(t)) return "language";
+  if (/calc|equation|worksheet|algebra|geometry|trig|derivative|integral|factor/i.test(t)) return "math";
+  if (/timeline|source|cause|effect|war|revolution|event/i.test(t)) return "history";
+  if (/reaction|cell|atom|force|energy|molecule/i.test(t)) return "science";
+  // Subject is the tiebreaker when the title is generic ("Assignment 3", "Chapter 5", etc.)
+  return detectTypeFromSubject(subject);
 }
 
 function getUrgency(task: Task): "overdue" | "today" | "tomorrow" | "soon" | "none" {
@@ -47,9 +62,11 @@ function getUrgency(task: Task): "overdue" | "today" | "tomorrow" | "soon" | "no
 }
 
 function buildAdvice(task: Task): CoachAdvice {
-  const type = detectType(task.title, task.subject || "");
+  const subject = task.subject || "";
+  const type = detectType(task.title, subject);
   const urgency = getUrgency(task);
   const urgent = urgency === "overdue" || urgency === "today" || urgency === "tomorrow";
+  const subjectLabel = subject && subject !== "General" ? ` (${subject})` : "";
 
   const urgencyPrefix =
     urgency === "overdue"  ? "Overdue — " :
@@ -59,7 +76,7 @@ function buildAdvice(task: Task): CoachAdvice {
   switch (type) {
     case "writing":
       return {
-        headline: urgencyPrefix + "Writing task",
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — writing` : "Writing task"),
         approach: `Set a 10-minute timer and write everything you know about "${task.title}" without stopping. No editing. No deleting. Just get it out. Structure comes after.`,
         steps: [
           "10-min brain dump: write non-stop, no corrections.",
@@ -74,10 +91,10 @@ function buildAdvice(task: Task): CoachAdvice {
 
     case "math":
       return {
-        headline: urgencyPrefix + "Maths / calculation",
-        approach: `Before doing your own problems for "${task.title}", find 2 worked examples and copy the full solution step by step. Then cover it and redo it from scratch.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — problem solving` : "Maths / calculation"),
+        approach: `Before working through "${task.title}", find 2 worked examples from your ${subject || "maths"} notes and copy each step in full. Then cover and redo from scratch.`,
         steps: [
-          "Find 2 worked examples (textbook, notes, or online). Copy every step.",
+          `Find 2 worked examples from your ${subject || "maths"} notes or textbook. Copy every step.`,
           "Cover the solution. Attempt each problem yourself from scratch.",
           "If stuck, re-read the example step — not the answer.",
         ],
@@ -89,101 +106,101 @@ function buildAdvice(task: Task): CoachAdvice {
 
     case "reading":
       return {
-        headline: urgencyPrefix + "Reading / comprehension",
-        approach: `Before reading "${task.title}", spend 2 minutes skimming: headings, subheadings, bold terms, and the last paragraph. This primes your brain to absorb.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — reading` : "Reading / comprehension"),
+        approach: `Before reading "${task.title}", spend 2 minutes skimming headings, bold terms, and the last paragraph. This gives your brain a map to attach detail to.`,
         steps: [
-          "Skim first: headings, first sentence of each paragraph. Takes 2 min.",
-          "Write 2–3 questions you expect the text to answer.",
-          "Read actively — when you find an answer, underline and note it in the margin.",
+          "Skim first: headings, first sentence of each paragraph. 2 minutes max.",
+          `Write 2–3 questions you expect the ${subject || "text"} to answer.`,
+          "Read actively — when you find an answer, underline it and jot a note.",
         ],
-        avoid: "Don't read passively. If you finish a page and can't say what it was about, reread it.",
+        avoid: "Don't read passively. If you finish a page and can't say what it was about, go back.",
         technique: "Survey → Question → Read (SQ3R)",
-        techniqueWhy: "Passive reading has near-zero retention. Active reading — where you're hunting for answers — retains 3x more.",
+        techniqueWhy: "Passive reading has near-zero retention. Active reading — hunting for answers — retains 3× more.",
         timer: 30,
       };
 
     case "coding":
       return {
-        headline: urgencyPrefix + "Programming / coding",
-        approach: `For "${task.title}", define what done looks like before writing a single line. Then write pseudocode. Then code the smallest thing that works.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — programming` : "Programming / coding"),
+        approach: `For "${task.title}", define what done looks like in plain English before writing a line. Then pseudocode. Then code the smallest thing that works and runs.`,
         steps: [
-          "Write in plain English: what should this function/feature actually do?",
+          "Write what the function/feature should do in plain English.",
           "Pseudocode: map the logic in steps, no syntax.",
-          "Code one piece, run it, fix it. Then expand. Never build everything at once.",
+          "Code one piece, run it, fix it. Expand only after it works.",
         ],
-        avoid: "Don't start with the hardest part. Don't write more than you can test immediately.",
+        avoid: "Don't start with the hardest part. Don't write more than you can immediately test.",
         technique: "Define → pseudocode → smallest working version",
-        techniqueWhy: "Coding blocks almost always come from scope creep. Tiny, testable steps eliminate the wall.",
+        techniqueWhy: "Coding blocks come from scope creep. Tiny, testable steps eliminate the wall.",
         timer: 45,
       };
 
     case "revision":
       return {
-        headline: urgencyPrefix + "Revision / exam prep",
-        approach: `For "${task.title}" — don't re-read your notes. Close them and recall everything you know. Then check. Re-reading feels productive but isn't.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — revision` : "Revision / exam prep"),
+        approach: `For "${task.title}" — close your ${subject || "notes"} and write down everything you remember. Then check. Re-reading feels productive but isn't.`,
         steps: [
-          "Close all notes. Write down everything you remember on the topic.",
+          `Close all ${subject || "course"} notes. Write everything you remember on this topic.`,
           "Check what you missed or got wrong. Focus only on those gaps.",
           "Test yourself again in 10 minutes without looking at anything.",
         ],
         avoid: "Don't re-read your notes and call it studying. That's not revision, it's reading.",
         technique: "Active recall — not passive review",
-        techniqueWhy: "Re-reading creates an illusion of knowing. Retrieval practice — actually testing yourself — builds real memory.",
+        techniqueWhy: "Re-reading creates an illusion of knowing. Retrieval practice builds real memory.",
         timer: 25,
       };
 
     case "language":
       return {
-        headline: urgencyPrefix + "Language / vocabulary",
-        approach: `For "${task.title}", short bursts beat marathon sessions. Go through the vocab once out loud, then cover and test — don't just read.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — vocabulary` : "Language / vocabulary"),
+        approach: `For "${task.title}", short bursts beat marathon sessions. Read through the vocabulary once out loud — then cover and test every item.`,
         steps: [
           "Read each word and definition out loud once.",
           "Cover the definition. Test yourself on every item — mark what you miss.",
-          "Review only the missed ones. Repeat until you get them all.",
+          "Review only the missed ones. Repeat until you get them all clean.",
         ],
-        avoid: "Don't read the list top to bottom repeatedly. That's not learning — it's familiarity.",
+        avoid: "Don't read the list top to bottom repeatedly. That's familiarity, not learning.",
         technique: "Spaced retrieval — test, don't read",
-        techniqueWhy: "Languages require retrieval practice to stick. Passive reading creates recognition, not recall.",
+        techniqueWhy: "Languages require retrieval practice. Passive reading creates recognition, not recall.",
         timer: 20,
       };
 
     case "science":
       return {
-        headline: urgencyPrefix + "Science concept",
-        approach: `For "${task.title}", use the Feynman method: read once, close the book, and explain the concept out loud as if teaching someone who knows nothing.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — concept` : "Science concept"),
+        approach: `For "${task.title}" in ${subject || "science"}, use the Feynman method: read once, close the book, and explain the concept out loud as if teaching someone from scratch.`,
         steps: [
-          "Read the concept or topic once. Then close the book.",
+          `Read the ${subject || "science"} concept once. Then close the book.`,
           "Explain it out loud in simple language. Note every point where you hesitate.",
-          "Go back and reread only the parts where you got stuck.",
+          "Go back and re-read only the parts where you got stuck.",
         ],
-        avoid: "Don't re-read the same section 3 times. Identify the specific gap and fix that.",
+        avoid: "Don't re-read the same section 3 times. Find the specific gap and fix that gap.",
         technique: "Feynman method — teach to understand",
-        techniqueWhy: "If you can't explain it simply, you don't understand it. Teaching exposes every gap instantly.",
+        techniqueWhy: "If you can't explain it simply, you don't understand it. Teaching exposes gaps instantly.",
         timer: 35,
       };
 
     case "history":
       return {
-        headline: urgencyPrefix + "History / social studies",
-        approach: `For "${task.title}", build a simple timeline or cause-effect chain from memory first. Then fill in the detail around that structure.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — analysis` : "History / social studies"),
+        approach: `For "${task.title}" in ${subject || "history"}, build a cause-effect chain or timeline from memory first — then fill in evidence and detail around that structure.`,
         steps: [
-          "Write the key events in chronological order from memory (5 min).",
-          "For each event: one cause, one effect. No more.",
-          "Use the timeline as your framework — add detail and evidence around it.",
+          `Write the key ${subject || "history"} events or arguments from memory first (5 min).`,
+          "For each: one cause, one effect, one piece of evidence. No more.",
+          "Use that structure as your framework — layer in detail and quotations.",
         ],
-        avoid: "Don't try to memorise isolated facts. Dates and names without context won't stick.",
-        technique: "Timeline + cause-effect mapping",
-        techniqueWhy: "History makes sense as a story. Spatial mapping locks in the narrative before you add detail.",
+        avoid: "Don't memorise isolated facts. Dates and names without context won't stick.",
+        technique: "Cause-effect mapping before detail",
+        techniqueWhy: `${subject || "History"} makes sense as a narrative. Structural mapping locks in the story before you add detail.`,
         timer: 30,
       };
 
     case "lab":
       return {
-        headline: urgencyPrefix + "Lab / practical",
-        approach: `For "${task.title}", read the full method before starting. Know exactly what you're measuring, why, and what your results table looks like — before you touch anything.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — lab / practical` : "Lab / practical"),
+        approach: `For "${task.title}", read the full ${subject || "science"} method before starting. Know exactly what you're measuring, why, and what your results table looks like.`,
         steps: [
           "Read the entire procedure. Note every safety step and what data to record.",
-          "Draw your results table before starting the experiment.",
+          "Draw your results table before touching any equipment.",
           "Record everything during — including unexpected results. They're marked.",
         ],
         avoid: "Don't start without reading the method fully. One skipped step can invalidate the whole thing.",
@@ -194,41 +211,41 @@ function buildAdvice(task: Task): CoachAdvice {
 
     case "presentation":
       return {
-        headline: urgencyPrefix + "Presentation / speech",
-        approach: `For "${task.title}", don't memorise a script. Know 3–5 key points and practise talking through them naturally. Record yourself once.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — presentation` : "Presentation / speech"),
+        approach: `For "${task.title}", don't memorise a script. Know 3–5 key ideas and practise talking through them naturally. Record yourself once and watch it back.`,
         steps: [
-          "Write 3–5 bullet points — not sentences, just concepts.",
+          "Write 3–5 bullet points — concepts, not full sentences.",
           "Record a practice run on your phone. Watch it back once.",
-          "Practise your opening line until it comes out smooth. First 20 seconds matter most.",
+          "Practise your opening line until it comes out naturally. First 20 seconds matter most.",
         ],
-        avoid: "Don't memorise word-for-word. Scripted presentations fall apart the moment you lose your place.",
+        avoid: "Don't memorise word-for-word. Scripted delivery falls apart the moment you lose your place.",
         technique: "Key points + verbal rehearsal",
-        techniqueWhy: "Knowing the ideas — not the words — means you can recover from any disruption naturally.",
+        techniqueWhy: "Knowing the ideas — not the words — means you can recover from any interruption naturally.",
         timer: 30,
       };
 
     case "research":
       return {
-        headline: urgencyPrefix + "Research task",
-        approach: `For "${task.title}", write your research question at the top of the doc before opening a single tab. Every source must answer that question — if it doesn't, skip it.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — research` : "Research task"),
+        approach: `For "${task.title}", write your central research question at the top of the doc before opening a single source. Every source must answer that question — if it doesn't, skip it.`,
         steps: [
-          "Write your central question or thesis before searching anything.",
-          "Find 3 credible sources. For each: one key claim + page/URL.",
+          "Write your central question or argument before searching anything.",
+          `Find 3 credible ${subject || "subject"} sources. For each: one key claim + page or URL.`,
           "Summarise each source in one sentence in your own words.",
         ],
-        avoid: "Don't open sources and hope a thesis emerges. That wastes hours. Question first, evidence second.",
+        avoid: "Don't open sources and hope a thesis appears. That wastes hours. Question first, evidence second.",
         technique: "Question-first research",
-        techniqueWhy: "Starting with sources and working backwards is the most common research time-waster. Know what you're looking for.",
+        techniqueWhy: "Starting with sources and working backwards is the most common research time-waster.",
         timer: 45,
       };
 
     default:
       return {
-        headline: urgencyPrefix + "Let's break this down",
-        approach: `Before starting "${task.title}", spend 5 minutes getting clear: what does the finished result actually look like? Write it down.`,
+        headline: urgencyPrefix + (subject && subject !== "General" ? `${subject} — let's plan this` : "Let's break this down"),
+        approach: `Before starting "${task.title}"${subjectLabel}, spend 5 minutes getting clear: what does the finished result actually look like? Write it down.`,
         steps: [
           "Write what done looks like — specific, not vague.",
-          "Break it into 3 smaller actions you can actually do right now.",
+          "Break it into 3 smaller actions you can do right now.",
           "Start with the easiest one to build momentum.",
         ],
         avoid: "Don't start without knowing what done looks like. Vagueness is the #1 cause of procrastination.",

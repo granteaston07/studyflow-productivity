@@ -14,36 +14,52 @@ interface SessionBlock {
   howToStart: string;
 }
 
-function detectType(title: string, subject?: string) {
-  const t = (title + " " + (subject || "")).toLowerCase();
-  if (/essay|write|draft|paper|report|paragraph|writing|response/i.test(t)) return "writing";
-  if (/math|calc|algebra|geometry|equation|problem|worksheet|trig|derivative|integral|factor/i.test(t)) return "math";
-  if (/read|chapter|textbook|pages?|article|novel|book/i.test(t)) return "reading";
-  if (/code|program|debug|implement|function|class|algorithm|project|app|build/i.test(t)) return "coding";
-  if (/study|revise|review|revision|exam|test|quiz|flashcard/i.test(t)) return "revision";
-  if (/lab|experiment|practical|data|results|hypothesis/i.test(t)) return "lab";
-  if (/vocab|grammar|translat|spanish|french|german|japanese|language/i.test(t)) return "language";
-  if (/history|timeline|source|event|cause|effect|war|revolution/i.test(t)) return "history";
-  if (/science|biology|chemistry|physics|reaction|cell|atom|force|energy/i.test(t)) return "science";
-  if (/present|slide|speech|talk|pitch/i.test(t)) return "presentation";
-  if (/research|find|source|bibliograph|cite|notes/i.test(t)) return "research";
+function detectTypeFromSubject(subject: string): string {
+  const s = subject.toLowerCase();
+  if (/\bhistory\b|social studies|civics|geography|humanities|govt|government/i.test(s)) return "history";
+  if (/\bmath\b|mathematics|calculus|algebra|geometry|statistics|arithmetic|trig/i.test(s)) return "math";
+  if (/biology|chemistry|physics|\bscience\b|environmental|earth science/i.test(s)) return "science";
+  if (/\benglish\b|literature|\bwriting\b|composition|language arts/i.test(s)) return "writing";
+  if (/comp.?sci|computer|coding|programming|software/i.test(s)) return "coding";
+  if (/spanish|french|german|japanese|mandarin|latin|\blanguage\b|linguistics/i.test(s)) return "language";
+  if (/psychology|sociology|economics|political science/i.test(s)) return "history";
   return "general";
 }
 
-const TYPE_INFO: Record<string, { minutes: number; howToStart: string }> = {
-  writing:      { minutes: 45, howToStart: "Brain dump for 10 min — write without editing at all." },
-  math:         { minutes: 45, howToStart: "Work through 2 examples from your notes before starting." },
-  reading:      { minutes: 30, howToStart: "Skim all headings first, then read with a pen in hand." },
-  coding:       { minutes: 45, howToStart: "Write what the function should do in plain English first." },
-  revision:     { minutes: 25, howToStart: "Close your notes and write down everything you remember." },
-  lab:          { minutes: 60, howToStart: "Read the full procedure before touching anything." },
-  language:     { minutes: 20, howToStart: "Cover answers and test every word — don't just read them." },
-  history:      { minutes: 30, howToStart: "Write a quick timeline from memory, then fill in gaps." },
-  science:      { minutes: 35, howToStart: "Explain the concept out loud before opening your notes." },
-  presentation: { minutes: 30, howToStart: "Write 3 key points on paper. Practice saying them out loud." },
-  research:     { minutes: 45, howToStart: "Write your central question at the top before any searching." },
-  general:      { minutes: 30, howToStart: "Write what done looks like before you start anything." },
-};
+function detectType(title: string, subject?: string): string {
+  const t = (title + " " + (subject || "")).toLowerCase();
+  if (/lab|experiment|practical|dissect|hypothesis/i.test(t)) return "lab";
+  if (/essay|write|draft|paper|report|paragraph|composition/i.test(t)) return "writing";
+  if (/present|slide|speech|talk|pitch/i.test(t)) return "presentation";
+  if (/research|bibliograph|cite|annotated/i.test(t)) return "research";
+  if (/exam|test\b|quiz|revision|revise|flashcard/i.test(t)) return "revision";
+  if (/read|chapter|textbook|pages?|article|novel\b/i.test(t)) return "reading";
+  if (/code|program|debug|implement|function|class|algorithm|app\b|build/i.test(t)) return "coding";
+  if (/vocab|translat|grammar/i.test(t)) return "language";
+  if (/calc|equation|worksheet|algebra|geometry|trig|derivative|integral|factor/i.test(t)) return "math";
+  if (/timeline|source|cause|effect|war|revolution|event/i.test(t)) return "history";
+  if (/reaction|cell|atom|force|energy|molecule/i.test(t)) return "science";
+  return detectTypeFromSubject(subject || "");
+}
+
+function getTypeInfo(type: string, subject?: string): { minutes: number; howToStart: string } {
+  const s = subject && subject !== "General" ? subject : null;
+  const map: Record<string, { minutes: number; howToStart: string }> = {
+    writing:      { minutes: 45, howToStart: `Brain dump for 10 min — write without editing.${s ? ` Frame it around your ${s} argument.` : ""}` },
+    math:         { minutes: 45, howToStart: `Work through 2 examples from your ${s || "maths"} notes before attempting any problems.` },
+    reading:      { minutes: 30, howToStart: `Skim headings first, then read ${s ? `this ${s} text` : "it"} with a pen in hand.` },
+    coding:       { minutes: 45, howToStart: "Write what the function/feature should do in plain English first." },
+    revision:     { minutes: 25, howToStart: `Close your ${s || "course"} notes and write down everything you can recall.` },
+    lab:          { minutes: 60, howToStart: `Read the full ${s || "lab"} procedure before touching any equipment.` },
+    language:     { minutes: 20, howToStart: `Cover the ${s || "vocab"} definitions and test yourself — don't just read.` },
+    history:      { minutes: 30, howToStart: `Write a ${s || "history"} timeline or cause-effect chain from memory first.` },
+    science:      { minutes: 35, howToStart: `Explain this ${s || "science"} concept out loud before opening your notes.` },
+    presentation: { minutes: 30, howToStart: `Write 3 key ${s || "topic"} points. Practise saying them out loud once.` },
+    research:     { minutes: 45, howToStart: `Write your ${s || "research"} question at the top before searching anything.` },
+    general:      { minutes: 30, howToStart: `Write what "${s ? `this ${s} task` : "done"}" looks like before starting.` },
+  };
+  return map[type] ?? map.general;
+}
 
 function scoreTask(task: Task): number {
   let score = 0;
@@ -69,7 +85,7 @@ function buildSession(tasks: Task[]): SessionBlock[] {
   const sorted = [...active].sort((a, b) => scoreTask(b) - scoreTask(a)).slice(0, 3);
   return sorted.map(task => {
     const type = detectType(task.title, task.subject);
-    const info = TYPE_INFO[type];
+    const info = getTypeInfo(type, task.subject);
     const base = info.minutes;
     const minutes = task.priority === "high" ? Math.min(base + 15, 90) : base;
     return { task, minutes, howToStart: info.howToStart };

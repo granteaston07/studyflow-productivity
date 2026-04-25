@@ -46,10 +46,11 @@ export function StudyLinks() {
         </div>
         <button
           onClick={() => setEditOpen(true)}
-          className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors duration-150"
+          className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground/60 hover:text-muted-foreground transition-colors duration-150"
+          title="Customize links"
         >
-          <Settings className="h-3 w-3" />
-          Customize links
+          <Settings className="h-2.5 w-2.5" />
+          edit
         </button>
       </div>
 
