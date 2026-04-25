@@ -28,8 +28,6 @@ import { FloatingTimerWidget } from "@/components/FloatingTimerWidget";
 import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { SubjectManager } from "@/components/SubjectManager";
 import { ProfileSheet } from "@/components/ProfileSheet";
-import { OnePageDashboard } from "@/components/OnePageDashboard";
-import { useLayoutMode } from "@/hooks/useLayoutMode";
 import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -67,7 +65,7 @@ const Index = () => {
     localStorage.getItem('studyflow_guest_name') || ''
   );
   const [profileOpen, setProfileOpen] = useState(false);
-  const { layoutMode, setLayoutMode } = useLayoutMode();
+  const [subjectsOpen, setSubjectsOpen] = useState(false);
   const { permission, requestPermission, notifyDueToday } = useNotifications();
 
   const {
@@ -221,43 +219,6 @@ const Index = () => {
     { id: 'notes' as Tab, icon: NotebookPen, label: 'Notes' },
     { id: 'stats' as Tab, icon: BarChart2, label: 'Stats' },
   ];
-
-  const StatsTab = ({ tasks, userName }: { tasks: typeof tasks; userName?: string }) => {
-    const [subjectsOpen, setSubjectsOpen] = useState(false);
-    return (
-      <div className="space-y-5 animate-fade-in">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">Stats</h1>
-          <p className="text-sm text-muted-foreground mt-0.5">Your progress at a glance.</p>
-        </div>
-        <AIDailyBrief tasks={tasks} userName={userName} />
-        {tasks.length > 0 ? (
-          <ProgressTracker tasks={tasks} />
-        ) : (
-          <div className="text-center py-16 text-muted-foreground">
-            <BarChart2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
-            <p className="font-medium">No data yet</p>
-            <p className="text-xs mt-1">Complete some tasks to see your stats</p>
-          </div>
-        )}
-        {/* Subject management — collapsible */}
-        <div className="rounded-xl border border-border/50 overflow-hidden">
-          <button
-            onClick={() => setSubjectsOpen(v => !v)}
-            className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
-          >
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manage Subjects</p>
-            <X className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${subjectsOpen ? "rotate-0" : "rotate-45"}`} />
-          </button>
-          {subjectsOpen && (
-            <div className="px-4 py-4 bg-card">
-              <SubjectManager tasks={tasks} />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -651,7 +612,36 @@ const Index = () => {
 
       // STATS ──────────────────────────────────────────────────────
       case 'stats': return (
-        <StatsTab tasks={tasks} userName={userName} />
+        <div className="space-y-5 animate-fade-in">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Stats</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Your progress at a glance.</p>
+          </div>
+          <AIDailyBrief tasks={tasks} userName={userName} />
+          {tasks.length > 0 ? (
+            <ProgressTracker tasks={tasks} />
+          ) : (
+            <div className="text-center py-16 text-muted-foreground">
+              <BarChart2 className="h-12 w-12 mx-auto mb-3 opacity-30" />
+              <p className="font-medium">No data yet</p>
+              <p className="text-xs mt-1">Complete some tasks to see your stats</p>
+            </div>
+          )}
+          <div className="rounded-xl border border-border/50 overflow-hidden">
+            <button
+              onClick={() => setSubjectsOpen(v => !v)}
+              className="w-full flex items-center justify-between px-4 py-3 bg-muted/30 hover:bg-muted/50 transition-colors duration-150"
+            >
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Manage Subjects</p>
+              <X className={`h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 ${subjectsOpen ? "rotate-0" : "rotate-45"}`} />
+            </button>
+            {subjectsOpen && (
+              <div className="px-4 py-4 bg-card">
+                <SubjectManager tasks={tasks} />
+              </div>
+            )}
+          </div>
+        </div>
       );
     }
   };
@@ -775,37 +765,13 @@ const Index = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className={`px-5 py-6 md:pb-8 ${layoutMode === "page" ? "pb-8" : "pb-24"}`}>
-            {layoutMode === "page" ? (
-              <OnePageDashboard
-                tasks={tasks}
-                userName={userName}
-                streakCount={streakCount}
-                onAddTask={async (d) => { await addTask(d); }}
-                onToggleTask={handleToggleTask}
-                onUpdateDueDate={handleUpdateDueDate}
-                onUpdateTask={updateTask}
-                onDeleteTask={deleteTask}
-                selectedTaskId={selectedTaskId}
-                onSelectTask={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
-                timerActive={timerActive}
-                timeRemaining={timeRemaining}
-                timerPaused={timerPaused}
-                onStartTimer={startTimer}
-                onUpdateTimerDuration={updateTimerDuration}
-                onPauseTimer={pauseTimer}
-                onResetTimer={resetTimer}
-                selectedSession={selectedSession}
-                onSessionChange={setSelectedSession}
-              />
-            ) : (
-              renderContent()
-            )}
+          <div className="px-5 py-6 pb-24 md:pb-8">
+            {renderContent()}
           </div>
         </main>
 
-        {/* Mobile bottom nav — hidden in one-page mode */}
-        <nav className={`md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/40 z-50 ${layoutMode === "page" ? "hidden" : ""}`}>
+        {/* Mobile bottom nav */}
+        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/40 z-50">
           <div className="flex">
             {NAV.map(({ id, icon: Icon, label }) => (
               <button key={id} onClick={() => setActiveTab(id)}
@@ -846,8 +812,6 @@ const Index = () => {
         xpToNext={xpToNext}
         xpProgress={xpProgress}
         completedCount={completedTasks.length}
-        layoutMode={layoutMode}
-        onLayoutModeChange={setLayoutMode}
       />
 
       {timerActive && activeTab !== 'focus' && (

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LogOut, LogIn, Sun, Moon, Bell, BellOff, Check, Pencil, X,
-  Shield, Palette, LayoutDashboard, Layers,
+  Shield, Palette,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
@@ -26,14 +26,11 @@ interface ProfileSheetProps {
   xpToNext: number;
   xpProgress: number;
   completedCount: number;
-  layoutMode: "tabs" | "page";
-  onLayoutModeChange: (mode: "tabs" | "page") => void;
 }
 
 export function ProfileSheet({
   open, onOpenChange, userName, guestName, onGuestNameChange,
   streakCount, level, levelName, xpInLevel, xpToNext, xpProgress, completedCount,
-  layoutMode, onLayoutModeChange,
 }: ProfileSheetProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -158,34 +155,6 @@ export function ProfileSheet({
               <span className="text-xs text-muted-foreground capitalize">{theme}</span>
             </button>
 
-            {/* Layout mode */}
-            <div className="mt-2">
-              <p className="text-xs text-muted-foreground mb-1.5 px-1">Layout</p>
-              <div className="grid grid-cols-2 gap-1.5">
-                <button
-                  onClick={() => onLayoutModeChange("tabs")}
-                  className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors duration-150 ${
-                    layoutMode === "tabs"
-                      ? "border-primary/40 bg-primary/8 text-primary"
-                      : "border-border/40 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <Layers className="h-4 w-4" />
-                  Tabs
-                </button>
-                <button
-                  onClick={() => onLayoutModeChange("page")}
-                  className={`flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors duration-150 ${
-                    layoutMode === "page"
-                      ? "border-primary/40 bg-primary/8 text-primary"
-                      : "border-border/40 bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <LayoutDashboard className="h-4 w-4" />
-                  One Page
-                </button>
-              </div>
-            </div>
           </div>
 
           <div className="space-y-1">
