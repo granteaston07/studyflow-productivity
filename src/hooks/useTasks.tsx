@@ -11,7 +11,7 @@ export interface Task {
   dueDate?: Date;
   completed: boolean;
   priority: 'low' | 'medium' | 'high';
-  status: 'pending' | 'in-progress' | 'completed' | 'overdue';
+  status: 'pending' | 'in-progress' | 'review' | 'blocked' | 'completed' | 'overdue';
   completedAt?: Date;
   createdAt: Date;
   updatedAt: Date;

@@ -11,11 +11,12 @@ interface DraggableTaskCardProps {
   onUpdateStatus: (id: string, status: Task['status']) => void;
   onUpdateTitle: (id: string, title: string) => void;
   onUpdatePriority: (id: string, priority: Task['priority']) => void;
+  onUpdateSubject?: (id: string, subject: string) => void;
   onDelete: (id: string) => void;
   isReorderMode: boolean;
 }
 
-export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onUpdateTitle, onUpdatePriority, onDelete, isReorderMode }: DraggableTaskCardProps) {
+export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onUpdateTitle, onUpdatePriority, onUpdateSubject, onDelete, isReorderMode }: DraggableTaskCardProps) {
   const {
     attributes,
     listeners,
@@ -51,6 +52,7 @@ export function DraggableTaskCard({ task, onToggle, onUpdateDueDate, onUpdateSta
           onUpdateStatus={onUpdateStatus}
           onUpdateTitle={onUpdateTitle}
           onUpdatePriority={onUpdatePriority}
+          onUpdateSubject={onUpdateSubject}
           onDelete={onDelete}
           isReorderMode={isReorderMode}
         />

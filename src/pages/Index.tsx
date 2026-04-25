@@ -200,6 +200,7 @@ const Index = () => {
                       onUpdateStatus={(id, s) => updateTask(id, { status: s })}
                       onUpdateTitle={(id, t) => updateTask(id, { title: t })}
                       onUpdatePriority={(id, p) => updateTask(id, { priority: p })}
+                      onUpdateSubject={(id, s) => updateTask(id, { subject: s })}
                       onDelete={(id) => deleteTask(id)}
                       selected={selectedTaskId === task.id}
                       onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
@@ -328,6 +329,7 @@ const Index = () => {
                               onUpdateStatus={(id, s) => updateTask(id, { status: s })}
                               onUpdateTitle={(id, t) => updateTask(id, { title: t })}
                               onUpdatePriority={(id, p) => updateTask(id, { priority: p })}
+                              onUpdateSubject={(id, s) => updateTask(id, { subject: s })}
                               onDelete={(id) => deleteTask(id)}
                               isReorderMode />
                           ))}
@@ -624,7 +626,7 @@ const Index = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-2xl mx-auto px-4 py-6 pb-24 md:pb-8">
+          <div className="px-5 py-6 pb-24 md:pb-8">
             {renderContent()}
           </div>
         </main>

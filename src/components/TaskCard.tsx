@@ -1,4 +1,4 @@
-import { Check, Clock, AlertTriangle, Calendar, Trash2, Pencil, NotebookPen } from "lucide-react";
+import { Check, Clock, AlertTriangle, Calendar, Trash2, Pencil, X, Save, Ban, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +23,7 @@ interface TaskCardProps {
   onUpdateStatus: (id: string, status: Task['status']) => void;
   onUpdateTitle?: (id: string, title: string) => void;
   onUpdatePriority?: (id: string, priority: Task['priority']) => void;
+  onUpdateSubject?: (id: string, subject: string) => void;
   onDelete: (id: string) => void;
   isGuest?: boolean;
   selected?: boolean;
@@ -30,46 +31,115 @@ interface TaskCardProps {
   isReorderMode?: boolean;
 }
 
+const STATUS_OPTIONS: { value: Task['status']; label: string; color: string }[] = [
+  { value: 'pending',     label: 'To Do',       color: 'bg-muted text-muted-foreground border-border' },
+  { value: 'in-progress', label: 'In Progress',  color: 'bg-warning/15 text-warning border-warning/25' },
+  { value: 'review',      label: 'Review',       color: 'bg-primary/15 text-primary border-primary/25' },
+  { value: 'blocked',     label: 'Blocked',      color: 'bg-error/15 text-error border-error/25' },
+];
 
-export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete, onUpdateTitle, onUpdatePriority, isGuest = false, selected = false, onSelect, isReorderMode = false }: TaskCardProps) {
+function getStatusStyle(status: Task['status']): string {
+  const opt = STATUS_OPTIONS.find(o => o.value === status);
+  if (opt) return opt.color;
+  if (status === 'completed') return 'bg-success/15 text-success border-success/25';
+  if (status === 'overdue')   return 'bg-error/15 text-error border-error/25';
+  return 'bg-muted text-muted-foreground border-border';
+}
+
+function getStatusLabel(status: Task['status']): string {
+  const opt = STATUS_OPTIONS.find(o => o.value === status);
+  if (opt) return opt.label;
+  if (status === 'completed') return 'Done';
+  if (status === 'overdue')   return 'Overdue';
+  return status;
+}
+
+function getPriorityColor(priority: Task['priority']): string {
+  switch (priority) {
+    case 'high':   return 'bg-error';
+    case 'medium': return 'bg-warning';
+    case 'low':    return 'bg-success';
+    default:       return 'bg-muted';
+  }
+}
+
+function formatDueDate(date?: Date, completed?: boolean): string | null {
+  if (!date) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  if (d.getTime() === today.getTime()) return 'Due today';
+  if (d.getTime() === today.getTime() + 86400000) return 'Due tomorrow';
+  if (d < today) return completed ? `Due ${format(date, 'MMM d')}` : 'Overdue';
+  return `Due ${format(date, 'MMM d')}`;
+}
+
+export function TaskCard({
+  task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete,
+  onUpdateTitle, onUpdatePriority, onUpdateSubject,
+  isGuest = false, selected = false, onSelect, isReorderMode = false,
+}: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUndoing, setIsUndoing] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [titleInput, setTitleInput] = useState(task.title);
+  const [subjectInput, setSubjectInput] = useState(task.subject || '');
+  const [priorityInput, setPriorityInput] = useState<Task['priority']>(task.priority);
+  const [statusInput, setStatusInput] = useState<Task['status']>(task.status);
+  const [dateInput, setDateInput] = useState<Date | undefined>(task.dueDate);
   const { getDisplayName } = useCustomSubjects();
 
   useEffect(() => {
     setTitleInput(task.title);
-  }, [task.title]);
+    setSubjectInput(task.subject || '');
+    setPriorityInput(task.priority);
+    setStatusInput(task.status);
+    setDateInput(task.dueDate);
+  }, [task]);
 
-  const handleTitleSave = () => {
+  const openEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setTitleInput(task.title);
+    setSubjectInput(task.subject || '');
+    setPriorityInput(task.priority);
+    setStatusInput(task.status);
+    setDateInput(task.dueDate);
+    setIsEditing(true);
+  };
+
+  const saveEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
     const trimmed = titleInput.trim();
-    if (trimmed && trimmed !== task.title) {
-      if (onUpdateTitle) onUpdateTitle(task.id, trimmed);
-    }
-    setIsEditingTitle(false);
+    if (trimmed && trimmed !== task.title) onUpdateTitle?.(task.id, trimmed);
+    const sub = subjectInput.trim();
+    if (sub !== (task.subject || '')) onUpdateSubject?.(task.id, sub || 'General');
+    if (priorityInput !== task.priority) onUpdatePriority?.(task.id, priorityInput);
+    if (statusInput !== task.status) onUpdateStatus(task.id, statusInput);
+    if (dateInput !== task.dueDate) onUpdateDueDate(task.id, dateInput);
+    setIsEditing(false);
+  };
+
+  const cancelEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(false);
   };
 
   const handleToggle = async () => {
     if (!task.completed) {
-      // For authenticated users, show feedback popup before completing the task
       if (!isGuest) {
         setFeedbackTask(task);
         setShowFeedback(true);
-        return; // Don't complete the task yet, let the popup handle it
+        return;
       }
-      
-      // For guest users, complete normally
       setIsCompleting(true);
       setTimeout(async () => {
         await onToggle(task.id, false);
         setIsCompleting(false);
       }, 800);
     } else {
-      // Uncompleting a task - smooth transition
       setIsUndoing(true);
       setTimeout(async () => {
         await onToggle(task.id);
@@ -81,8 +151,6 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
   const handleFeedbackClose = async () => {
     setShowFeedback(false);
     setFeedbackTask(null);
-    
-    // Now complete the task after feedback popup closes
     setIsCompleting(true);
     setTimeout(async () => {
       await onToggle(task.id, false);
@@ -90,80 +158,13 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
     }, 800);
   };
 
-  const handleDelete = () => {
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
     setIsDeleting(true);
-    setTimeout(() => {
-      onDelete(task.id);
-    }, 500);
-  };
-  const getStatusColor = (status: Task['status']) => {
-    switch (status) {
-      case 'completed':
-        return 'bg-success-light text-success border-success/20';
-      case 'in-progress':
-        return 'bg-warning-light text-warning border-warning/20';
-      case 'overdue':
-        return 'bg-error-light text-error border-error/20';
-      default:
-        return 'bg-muted text-muted-foreground border-border';
-    }
+    setTimeout(() => onDelete(task.id), 500);
   };
 
-  const getStatusIcon = (status: Task['status'], dueDate?: Date) => {
-    // Don't show overdue icon for tasks due today
-    if (status === 'overdue' && dueDate && formatDueDate(dueDate, false) === 'Due today') {
-      return <Clock className="h-4 w-4" />;
-    }
-    
-    switch (status) {
-      case 'completed':
-        return <Check className="h-4 w-4" />;
-      case 'in-progress':
-        return <Clock className="h-4 w-4" />;
-      case 'overdue':
-        return <AlertTriangle className="h-4 w-4" />;
-      default:
-        return <Clock className="h-4 w-4" />;
-    }
-  };
-
-  const getPriorityColor = (priority: Task['priority']) => {
-    switch (priority) {
-      case 'high':
-        return 'bg-error';
-      case 'medium':
-        return 'bg-warning';
-      case 'low':
-        return 'bg-success';
-      default:
-        return 'bg-muted';
-    }
-  };
-
-  const formatDueDate = (date?: Date, isCompleted?: boolean) => {
-    if (!date) return null;
-    
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const taskDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    
-    if (taskDate.getTime() === today.getTime()) {
-      return 'Due today';
-    } else if (taskDate.getTime() === today.getTime() + 86400000) {
-      return 'Due tomorrow';
-    } else if (taskDate < today) {
-      if (isCompleted) {
-        return `Due ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-      }
-      return 'Overdue';
-    } else {
-      return `Due ${date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric' 
-      })}`;
-    }
-  };
-
+  const dueDateText = formatDueDate(task.dueDate, task.completed);
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const displayStatus: Task['status'] = (() => {
@@ -177,221 +178,209 @@ export function TaskCard({ task, onToggle, onUpdateDueDate, onUpdateStatus, onDe
 
   return (
     <>
-    <Card className={cn(
-      "p-4 border border-border/50 bg-card/50 backdrop-blur-sm animate-fade-in",
-      !isReorderMode && "transition-all duration-200 hover:shadow-lg hover:border-primary/30 hover:scale-[1.02]",
-      selected && "border-primary bg-primary/10",
-      isCompleting && "animate-task-complete",
-      isDeleting && "animate-task-poof",
-      isUndoing && "animate-task-undo"
-    )}>
-      <div className="flex items-start gap-3">
-        <Checkbox
-          checked={task.completed}
-          onCheckedChange={handleToggle}
-          className={cn(
-            "mt-1 w-6 h-6 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all duration-300",
-            isCompleting && "animate-checkbox-check"
+      <Card className={cn(
+        "border border-border/50 bg-card/50 backdrop-blur-sm animate-fade-in overflow-hidden",
+        !isReorderMode && "transition-all duration-200 hover:shadow-md hover:border-primary/20",
+        selected && "border-primary/40 bg-primary/5",
+        isCompleting && "animate-task-complete",
+        isDeleting && "animate-task-poof",
+        isUndoing && "animate-task-undo"
+      )}>
+        {/* Main row */}
+        <div className="flex items-center gap-3 px-4 py-3">
+          <Checkbox
+            checked={task.completed}
+            onCheckedChange={handleToggle}
+            className={cn(
+              "w-5 h-5 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success transition-all duration-300",
+              isCompleting && "animate-checkbox-check"
+            )}
+          />
+
+          {/* Priority dot */}
+          <div className={cn("w-2 h-2 rounded-full flex-shrink-0", getPriorityColor(task.priority))} />
+
+          {/* Title + meta */}
+          <div
+            className="flex-1 min-w-0 cursor-pointer"
+            onClick={() => { if (!task.completed && !isEditing) onSelect?.(task.id); }}
+          >
+            <p className={cn(
+              "text-sm font-medium leading-snug",
+              task.completed ? "line-through text-muted-foreground" : "text-foreground"
+            )}>
+              {task.title}
+            </p>
+            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+              {task.subject && (
+                <span className="text-xs text-primary/80 font-medium">
+                  {getDisplayName(task.subject)}
+                </span>
+              )}
+              {dueDateText && (
+                <span className={cn(
+                  "text-xs flex items-center gap-1",
+                  displayStatus === 'overdue' ? "text-error font-medium" :
+                  dueDateText === 'Due today' ? "text-warning font-medium" : "text-muted-foreground"
+                )}>
+                  <Calendar className="h-3 w-3" />
+                  {dueDateText}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Status badge */}
+          <Badge
+            variant="outline"
+            className={cn("text-xs border flex-shrink-0 hidden sm:flex", getStatusStyle(displayStatus))}
+          >
+            {getStatusLabel(displayStatus)}
+          </Badge>
+
+          {/* Actions */}
+          {!isReorderMode && !task.completed && (
+            <button
+              onClick={openEdit}
+              className={cn(
+                "w-7 h-7 flex items-center justify-center rounded-lg flex-shrink-0 transition-all",
+                isEditing
+                  ? "bg-primary/15 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+              )}
+              aria-label="Edit task"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
           )}
-        />
-        
-        <div className="flex-1 space-y-2 cursor-pointer"
-          onClick={() => { if (!task.completed) { onSelect?.(task.id); } }}
-        >
-          <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2">
-              {!task.completed && !isReorderMode ? (
+          {!isReorderMode && (
+            <button
+              onClick={handleDelete}
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-muted-foreground hover:text-error hover:bg-error/10 transition-all flex-shrink-0"
+              aria-label="Delete task"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Edit panel */}
+        {isEditing && (
+          <div
+            className="border-t border-border/40 bg-muted/20 px-4 py-3 space-y-3"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Title */}
+            <div className="space-y-1">
+              <label className="text-xs text-muted-foreground font-medium">Title</label>
+              <Input
+                value={titleInput}
+                onChange={e => setTitleInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') saveEdit(e as any); if (e.key === 'Escape') cancelEdit(e as any); }}
+                className="h-8 text-sm"
+                autoFocus
+              />
+            </div>
+
+            {/* Subject + Priority row */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground font-medium">Subject</label>
+                <Input
+                  value={subjectInput}
+                  onChange={e => setSubjectInput(e.target.value)}
+                  placeholder="e.g. Maths"
+                  className="h-8 text-sm"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground font-medium">Priority</label>
+                <Select value={priorityInput} onValueChange={(v) => setPriorityInput(v as Task['priority'])}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="high">
+                      <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-error" />High</div>
+                    </SelectItem>
+                    <SelectItem value="medium">
+                      <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-warning" />Medium</div>
+                    </SelectItem>
+                    <SelectItem value="low">
+                      <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-success" />Low</div>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Status + Due date row */}
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground font-medium">Status</label>
+                <Select value={statusInput} onValueChange={(v) => setStatusInput(v as Task['status'])}>
+                  <SelectTrigger className="h-8 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground font-medium">Due date</label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <div className={cn(
-                      "w-2 h-2 rounded-full shrink-0 cursor-pointer hover:scale-125 transition-transform",
-                      getPriorityColor(task.priority)
-                    )} />
+                    <button className="h-8 w-full px-3 text-sm rounded-md border border-input bg-background text-left flex items-center gap-2 hover:bg-muted/40 transition-all">
+                      <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                      <span className={dateInput ? "text-foreground" : "text-muted-foreground"}>
+                        {dateInput ? format(dateInput, 'MMM d') : 'Pick date'}
+                      </span>
+                    </button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-48 p-3 z-50 bg-background border shadow-lg" align="start">
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium">Priority</div>
-                      <Select 
-                        value={task.priority} 
-                        onValueChange={(value: Task['priority']) => onUpdatePriority?.(task.id, value)}
-                      >
-                        <SelectTrigger className="w-full bg-background">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent className="bg-background border shadow-lg z-50">
-                          <SelectItem value="high">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-error" />
-                              High
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="medium">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-warning" />
-                              Medium
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="low">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 rounded-full bg-success" />
-                              Low
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarComponent
+                      mode="single"
+                      selected={dateInput}
+                      onSelect={setDateInput}
+                      initialFocus
+                    />
+                    {dateInput && (
+                      <div className="p-2 border-t">
+                        <Button variant="outline" size="sm" className="w-full text-xs"
+                          onClick={() => setDateInput(undefined)}>
+                          Remove date
+                        </Button>
+                      </div>
+                    )}
                   </PopoverContent>
                 </Popover>
-              ) : (
-                <div className={cn(
-                  "w-2 h-2 rounded-full shrink-0",
-                  getPriorityColor(task.priority)
-                )} />
-              )}
-              {isEditingTitle ? (
-                <div className="flex items-center gap-2">
-                  <Input
-                    value={titleInput}
-                    onChange={(e) => setTitleInput(e.target.value)}
-                    onBlur={handleTitleSave}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleTitleSave();
-                      if (e.key === 'Escape') setIsEditingTitle(false);
-                    }}
-                    onClick={(e) => e.stopPropagation()}
-                    className="h-7"
-                  />
-                  <Button variant="ghost" size="sm" className="h-6 px-2" onClick={(e) => { e.stopPropagation(); handleTitleSave(); }}>Save</Button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <h3 className={cn(
-                    "font-medium text-foreground leading-tight",
-                    task.completed && "line-through text-muted-foreground"
-                  )}>
-                    {task.title}
-                  </h3>
-                  {!task.completed && !isReorderMode && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-                      onClick={(e) => { e.stopPropagation(); setIsEditingTitle(true); }}
-                      aria-label="Edit task title"
-                    >
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              )}
-            </div>
-            
-            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-              <Badge
-                variant="secondary"
-                className={cn(
-                  "text-xs font-medium px-2 py-1 shrink-0 cursor-pointer transition-opacity",
-                  getStatusColor(displayStatus),
-                  (displayStatus === 'pending' || displayStatus === 'in-progress') && "hover:opacity-80"
-                )}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (displayStatus === 'pending') {
-                    onUpdateStatus(task.id, 'in-progress');
-                  } else if (displayStatus === 'in-progress') {
-                    onUpdateStatus(task.id, 'pending');
-                  }
-                }}
-              >
-                <span className="flex items-center gap-1">
-                  {getStatusIcon(displayStatus, task.dueDate)}
-                  {displayStatus.charAt(0).toUpperCase() + displayStatus.slice(1).replace('-', ' ')}
-                </span>
-              </Badge>
-              {!task.completed && !isReorderMode && (
-                <>
-
-                  {/* Edit Due Date Button */}
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 text-muted-foreground hover:text-primary"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <NotebookPen className="h-3 w-3" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="end">
-                      <div className="p-3 space-y-3">
-                        <div className="text-sm font-medium">Edit Due Date</div>
-                        <CalendarComponent
-                          mode="single"
-                          selected={task.dueDate}
-                          onSelect={(date) => onUpdateDueDate(task.id, date)}
-                          initialFocus
-                          className="rounded-md border-0"
-                        />
-                        {task.dueDate && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onUpdateDueDate(task.id, undefined)}
-                            className="w-full text-xs"
-                          >
-                            Remove Due Date
-                          </Button>
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
-                </>
-              )}
-              {/* Delete Task Button */}
-              {!isReorderMode && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => { e.stopPropagation(); handleDelete(); }}
-                  className="h-6 w-6 p-0 text-muted-foreground hover:text-error"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            {task.subject && (
-              <span className="bg-primary-light text-primary px-2 py-1 rounded-md text-xs font-medium">
-                {getDisplayName(task.subject)}
-              </span>
-            )}
-            {task.dueDate && (
-              <div className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                <span className={cn(
-                  "text-xs",
-                  displayStatus === 'overdue' && "text-error font-medium",
-                  formatDueDate(task.dueDate, false) === 'Due today' && !task.completed && "text-warning font-medium"
-                )}>
-                  {formatDueDate(task.dueDate, task.completed)}
-                </span>
               </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </Card>
+            </div>
 
-    {feedbackTask && (
-      <TaskCompletionFeedback
-        isOpen={showFeedback}
-        onClose={handleFeedbackClose}
-        task={feedbackTask}
-      />
-    )}
+            {/* Save / Cancel */}
+            <div className="flex items-center gap-2 pt-1">
+              <Button size="sm" className="h-7 px-3 text-xs gap-1.5" onClick={saveEdit}>
+                <Save className="h-3 w-3" /> Save
+              </Button>
+              <Button size="sm" variant="ghost" className="h-7 px-3 text-xs gap-1.5 text-muted-foreground"
+                onClick={cancelEdit}>
+                <X className="h-3 w-3" /> Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {feedbackTask && (
+        <TaskCompletionFeedback
+          isOpen={showFeedback}
+          onClose={handleFeedbackClose}
+          task={feedbackTask}
+        />
+      )}
     </>
   );
 }
