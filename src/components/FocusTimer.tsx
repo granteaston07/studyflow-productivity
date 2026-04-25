@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Coffee, Brain, Plus, Repeat, SkipForward } from "lucide-react";
-import { SmartFocusTimer } from "@/components/SmartFocusTimer";
+import { Play, Pause, RotateCcw, Coffee, Brain, Plus, Repeat, SkipForward, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLearningInsights } from "@/hooks/useLearningInsights";
 
 interface TimerSession {
   type: 'work' | 'break';
@@ -49,6 +49,8 @@ export function FocusTimer({
   const [customMinutes, setCustomMinutes] = useState(25);
   const [customType, setCustomType] = useState<'work' | 'break'>('work');
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { getTimeEstimateForTask } = useLearningInsights();
+  const smartDuration = selectedTask ? (getTimeEstimateForTask(selectedTask.subject) || 25) : 25;
 
   // Auto-pomodoro state
   const [autoPomodoro, setAutoPomodoro] = useState(false);
@@ -232,17 +234,27 @@ export function FocusTimer({
               <span className="opacity-70">{POMODORO_FOCUS}/{POMODORO_BREAK}m</span>
             </button>
 
-            <SmartFocusTimer
-              selectedTask={selectedTask}
-              onSelectSession={(s) => {
-                setAutoPomodoro(false);
-                setSelectedSession(s);
-                onUpdateDuration(s.duration * 60);
-              }}
-              selectedSession={selectedSession}
-              timerActive={timerActive}
-              timerPaused={timerPaused}
-            />
+            {selectedTask && (
+              <button
+                onClick={() => {
+                  if (!timerActive || timerPaused) {
+                    const s: TimerSession = { type: 'work', duration: smartDuration, label: 'AI Suggested' };
+                    setAutoPomodoro(false);
+                    setSelectedSession(s);
+                    onUpdateDuration(s.duration * 60);
+                  }
+                }}
+                disabled={timerActive && !timerPaused}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors duration-150 ${
+                  selectedSession.label === 'AI Suggested'
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground disabled:opacity-40'
+                }`}>
+                <Star className="h-3 w-3" />
+                Suggested
+                <span className="opacity-70">{smartDuration}m</span>
+              </button>
+            )}
 
             {SESSIONS.map((s, i) => {
               const Icon = s.type === 'work' ? Brain : Coffee;
