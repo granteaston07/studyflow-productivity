@@ -29,7 +29,6 @@ import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { SubjectManager } from "@/components/SubjectManager";
 import { ProfileSheet } from "@/components/ProfileSheet";
 import { CalendarView } from "@/components/CalendarView";
-import TimerCelebration from "@/components/TimerCelebration";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -54,7 +53,6 @@ const Index = () => {
   const { level, levelName, xpInLevel, xpToNext, progress: xpProgress, awardTask } = useXP();
   const [activeTab, setActiveTab] = useState<Tab>('today');
   const [isReorderMode, setIsReorderMode] = useState(false);
-  const [showCelebration, setShowCelebration] = useState(false);
   const [studyMode, setStudyMode] = useState(false);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [taskSearch, setTaskSearch] = useState('');
@@ -73,9 +71,7 @@ const Index = () => {
   const {
     timerActive, timeRemaining, timerPaused, selectedSessionDuration,
     startTimer, updateTimerDuration, pauseTimer, resetTimer
-  } = useBackgroundTimer(() => {
-    if (studyMode) setShowCelebration(true);
-  });
+  } = useBackgroundTimer();
 
   const [selectedSession, setSelectedSession] = useState<any>({ type: 'work', duration: 25, label: 'Focus' });
 
@@ -191,11 +187,6 @@ const Index = () => {
           onPauseTimer={pauseTimer}
           onResetTimer={resetTimer}
           selectedTaskTitle={selectedTaskTitle}
-        />
-        <TimerCelebration
-          isVisible={showCelebration}
-          onDismiss={() => setShowCelebration(false)}
-          onReset={() => { setShowCelebration(false); resetTimer(); }}
         />
       </>
     );
@@ -822,12 +813,6 @@ const Index = () => {
           </div>
         </nav>
       </div>
-
-      <TimerCelebration
-        isVisible={showCelebration}
-        onDismiss={() => setShowCelebration(false)}
-        onReset={() => { setShowCelebration(false); resetTimer(); }}
-      />
 
       {showOnboarding && (
         <OnboardingFlow onComplete={handleOnboardingComplete} />
