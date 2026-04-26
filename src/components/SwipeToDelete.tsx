@@ -95,23 +95,25 @@ export function SwipeToDelete({ onDelete, children, disabled = false }: SwipeToD
 
   return (
     <div ref={containerRef} className="relative overflow-hidden rounded-2xl">
-      {/* Red background — always full height, width grows with swipe */}
-      <div
-        className="absolute inset-y-0 right-0 bg-error rounded-2xl flex items-center justify-end pr-5"
-        style={{
-          width: bgWidth,
-          transition: isDragging ? 'none' : isFlying ? 'width 0.32s cubic-bezier(0.4,0,0.2,1)' : 'width 0.25s ease-out',
-        }}
-      >
-        <Trash2
-          className="h-5 w-5 text-white flex-shrink-0"
+      {/* Red background — only rendered when there's an active swipe */}
+      {(offset > 0 || isFlying) && (
+        <div
+          className="absolute inset-y-0 right-0 bg-error rounded-2xl flex items-center justify-end pr-5"
           style={{
-            opacity: trashOpacity,
-            transform: `scale(${trashScale})`,
-            transition: 'opacity 0.12s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1)',
+            width: bgWidth,
+            transition: isDragging ? 'none' : isFlying ? 'width 0.32s cubic-bezier(0.4,0,0.2,1)' : 'width 0.25s ease-out',
           }}
-        />
-      </div>
+        >
+          <Trash2
+            className="h-5 w-5 text-white flex-shrink-0"
+            style={{
+              opacity: trashOpacity,
+              transform: `scale(${trashScale})`,
+              transition: 'opacity 0.12s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1)',
+            }}
+          />
+        </div>
+      )}
 
       {/* Card — slides left while dragging, flies off on confirm, snaps back on cancel */}
       <div

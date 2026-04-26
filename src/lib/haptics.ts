@@ -1,53 +1,25 @@
-// Haptic feedback — uses Capacitor on native iOS/Android, Web Vibration API as fallback
+import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics';
 
-declare global {
-  interface Window {
-    Capacitor?: {
-      isNativePlatform?: () => boolean;
-      Plugins?: {
-        Haptics?: {
-          impact?: (options: { style: string }) => Promise<void>;
-          notification?: (options: { type: string }) => Promise<void>;
-          selectionStart?: () => Promise<void>;
-        };
-      };
-    };
-  }
-}
+const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
 
 export async function hapticImpact(style: 'light' | 'medium' | 'heavy' = 'medium') {
+  if (!isNative) return;
   try {
-    const Haptics = window.Capacitor?.Plugins?.Haptics;
-    if (Haptics?.impact) {
-      await Haptics.impact({ style: style.toUpperCase() });
-      return;
-    }
-  } catch {}
-  // Web fallback
-  try {
-    const ms = style === 'light' ? 20 : style === 'medium' ? 40 : 80;
-    navigator.vibrate?.(ms);
+    const map = { light: ImpactStyle.Light, medium: ImpactStyle.Medium, heavy: ImpactStyle.Heavy };
+    await Haptics.impact({ style: map[style] });
   } catch {}
 }
 
 export async function hapticSuccess() {
+  if (!isNative) return;
   try {
-    const Haptics = window.Capacitor?.Plugins?.Haptics;
-    if (Haptics?.notification) {
-      await Haptics.notification({ type: 'SUCCESS' });
-      return;
-    }
+    await Haptics.notification({ type: NotificationType.Success });
   } catch {}
-  try { navigator.vibrate?.([30, 30, 60]); } catch {}
 }
 
 export async function hapticSelection() {
+  if (!isNative) return;
   try {
-    const Haptics = window.Capacitor?.Plugins?.Haptics;
-    if (Haptics?.selectionStart) {
-      await Haptics.selectionStart();
-      return;
-    }
+    await Haptics.selectionStart();
   } catch {}
-  try { navigator.vibrate?.(10); } catch {}
 }
