@@ -107,14 +107,6 @@ export function CountdownPins() {
               );
             })}
 
-            {/* Add another */}
-            <button
-              onClick={() => setAddOpen(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-2xl border border-dashed border-border/50 text-xs font-semibold text-muted-foreground active:bg-muted/30 transition-colors"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add another
-            </button>
           </div>
         )}
       </div>
