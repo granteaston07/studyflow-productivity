@@ -111,45 +111,47 @@ const Index = () => {
   // Must be before any early returns to satisfy Rules of Hooks
   useEffect(() => {
     if (!tasksLoading) scheduleNotifications(tasks, streak?.current_streak ?? 0);
-  }, [tasksLoading, streak, scheduleNotifications]);
+  }, [tasksLoading, tasks, streak, scheduleNotifications]);
 
-  // Sync live data to iOS widgets via shared App Group
+  // Sync live data to iOS widgets — debounced so it doesn't fire on every keystroke
   useEffect(() => {
     if (tasksLoading) return;
-    const today = new Date(); today.setHours(0, 0, 0, 0);
-    const activeTasks = tasks.filter(t => !t.completed);
-    const completedToday = tasks.filter(t => {
-      if (!t.completed || !t.completedAt) return false;
-      const d = new Date(t.completedAt); d.setHours(0, 0, 0, 0);
-      return d.getTime() === today.getTime();
-    }).length;
-    const nextTasks = activeTasks.slice(0, 4).map(t => {
-      const now = new Date(); const tod = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      let dueDateLabel: string | undefined;
-      if (t.dueDate) {
-        const d = new Date(t.dueDate.getFullYear(), t.dueDate.getMonth(), t.dueDate.getDate());
-        if (d.getTime() === tod.getTime()) dueDateLabel = 'Due today';
-        else if (d.getTime() === tod.getTime() + 86400000) dueDateLabel = 'Due tomorrow';
-        else if (d < tod) dueDateLabel = 'Overdue';
-      }
-      return { id: t.id, title: t.title, priority: t.priority, subject: t.subject ?? undefined, dueDateLabel };
-    });
-    // Nearest upcoming countdown
-    const nearest = countdowns
-      .map(c => ({ ...c, daysLeft: differenceInCalendarDays(parseISO(c.date), today) }))
-      .filter(c => c.daysLeft >= 0)
-      .sort((a, b) => a.daysLeft - b.daysLeft)[0];
-    syncWidgetData({
-      taskCount: activeTasks.length,
-      completedToday,
-      streak: streak?.current_streak ?? 0,
-      levelName,
-      xp,
-      xpToNext,
-      nextTasks,
-      countdownTitle: nearest?.title,
-      countdownDays: nearest?.daysLeft,
-    });
+    const timer = setTimeout(() => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const activeTasks = tasks.filter(t => !t.completed);
+      const completedToday = tasks.filter(t => {
+        if (!t.completed || !t.completedAt) return false;
+        const d = new Date(t.completedAt); d.setHours(0, 0, 0, 0);
+        return d.getTime() === today.getTime();
+      }).length;
+      const nextTasks = activeTasks.slice(0, 4).map(t => {
+        const tod = new Date(today);
+        let dueDateLabel: string | undefined;
+        if (t.dueDate) {
+          const d = new Date(t.dueDate.getFullYear(), t.dueDate.getMonth(), t.dueDate.getDate());
+          if (d.getTime() === tod.getTime()) dueDateLabel = 'Due today';
+          else if (d.getTime() === tod.getTime() + 86400000) dueDateLabel = 'Due tomorrow';
+          else if (d < tod) dueDateLabel = 'Overdue';
+        }
+        return { id: t.id, title: t.title, priority: t.priority, subject: t.subject ?? undefined, dueDateLabel };
+      });
+      const nearest = countdowns
+        .map(c => ({ ...c, daysLeft: differenceInCalendarDays(parseISO(c.date), today) }))
+        .filter(c => c.daysLeft >= 0)
+        .sort((a, b) => a.daysLeft - b.daysLeft)[0];
+      syncWidgetData({
+        taskCount: activeTasks.length,
+        completedToday,
+        streak: streak?.current_streak ?? 0,
+        levelName,
+        xp,
+        xpToNext,
+        nextTasks,
+        countdownTitle: nearest?.title,
+        countdownDays: nearest?.daysLeft,
+      });
+    }, 1000);
+    return () => clearTimeout(timer);
   }, [tasks, tasksLoading, streak, xp, xpToNext, levelName, countdowns]);
 
   const handleDragEnd = (event: DragEndEvent) => {

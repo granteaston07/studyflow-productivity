@@ -11,28 +11,22 @@ const XP_PER_LEVEL = 500;
 const XP_PER_TASK = 50;
 const XP_HIGH_PRIORITY_BONUS = 25;
 
-const GUEST_KEY = 'studyflow-xp-guest';
-
 export function useXP() {
   const { user } = useAuth();
   const [xp, setXP] = useState(0);
 
-  // Load XP whenever the user changes
   useEffect(() => {
-    if (!user) {
-      const stored = localStorage.getItem(GUEST_KEY);
-      setXP(stored ? parseInt(stored, 10) : 0);
-      return;
-    }
+    if (!user) return;
 
     supabase
       .from('profiles')
       .select('xp')
       .eq('user_id', user.id)
       .maybeSingle()
-      .then(({ data }) => {
-        setXP(data?.xp ?? 0);
-      });
+      .then(({ data, error }) => {
+        if (!error) setXP(data?.xp ?? 0);
+      })
+      .catch(() => {});
   }, [user?.id]);
 
   const level = Math.floor(xp / XP_PER_LEVEL);
@@ -42,13 +36,7 @@ export function useXP() {
   const progress = (xpInLevel / xpToNext) * 100;
 
   const addXP = useCallback(async (amount: number) => {
-    if (!user) {
-      const current = parseInt(localStorage.getItem(GUEST_KEY) ?? '0', 10);
-      const next = current + amount;
-      localStorage.setItem(GUEST_KEY, String(next));
-      setXP(next);
-      return;
-    }
+    if (!user) return;
 
     // Optimistic update so the UI responds immediately
     setXP(prev => prev + amount);

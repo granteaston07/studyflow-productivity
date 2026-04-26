@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 
 interface StudyStreak {
   id: string;
@@ -18,7 +18,6 @@ export const useStudyStreak = () => {
   const [streak, setStreak] = useState<StudyStreak | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const fetchStreak = async () => {
     if (!user) {
@@ -39,11 +38,6 @@ export const useStudyStreak = () => {
       setStreak(data);
     } catch (error) {
       console.error('Error fetching study streak:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load study streak",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
@@ -67,11 +61,6 @@ export const useStudyStreak = () => {
       return true;
     } catch (error) {
       console.error('Error updating study streak:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to update study streak",
-        variant: "destructive",
-      });
       return false;
     }
   };
@@ -79,15 +68,10 @@ export const useStudyStreak = () => {
   const recordStudyActivity = async () => {
     const success = await updateStreak();
     if (success && streak) {
-      // Show streak achievement if applicable
       const today = new Date().toISOString().split('T')[0];
       const lastActivity = streak.last_activity_date;
-      
       if (lastActivity !== today) {
-        toast({
-          title: "Study Streak Updated! 🔥",
-          description: `You're on a ${streak.current_streak + 1} day streak!`,
-        });
+        toast.success(`${streak.current_streak + 1}-day streak! 🔥`);
       }
     }
     return success;
@@ -95,7 +79,7 @@ export const useStudyStreak = () => {
 
   useEffect(() => {
     fetchStreak();
-  }, [user]);
+  }, [user?.id]);
 
   return {
     streak,
