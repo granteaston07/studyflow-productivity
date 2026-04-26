@@ -285,19 +285,25 @@ export function ProfileSheet({
             {/* Accent color */}
             <div>
               <p className="text-xs text-muted-foreground mb-2">Accent color</p>
-              <div className="flex gap-2 flex-wrap">
+              <div className="grid grid-cols-6 gap-2">
                 {(Object.entries(accentColors) as [AccentColor, typeof accentColors[AccentColor]][]).map(([key, def]) => (
-                  <button
-                    key={key}
-                    onClick={() => setAccentColor(key)}
-                    title={def.label}
-                    className={`w-8 h-8 rounded-full border-2 transition-all duration-150 flex items-center justify-center ${
-                      accentColor === key ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
-                    }`}
-                    style={{ backgroundColor: def.swatch }}
-                  >
-                    {accentColor === key && <Check className="h-3.5 w-3.5 text-white" />}
-                  </button>
+                  <div key={key} className="flex flex-col items-center gap-1">
+                    <button
+                      onClick={() => setAccentColor(key)}
+                      title={def.label}
+                      className={`w-9 h-9 rounded-full border-2 transition-all duration-150 flex items-center justify-center ${
+                        accentColor === key ? 'border-foreground scale-110 shadow-md' : 'border-transparent hover:scale-105 hover:border-border/60'
+                      }`}
+                      style={{ backgroundColor: def.swatch }}
+                    >
+                      {accentColor === key && <Check className="h-3.5 w-3.5 text-white drop-shadow" />}
+                    </button>
+                    {def.isDefault && (
+                      <span className="text-[8px] font-semibold text-muted-foreground uppercase tracking-wide leading-none">
+                        Default
+                      </span>
+                    )}
+                  </div>
                 ))}
               </div>
             </div>

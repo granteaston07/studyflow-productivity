@@ -330,7 +330,7 @@ const Index = () => {
           })()}
 
           {/* Countdown Pins */}
-          <CountdownPins tasks={tasks} />
+          <CountdownPins />
 
           {/* Quick focus */}
           <div className="space-y-2">

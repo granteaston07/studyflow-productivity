@@ -1,13 +1,34 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 
-export type AccentColor = 'purple' | 'blue' | 'green' | 'orange' | 'pink' | 'teal';
+export type AccentColor =
+  | 'purple' | 'indigo' | 'blue' | 'cyan' | 'teal'
+  | 'green' | 'yellow' | 'orange' | 'red' | 'pink' | 'rose' | 'slate';
 
-const ACCENT_COLORS: Record<AccentColor, { label: string; swatch: string; light: string; dark: string; lightFg: string; darkFg: string }> = {
+interface ColorDef {
+  label: string;
+  swatch: string;
+  light: string;
+  dark: string;
+  lightFg: string;
+  darkFg: string;
+  isDefault?: boolean;
+}
+
+const ACCENT_COLORS: Record<AccentColor, ColorDef> = {
   purple: {
     label: 'Purple',
     swatch: '#7c3aed',
     light: '263 70% 58%',
     dark:  '263 75% 65%',
+    lightFg: '0 0% 100%',
+    darkFg: '240 8% 6%',
+    isDefault: true,
+  },
+  indigo: {
+    label: 'Indigo',
+    swatch: '#4f46e5',
+    light: '243 75% 59%',
+    dark:  '243 75% 68%',
     lightFg: '0 0% 100%',
     darkFg: '240 8% 6%',
   },
@@ -19,11 +40,35 @@ const ACCENT_COLORS: Record<AccentColor, { label: string; swatch: string; light:
     lightFg: '0 0% 100%',
     darkFg: '240 8% 6%',
   },
+  cyan: {
+    label: 'Cyan',
+    swatch: '#0891b2',
+    light: '192 91% 36%',
+    dark:  '192 91% 50%',
+    lightFg: '0 0% 100%',
+    darkFg: '240 8% 6%',
+  },
+  teal: {
+    label: 'Teal',
+    swatch: '#0d9488',
+    light: '174 72% 32%',
+    dark:  '174 72% 46%',
+    lightFg: '0 0% 100%',
+    darkFg: '240 8% 6%',
+  },
   green: {
     label: 'Green',
     swatch: '#16a34a',
     light: '142 71% 40%',
     dark:  '142 64% 52%',
+    lightFg: '0 0% 100%',
+    darkFg: '240 8% 6%',
+  },
+  yellow: {
+    label: 'Yellow',
+    swatch: '#ca8a04',
+    light: '43 96% 46%',
+    dark:  '43 96% 56%',
     lightFg: '0 0% 100%',
     darkFg: '240 8% 6%',
   },
@@ -35,6 +80,14 @@ const ACCENT_COLORS: Record<AccentColor, { label: string; swatch: string; light:
     lightFg: '0 0% 100%',
     darkFg: '240 8% 6%',
   },
+  red: {
+    label: 'Red',
+    swatch: '#dc2626',
+    light: '0 84% 55%',
+    dark:  '0 84% 65%',
+    lightFg: '0 0% 100%',
+    darkFg: '240 8% 6%',
+  },
   pink: {
     label: 'Pink',
     swatch: '#db2777',
@@ -43,11 +96,19 @@ const ACCENT_COLORS: Record<AccentColor, { label: string; swatch: string; light:
     lightFg: '0 0% 100%',
     darkFg: '240 8% 6%',
   },
-  teal: {
-    label: 'Teal',
-    swatch: '#0d9488',
-    light: '174 72% 32%',
-    dark:  '174 72% 46%',
+  rose: {
+    label: 'Rose',
+    swatch: '#e11d48',
+    light: '347 77% 50%',
+    dark:  '347 77% 62%',
+    lightFg: '0 0% 100%',
+    darkFg: '240 8% 6%',
+  },
+  slate: {
+    label: 'Slate',
+    swatch: '#475569',
+    light: '215 25% 37%',
+    dark:  '215 20% 60%',
     lightFg: '0 0% 100%',
     darkFg: '240 8% 6%',
   },
@@ -78,7 +139,6 @@ function applyAccent(color: AccentColor) {
   root.style.setProperty('--ring', val);
   root.style.setProperty('--sidebar-primary', val);
   root.style.setProperty('--sidebar-ring', val);
-  // Accent (light tint)
   const [h, s] = val.split(' ');
   if (isDark) {
     root.style.setProperty('--accent', `${h} ${parseInt(s) * 0.5}% 18%`);
@@ -98,7 +158,6 @@ export function AccentColorProvider({ children }: { children: ReactNode }) {
     applyAccent(color);
   };
 
-  // Re-apply when theme class changes (dark/light switch)
   useEffect(() => {
     const observer = new MutationObserver(() => applyAccent(accentColor));
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
