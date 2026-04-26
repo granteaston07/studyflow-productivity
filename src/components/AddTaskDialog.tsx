@@ -118,7 +118,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
         </DialogTrigger>
       )}
       
-      <DialogContent className="max-w-[95vw] sm:max-w-md">
+      <DialogContent className="max-w-[95vw] sm:max-w-md rounded-3xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-primary" />
@@ -136,6 +136,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
               value={taskData.title}
               onChange={(e) => setTaskData({ ...taskData, title: e.target.value })}
               required
+              style={{ fontSize: '16px' }}
             />
           </div>
 
@@ -154,7 +155,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
                     }
                   }}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger style={{ fontSize: '16px' }}>
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
@@ -198,6 +199,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
                           handleAddCustomSubject();
                         }
                       }}
+                      style={{ fontSize: '16px' }}
                     />
                     <div className="flex gap-2">
                       <Button
@@ -230,7 +232,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
                 value={taskData.priority}
                 onValueChange={(value: Task['priority']) => setTaskData({ ...taskData, priority: value })}
               >
-                <SelectTrigger>
+                <SelectTrigger style={{ fontSize: '16px' }}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -307,7 +309,7 @@ export function AddTaskDialog({ onAddTask, children }: AddTaskDialogProps) {
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg w-full">
+          <Button type="submit" className="bg-gradient-to-r from-primary to-ai-primary text-primary-foreground hover:from-primary/90 hover:to-ai-primary/90 shadow-lg w-full rounded-xl">
             <Plus className="h-4 w-4 mr-2" />
             Add Task
           </Button>

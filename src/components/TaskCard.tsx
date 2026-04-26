@@ -1,19 +1,19 @@
-import { Calendar, Trash2, Pencil, X, Save, Repeat, ChevronDown, Plus } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Calendar, Pencil, X, ChevronDown, Repeat } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Task } from "@/hooks/useTasks";
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { TaskCompletionFeedback } from "./TaskCompletionFeedback";
 import { useCustomSubjects } from "@/hooks/useCustomSubjects";
 import { useSubtasks } from "@/hooks/useSubtasks";
+import { Button } from "@/components/ui/button";
 
 export type { Task } from "@/hooks/useTasks";
 
@@ -32,39 +32,12 @@ interface TaskCardProps {
   isReorderMode?: boolean;
 }
 
-// The 4 user-settable statuses in cycle order
-const CYCLE: Task['status'][] = ['pending', 'in-progress', 'review', 'blocked'];
-
-function getStatusStyle(status: Task['status']): string {
-  switch (status) {
-    case 'pending':     return 'bg-muted text-muted-foreground border-border';
-    case 'in-progress': return 'bg-warning/15 text-warning border-warning/25';
-    case 'review':      return 'bg-blue-500/15 text-blue-400 border-blue-500/25';
-    case 'blocked':     return 'bg-error/15 text-error border-error/25';
-    case 'completed':   return 'bg-success/15 text-success border-success/25';
-    case 'overdue':     return 'bg-error/15 text-error border-error/25';
-    default:            return 'bg-muted text-muted-foreground border-border';
-  }
-}
-
-function getStatusLabel(status: Task['status']): string {
-  switch (status) {
-    case 'pending':     return 'To Do';
-    case 'in-progress': return 'In Progress';
-    case 'review':      return 'Review';
-    case 'blocked':     return 'Blocked';
-    case 'completed':   return 'Done';
-    case 'overdue':     return 'Overdue';
-    default:            return status;
-  }
-}
-
 function getPriorityColor(priority: Task['priority']): string {
   switch (priority) {
     case 'high':   return 'bg-error';
     case 'medium': return 'bg-warning';
     case 'low':    return 'bg-success';
-    default:       return 'bg-muted';
+    default:       return 'bg-muted-foreground/40';
   }
 }
 
@@ -89,57 +62,19 @@ export function TaskCard({
   const [isUndoing, setIsUndoing] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackTask, setFeedbackTask] = useState<Task | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [subtasksOpen, setSubtasksOpen] = useState(false);
   const [titleInput, setTitleInput] = useState(task.title);
   const [subjectInput, setSubjectInput] = useState(task.subject || '');
   const [priorityInput, setPriorityInput] = useState<Task['priority']>(task.priority);
   const [dateInput, setDateInput] = useState<Date | undefined>(task.dueDate);
-  const [subtasksOpen, setSubtasksOpen] = useState(false);
   const [newSubtaskInput, setNewSubtaskInput] = useState('');
   const subtaskInputRef = useRef<HTMLInputElement>(null);
-  const { getDisplayName } = useCustomSubjects();
+  const { getDisplayName, allSubjects } = useCustomSubjects();
   const { subtasks, addSubtask, toggleSubtask, deleteSubtask, completedCount } = useSubtasks(task.id);
 
-  useEffect(() => {
-    setTitleInput(task.title);
-    setSubjectInput(task.subject || '');
-    setPriorityInput(task.priority);
-    setDateInput(task.dueDate);
-  }, [task]);
-
-  const openEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setTitleInput(task.title);
-    setSubjectInput(task.subject || '');
-    setPriorityInput(task.priority);
-    setDateInput(task.dueDate);
-    setIsEditing(true);
-  };
-
-  const saveEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const trimmed = titleInput.trim();
-    if (trimmed && trimmed !== task.title) onUpdateTitle?.(task.id, trimmed);
-    const sub = subjectInput.trim();
-    if (sub !== (task.subject || '')) onUpdateSubject?.(task.id, sub || 'General');
-    if (priorityInput !== task.priority) onUpdatePriority?.(task.id, priorityInput);
-    if (dateInput !== task.dueDate) onUpdateDueDate(task.id, dateInput);
-    setIsEditing(false);
-  };
-
-  const cancelEdit = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsEditing(false);
-  };
-
-  // Cycle through the 4 user statuses on badge click
-  const handleStatusClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (task.completed) return;
-    const idx = CYCLE.indexOf(displayStatus);
-    if (idx === -1) return;
-    onUpdateStatus(task.id, CYCLE[(idx + 1) % CYCLE.length]);
-  };
+  const dueDateText = formatDueDate(task.dueDate, task.completed);
+  const isOverdue = task.status === 'overdue' && !task.completed;
 
   const handleToggle = async () => {
     if (!task.completed) {
@@ -172,195 +107,146 @@ export function TaskCard({
     }, 800);
   };
 
-  const handleDelete = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsDeleting(true);
-    setTimeout(() => onDelete(task.id), 500);
+  const openEdit = () => {
+    setTitleInput(task.title);
+    setSubjectInput(task.subject || '');
+    setPriorityInput(task.priority);
+    setDateInput(task.dueDate);
+    setEditOpen(true);
   };
 
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const displayStatus: Task['status'] = (() => {
-    if (task.completed) return 'completed';
-    if (task.status === 'overdue' && task.dueDate) {
-      const d = new Date(task.dueDate.getFullYear(), task.dueDate.getMonth(), task.dueDate.getDate());
-      if (d.getTime() === today.getTime()) return 'pending';
-    }
-    return task.status;
-  })();
+  const saveEdit = () => {
+    const trimmed = titleInput.trim();
+    if (trimmed && trimmed !== task.title) onUpdateTitle?.(task.id, trimmed);
+    const sub = subjectInput.trim();
+    if (sub !== (task.subject || '')) onUpdateSubject?.(task.id, sub || 'General');
+    if (priorityInput !== task.priority) onUpdatePriority?.(task.id, priorityInput);
+    if (dateInput !== task.dueDate) onUpdateDueDate(task.id, dateInput);
+    setEditOpen(false);
+  };
 
-  const dueDateText = formatDueDate(task.dueDate, task.completed);
+  const handleDelete = () => {
+    setEditOpen(false);
+    setIsDeleting(true);
+    setTimeout(() => onDelete(task.id), 400);
+  };
 
   return (
     <>
-      <Card className={cn(
-        "border border-border/50 bg-card/50 backdrop-blur-sm animate-fade-in overflow-hidden",
-        !isReorderMode && "transition-colors duration-150 hover:border-primary/20",
-        selected && "border-primary/40 bg-primary/5",
+      <div className={cn(
+        "rounded-2xl bg-card/70 backdrop-blur-sm border border-border/40 overflow-hidden",
         isCompleting && "animate-task-complete",
         isDeleting && "animate-task-poof",
-        isUndoing && "animate-task-undo"
+        isUndoing && "animate-task-undo",
       )}>
         {/* Main row */}
-        <div className="flex items-center gap-2 px-3 py-3 sm:px-4 sm:py-4 min-h-[56px]">
+        <div className="flex items-center gap-2.5 px-3 py-2.5 min-h-[52px]">
+          {/* Checkbox */}
           <Checkbox
             checked={task.completed}
             onCheckedChange={handleToggle}
             className={cn(
-              "w-5 h-5 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success transition-colors duration-150",
+              "w-[18px] h-[18px] flex-shrink-0 rounded-full data-[state=checked]:bg-success data-[state=checked]:border-success transition-colors duration-150",
               isCompleting && "animate-checkbox-check"
             )}
           />
 
           {/* Priority dot */}
-          <div className={cn("w-2 h-2 rounded-full flex-shrink-0", getPriorityColor(task.priority))} />
+          <div className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5", getPriorityColor(task.priority))} />
 
           {/* Title + meta */}
-          <div
-            className="flex-1 min-w-0 cursor-pointer py-0.5"
-            onClick={() => { if (!task.completed && !isEditing) onSelect?.(task.id); }}
-          >
+          <div className="flex-1 min-w-0">
             <p className={cn(
-              "text-sm font-medium leading-snug",
+              "text-sm font-medium leading-tight",
               task.completed ? "line-through text-muted-foreground" : "text-foreground"
             )}>
               {task.title}
             </p>
-            <div className="flex items-center gap-2.5 mt-1.5 flex-wrap">
-              {task.subject && (
-                <span className="text-xs text-primary/80 font-medium">
-                  {getDisplayName(task.subject)}
-                </span>
-              )}
-              {dueDateText && (
-                <span className={cn(
-                  "text-xs flex items-center gap-1",
-                  displayStatus === 'overdue' ? "text-error font-medium" :
-                  dueDateText === 'Due today' ? "text-warning font-medium" : "text-muted-foreground"
-                )}>
-                  <Calendar className="h-3 w-3" />
-                  {dueDateText}
-                </span>
-              )}
-              {task.recurring && task.recurring !== 'none' && (
-                <span className="text-xs flex items-center gap-1 text-primary/70">
-                  <Repeat className="h-3 w-3" />
-                  {task.recurring}
-                </span>
-              )}
-            </div>
+            {(task.subject || dueDateText || (task.recurring && task.recurring !== 'none')) && (
+              <p className="text-xs text-muted-foreground mt-0.5 leading-tight flex items-center gap-1.5 flex-wrap">
+                {task.subject && (
+                  <span className="text-primary/70 font-medium">{getDisplayName(task.subject)}</span>
+                )}
+                {task.subject && dueDateText && <span>·</span>}
+                {dueDateText && (
+                  <span className={cn(
+                    isOverdue ? "text-error font-semibold" :
+                    dueDateText === 'Due today' ? "text-warning font-semibold" : ""
+                  )}>
+                    {dueDateText}
+                  </span>
+                )}
+                {task.recurring && task.recurring !== 'none' && (
+                  <Repeat className="h-2.5 w-2.5 text-primary/60" />
+                )}
+              </p>
+            )}
           </div>
 
-          {/* Status badge — click to cycle */}
-          {!task.completed && (
-            <Badge
-              variant="outline"
-              onClick={handleStatusClick}
-              className={cn(
-                "text-xs border flex-shrink-0 cursor-pointer select-none transition-all hover:opacity-80 active:scale-95",
-                getStatusStyle(displayStatus)
-              )}
-              title="Click to change status"
-            >
-              {getStatusLabel(displayStatus)}
-            </Badge>
-          )}
-          {task.completed && (
-            <Badge variant="outline" className={cn("text-xs border flex-shrink-0", getStatusStyle('completed'))}>
-              Done
-            </Badge>
-          )}
-
           {/* Subtask toggle */}
-          {!isReorderMode && !task.completed && (
+          {!task.completed && (
             <button
-              onClick={e => { e.stopPropagation(); setSubtasksOpen(v => !v); }}
+              onClick={() => setSubtasksOpen(v => !v)}
               className={cn(
-                "flex items-center gap-0.5 px-2 min-h-[40px] rounded-lg flex-shrink-0 text-xs transition-all",
-                subtasksOpen || subtasks.length > 0
-                  ? "text-primary/80 hover:bg-primary/10"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                "flex items-center gap-0.5 px-1.5 py-1.5 rounded-lg flex-shrink-0 transition-all active:bg-muted/60",
+                subtasksOpen ? "text-primary" : "text-muted-foreground"
               )}
-              title="Subtasks"
             >
-              {subtasks.length > 0 && (
-                <span className="font-medium">{completedCount}/{subtasks.length}</span>
-              )}
               <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", subtasksOpen && "rotate-180")} />
+              {subtasks.length > 0 && (
+                <span className="text-[10px] font-semibold">{completedCount}/{subtasks.length}</span>
+              )}
             </button>
           )}
 
-          {/* Edit + Delete */}
-          {!isReorderMode && !task.completed && (
+          {/* Edit button */}
+          {!task.completed && !isReorderMode && (
             <button
               onClick={openEdit}
-              className={cn(
-                "w-9 h-9 flex items-center justify-center rounded-lg flex-shrink-0 transition-all",
-                isEditing ? "bg-primary/15 text-primary" : "text-muted-foreground hover:text-foreground hover:bg-muted/60 active:bg-muted/80"
-              )}
+              className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground active:bg-muted/60 flex-shrink-0 transition-all"
             >
               <Pencil className="h-3.5 w-3.5" />
             </button>
           )}
-          {!isReorderMode && (
-            <button
-              onClick={handleDelete}
-              className="w-9 h-9 flex items-center justify-center rounded-lg text-muted-foreground hover:text-error hover:bg-error/10 active:bg-error/20 transition-all flex-shrink-0"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          )}
         </div>
 
-        {/* Subtask panel */}
+        {/* Subtasks panel */}
         {subtasksOpen && !task.completed && (
-          <div
-            className="border-t border-border/30 bg-muted/10 px-4 py-3 space-y-2"
-            onClick={e => e.stopPropagation()}
-          >
-            {subtasks.length > 0 && (
-              <div className="space-y-1.5">
-                {subtasks.map(sub => (
-                  <div key={sub.id} className="flex items-center gap-2 group">
-                    <Checkbox
-                      checked={sub.completed}
-                      onCheckedChange={() => toggleSubtask(sub.id)}
-                      className="w-5 h-5 flex-shrink-0 data-[state=checked]:bg-success data-[state=checked]:border-success"
-                    />
-                    <span className={cn(
-                      "flex-1 text-sm leading-snug",
-                      sub.completed ? "line-through text-muted-foreground" : "text-foreground"
-                    )}>{sub.title}</span>
-                    <button
-                      onClick={() => deleteSubtask(sub.id)}
-                      className="touch-visible w-7 h-7 flex items-center justify-center rounded text-muted-foreground opacity-40 group-hover:opacity-100 hover:text-error active:text-error transition-all flex-shrink-0"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </div>
-                ))}
+          <div className="border-t border-border/30 bg-muted/20 px-3 py-2 space-y-1">
+            {subtasks.map(st => (
+              <div key={st.id} className="flex items-center gap-2 py-1">
+                <Checkbox
+                  checked={st.completed}
+                  onCheckedChange={() => toggleSubtask(st.id)}
+                  className="w-4 h-4 flex-shrink-0 rounded data-[state=checked]:bg-success data-[state=checked]:border-success"
+                />
+                <span className={cn("text-xs flex-1 leading-tight", st.completed ? "line-through text-muted-foreground" : "text-foreground")}>
+                  {st.title}
+                </span>
+                <button onClick={() => deleteSubtask(st.id)} className="text-muted-foreground active:text-error transition-colors p-1 flex-shrink-0">
+                  <X className="h-3 w-3" />
+                </button>
               </div>
-            )}
-            <div className="flex items-center gap-2">
-              <Plus className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+            ))}
+            <div className="flex items-center gap-2 pt-1">
               <input
                 ref={subtaskInputRef}
                 value={newSubtaskInput}
                 onChange={e => setNewSubtaskInput(e.target.value)}
                 onKeyDown={e => {
-                  if (e.key === 'Enter') {
-                    addSubtask(newSubtaskInput);
+                  if (e.key === 'Enter' && newSubtaskInput.trim()) {
+                    addSubtask(newSubtaskInput.trim());
                     setNewSubtaskInput('');
                   }
-                  if (e.key === 'Escape') setSubtasksOpen(false);
                 }}
-                placeholder="Add a subtask..."
-                className="flex-1 text-xs bg-transparent border-none outline-none placeholder:text-muted-foreground/60 text-foreground"
+                placeholder="Add subtask..."
+                className="flex-1 bg-transparent outline-none text-foreground placeholder:text-muted-foreground"
+                style={{ fontSize: '16px' }}
               />
               {newSubtaskInput.trim() && (
                 <button
-                  onClick={() => { addSubtask(newSubtaskInput); setNewSubtaskInput(''); }}
-                  className="text-xs text-primary font-medium hover:text-primary/80 transition-colors"
+                  onClick={() => { addSubtask(newSubtaskInput.trim()); setNewSubtaskInput(''); }}
+                  className="text-primary text-xs font-semibold px-2 py-1"
                 >
                   Add
                 </button>
@@ -368,93 +254,113 @@ export function TaskCard({
             </div>
           </div>
         )}
+      </div>
 
-        {/* Edit panel */}
-        {isEditing && (
-          <div
-            className="border-t border-border/40 bg-muted/20 px-4 py-3 space-y-3"
-            onClick={e => e.stopPropagation()}
-          >
+      {/* Edit Sheet */}
+      <Sheet open={editOpen} onOpenChange={setEditOpen}>
+        <SheetContent side="bottom" className="rounded-t-3xl overflow-y-auto" style={{ maxHeight: '90vh' }}>
+          <SheetHeader className="mb-5">
+            <SheetTitle className="text-left text-lg font-bold">Edit Task</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-4 pb-8">
             {/* Title */}
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground font-medium">Title</label>
-              <Input
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Title</Label>
+              <input
                 value={titleInput}
                 onChange={e => setTitleInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter') saveEdit(e as any); if (e.key === 'Escape') cancelEdit(e as any); }}
-                className="h-8 text-sm"
-                autoFocus
+                className="w-full bg-muted/40 rounded-xl px-4 py-3 border border-border/50 outline-none focus:border-primary/50 text-foreground font-medium"
+                style={{ fontSize: '16px' }}
               />
             </div>
 
-            {/* Subject + Priority */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground font-medium">Subject</label>
-                <Input
-                  value={subjectInput}
-                  onChange={e => setSubjectInput(e.target.value)}
-                  placeholder="e.g. Maths"
-                  className="h-8 text-sm"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-muted-foreground font-medium">Priority</label>
-                <Select value={priorityInput} onValueChange={(v) => setPriorityInput(v as Task['priority'])}>
-                  <SelectTrigger className="h-8 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="high">
-                      <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-error" />High</div>
-                    </SelectItem>
-                    <SelectItem value="medium">
-                      <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-warning" />Medium</div>
-                    </SelectItem>
-                    <SelectItem value="low">
-                      <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-success" />Low</div>
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+            {/* Subject */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Subject</Label>
+              <Select value={subjectInput} onValueChange={setSubjectInput}>
+                <SelectTrigger className="rounded-xl border-border/50" style={{ fontSize: '16px' }}>
+                  <SelectValue placeholder="Select subject" />
+                </SelectTrigger>
+                <SelectContent>
+                  {allSubjects.map(s => (
+                    <SelectItem key={s} value={s}>{getDisplayName(s)}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Priority */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Priority</Label>
+              <div className="flex gap-2">
+                {(['low', 'medium', 'high'] as Task['priority'][]).map(p => (
+                  <button
+                    key={p}
+                    onClick={() => setPriorityInput(p)}
+                    className={cn(
+                      "flex-1 py-2.5 rounded-xl text-sm font-medium border capitalize transition-all",
+                      priorityInput === p
+                        ? p === 'high' ? 'bg-error/15 text-error border-error/30'
+                          : p === 'medium' ? 'bg-warning/15 text-warning border-warning/30'
+                          : 'bg-success/15 text-success border-success/30'
+                        : 'bg-muted/30 text-muted-foreground border-border/40'
+                    )}
+                  >
+                    {p}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Due date */}
-            <div className="space-y-1">
-              <label className="text-xs text-muted-foreground font-medium">Due date</label>
+            {/* Due Date */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Due Date</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <button className="h-8 w-full px-3 text-sm rounded-md border border-input bg-background text-left flex items-center gap-2 hover:bg-muted/40 transition-all">
-                    <Calendar className="h-3.5 w-3.5 text-muted-foreground flex-shrink-0" />
+                  <button className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-muted/40 border border-border/50 text-left" style={{ fontSize: '16px' }}>
+                    <Calendar className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                     <span className={dateInput ? "text-foreground" : "text-muted-foreground"}>
-                      {dateInput ? format(dateInput, 'MMM d, yyyy') : 'Pick a date'}
+                      {dateInput ? format(dateInput, 'MMM d, yyyy') : 'No due date'}
                     </span>
+                    {dateInput && (
+                      <button
+                        onClick={e => { e.stopPropagation(); setDateInput(undefined); }}
+                        className="ml-auto text-muted-foreground"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
                   </button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent mode="single" selected={dateInput} onSelect={setDateInput} initialFocus />
-                  {dateInput && (
-                    <div className="p-2 border-t">
-                      <Button variant="outline" size="sm" className="w-full text-xs"
-                        onClick={() => setDateInput(undefined)}>
-                        Remove date
-                      </Button>
-                    </div>
-                  )}
+                <PopoverContent className="w-auto p-0 rounded-2xl" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateInput}
+                    onSelect={setDateInput}
+                    initialFocus
+                  />
                 </PopoverContent>
               </Popover>
             </div>
 
-            {/* Save / Cancel */}
-            <div className="flex items-center gap-2 pt-1">
-              <Button size="sm" className="h-7 px-3 text-xs gap-1.5" onClick={saveEdit}>
-                <Save className="h-3 w-3" /> Save
-              </Button>
-              <Button size="sm" variant="ghost" className="h-7 px-3 text-xs gap-1.5 text-muted-foreground" onClick={cancelEdit}>
-                <X className="h-3 w-3" /> Cancel
-              </Button>
-            </div>
+            {/* Save */}
+            <Button
+              onClick={saveEdit}
+              className="w-full h-12 rounded-xl text-base font-semibold"
+            >
+              Save Changes
+            </Button>
+
+            {/* Delete */}
+            <button
+              onClick={handleDelete}
+              className="w-full h-12 rounded-xl text-error border border-error/20 bg-error/5 text-sm font-semibold transition-all active:bg-error/10"
+            >
+              Delete Task
+            </button>
           </div>
-        )}
-      </Card>
+        </SheetContent>
+      </Sheet>
 
       {feedbackTask && (
         <TaskCompletionFeedback

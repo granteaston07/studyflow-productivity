@@ -212,10 +212,10 @@ const Index = () => {
   })();
 
   const NAV = [
-    { id: 'today' as Tab, icon: LayoutDashboard, label: 'Today' },
     { id: 'tasks' as Tab, icon: CheckSquare, label: 'Tasks' },
-    { id: 'focus' as Tab, icon: Timer, label: 'Focus' },
     { id: 'notes' as Tab, icon: NotebookPen, label: 'Notes' },
+    { id: 'today' as Tab, icon: LayoutDashboard, label: 'Today' },
+    { id: 'focus' as Tab, icon: Timer, label: 'Focus' },
     { id: 'stats' as Tab, icon: BarChart2, label: 'Stats' },
   ];
 
@@ -278,6 +278,27 @@ const Index = () => {
           <div className="space-y-2">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
             <StudyLinks />
+          </div>
+
+          {/* Quick focus */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Focus</p>
+              <button onClick={() => setActiveTab('focus')} className="text-xs text-primary">Full timer →</button>
+            </div>
+            <div className="flex gap-2">
+              {[15, 25, 45].map(mins => (
+                <button key={mins}
+                  onClick={() => {
+                    setActiveTab('focus');
+                    updateTimerDuration(mins * 60);
+                    setSelectedSession({ type: 'work', duration: mins, label: `${mins}m Focus` });
+                  }}
+                  className="flex-1 py-3 rounded-2xl border border-border/40 bg-card/60 backdrop-blur-sm text-sm font-semibold text-muted-foreground active:bg-muted/60 transition-all">
+                  {mins}m
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Notification permission banner */}
@@ -632,7 +653,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-[100dvh] bg-background overflow-hidden">
 
       {/* ── Sidebar (desktop) ─────────────────────────────────── */}
       <aside className="hidden md:flex w-60 flex-col border-r border-border/50 bg-card/40 backdrop-blur-sm flex-shrink-0">
@@ -716,25 +737,34 @@ const Index = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Mobile header */}
-        <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border/40 bg-card/80 backdrop-blur-md flex-shrink-0 pt-safe">
+        <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border/30 bg-card/70 backdrop-blur-xl flex-shrink-0 pt-safe">
           <button
             onClick={() => setProfileOpen(true)}
             className="flex items-center gap-2 active:opacity-60 transition-opacity min-h-[44px] pr-2"
-            title="Profile & Settings"
           >
             <StudyFlowLogo size={26} />
             <span className="font-bold text-foreground text-base tracking-tight">StudyFlow</span>
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
+            {overdueTasks.length > 0 && (
+              <div className="text-xs font-bold text-error bg-error/10 rounded-full px-2.5 py-1 border border-error/20">
+                {overdueTasks.length} late
+              </div>
+            )}
+            {activeTasks.length > 0 && (
+              <div className="text-xs font-medium text-muted-foreground bg-muted/50 rounded-full px-2.5 py-1 border border-border/40">
+                {activeTasks.length} left
+              </div>
+            )}
             {streakCount > 0 && (
-              <div className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 rounded-full px-2.5 py-1.5">
+              <div className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 rounded-full px-2.5 py-1 border border-warning/20">
                 <span className="streak-fire">🔥</span>
                 {streakCount}
               </div>
             )}
             <AddTaskDialog onAddTask={async (d) => { await addTask(d); }}>
-              <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground active:bg-primary/80 transition-all shadow-sm">
-                <Plus className="h-5 w-5" />
+              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary text-primary-foreground active:bg-primary/80 transition-all shadow-sm">
+                <Plus className="h-4 w-4" />
               </button>
             </AddTaskDialog>
           </div>
@@ -747,23 +777,37 @@ const Index = () => {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/95 backdrop-blur-xl border-t border-border/30 z-50 nav-safe">
-          <div className="flex">
+        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/20 z-50 nav-safe">
+          <div className="flex items-end">
             {NAV.map(({ id, icon: Icon, label }) => (
-              <button key={id} onClick={() => setActiveTab(id)}
-                className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] relative transition-colors duration-150 ${
-                  activeTab === id ? 'text-primary' : 'text-muted-foreground/70'
-                }`}>
-                <div className={`flex items-center justify-center w-10 h-7 rounded-full transition-all duration-200 ${
-                  activeTab === id ? 'bg-primary/12' : ''
-                }`}>
-                  <Icon className={`transition-all duration-200 ${activeTab === id ? 'h-5 w-5' : 'h-[19px] w-[19px]'}`} />
-                </div>
-                <span className={`text-[10px] font-medium transition-all duration-150 ${activeTab === id ? 'font-semibold' : ''}`}>{label}</span>
-                {id === 'tasks' && overdueTasks.length > 0 && (
-                  <span className="absolute top-2.5 right-[calc(50%-10px)] w-2 h-2 bg-error rounded-full" />
-                )}
-              </button>
+              id === 'today' ? (
+                <button key={id} onClick={() => setActiveTab(id)}
+                  className="flex-1 flex flex-col items-center justify-center pb-2 pt-1 min-h-[60px] relative">
+                  <div className={`flex items-center justify-center w-14 h-9 rounded-2xl transition-all duration-200 shadow-sm ${
+                    activeTab === id
+                      ? 'bg-primary text-primary-foreground shadow-primary/30'
+                      : 'bg-muted/70 text-muted-foreground'
+                  }`}>
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className={`text-[10px] font-semibold mt-1 ${activeTab === id ? 'text-primary' : 'text-muted-foreground/70'}`}>Today</span>
+                </button>
+              ) : (
+                <button key={id} onClick={() => setActiveTab(id)}
+                  className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] relative transition-colors duration-150 ${
+                    activeTab === id ? 'text-primary' : 'text-muted-foreground/60'
+                  }`}>
+                  <div className={`flex items-center justify-center w-9 h-6 rounded-full transition-all duration-200 ${
+                    activeTab === id ? 'bg-primary/10' : ''
+                  }`}>
+                    <Icon className="h-[18px] w-[18px]" />
+                  </div>
+                  <span className={`text-[10px] transition-all duration-150 ${activeTab === id ? 'font-semibold' : 'font-medium'}`}>{label}</span>
+                  {id === 'tasks' && overdueTasks.length > 0 && (
+                    <span className="absolute top-2 right-[calc(50%-10px)] w-2 h-2 bg-error rounded-full" />
+                  )}
+                </button>
+              )
             ))}
           </div>
         </nav>

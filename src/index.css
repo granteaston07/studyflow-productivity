@@ -278,13 +278,16 @@
 
   body {
     -webkit-font-smoothing: antialiased;
-    overscroll-behavior-y: none;
   }
 }
 
 @layer utilities {
   .scroll-ios {
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
+  }
+
+  .glass {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
   }
 }
