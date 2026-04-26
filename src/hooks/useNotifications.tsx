@@ -42,8 +42,12 @@ function markFired(key: string) {
   localStorage.setItem(todayFlag(key), "1");
 }
 
+function notificationsSupported() {
+  return typeof window !== "undefined" && "Notification" in window;
+}
+
 function fire(title: string, body: string, tag: string) {
-  if (Notification.permission !== "granted") return;
+  if (!notificationsSupported() || Notification.permission !== "granted") return;
   try {
     new Notification(title, { body, icon: ICON, tag, silent: false });
   } catch {
@@ -61,7 +65,7 @@ export function useNotifications() {
   const [settings, setSettings] = useState<NotificationSettings>(loadSettings);
 
   const requestPermission = useCallback(async () => {
-    if (!("Notification" in window)) return "denied" as NotificationPermission;
+    if (!notificationsSupported()) return "denied" as NotificationPermission;
     const result = await Notification.requestPermission();
     setPermission(result);
     return result;
@@ -77,7 +81,7 @@ export function useNotifications() {
 
   // Called whenever tasks load or change — fires any notifications that are due
   const scheduleNotifications = useCallback((tasks: Task[], streakCount: number) => {
-    if (Notification.permission !== "granted") return;
+    if (!notificationsSupported() || Notification.permission !== "granted") return;
 
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();

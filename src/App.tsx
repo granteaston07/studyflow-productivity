@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Analytics } from '@vercel/analytics/react';
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
@@ -16,6 +16,7 @@ import DataProtection from "./pages/DataProtection";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -28,7 +29,7 @@ const App = () => (
             <Routes>
               <Route path="/app" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={isNative ? <Navigate to="/app" replace /> : <Landing />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/cookies" element={<CookiePolicy />} />
@@ -37,7 +38,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
-          <Analytics />
+          {!isNative && <Analytics />}
         </TooltipProvider>
       </ThemeProvider>
     </AuthProvider>
