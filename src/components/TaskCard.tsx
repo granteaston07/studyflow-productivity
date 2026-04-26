@@ -30,6 +30,7 @@ interface TaskCardProps {
   selected?: boolean;
   onSelect?: (id: string) => void;
   isReorderMode?: boolean;
+  statusMode?: boolean;
 }
 
 function getPriorityColor(priority: Task['priority']): string {
@@ -55,7 +56,7 @@ function formatDueDate(date?: Date, completed?: boolean): string | null {
 export function TaskCard({
   task, onToggle, onUpdateDueDate, onUpdateStatus, onDelete,
   onUpdateTitle, onUpdatePriority, onUpdateSubject,
-  isGuest = false, selected = false, onSelect, isReorderMode = false,
+  isGuest = false, selected = false, onSelect, isReorderMode = false, statusMode = false,
 }: TaskCardProps) {
   const [isCompleting, setIsCompleting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -183,30 +184,52 @@ export function TaskCard({
             )}
           </div>
 
-          {/* Subtask toggle */}
-          {!task.completed && (
+          {/* Status mode: cycle pill instead of subtask/edit */}
+          {statusMode && !task.completed ? (
             <button
-              onClick={() => setSubtasksOpen(v => !v)}
+              onClick={() => {
+                const next = task.status === 'in_progress' ? 'pending' : 'in_progress';
+                onUpdateStatus(task.id, next);
+              }}
               className={cn(
-                "flex items-center gap-0.5 px-1.5 py-1.5 rounded-lg flex-shrink-0 transition-all active:bg-muted/60",
-                subtasksOpen ? "text-primary" : "text-muted-foreground"
+                "flex-shrink-0 h-7 px-2.5 rounded-full text-[11px] font-semibold border transition-all active:scale-95",
+                task.status === 'in_progress'
+                  ? 'bg-primary/10 text-primary border-primary/25'
+                  : task.status === 'overdue'
+                    ? 'bg-error/10 text-error border-error/25'
+                    : 'bg-muted/50 text-muted-foreground border-border/40'
               )}
             >
-              <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", subtasksOpen && "rotate-180")} />
-              {subtasks.length > 0 && (
-                <span className="text-[10px] font-semibold">{completedCount}/{subtasks.length}</span>
-              )}
+              {task.status === 'in_progress' ? 'In Progress' : task.status === 'overdue' ? 'Overdue' : 'To Do'}
             </button>
-          )}
+          ) : (
+            <>
+              {/* Subtask toggle */}
+              {!task.completed && !statusMode && (
+                <button
+                  onClick={() => setSubtasksOpen(v => !v)}
+                  className={cn(
+                    "flex items-center gap-0.5 px-1.5 py-1.5 rounded-lg flex-shrink-0 transition-all active:bg-muted/60",
+                    subtasksOpen ? "text-primary" : "text-muted-foreground"
+                  )}
+                >
+                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform duration-200", subtasksOpen && "rotate-180")} />
+                  {subtasks.length > 0 && (
+                    <span className="text-[10px] font-semibold">{completedCount}/{subtasks.length}</span>
+                  )}
+                </button>
+              )}
 
-          {/* Edit button */}
-          {!task.completed && !isReorderMode && (
-            <button
-              onClick={openEdit}
-              className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground active:bg-muted/60 flex-shrink-0 transition-all"
-            >
-              <Pencil className="h-3.5 w-3.5" />
-            </button>
+              {/* Edit button */}
+              {!task.completed && !isReorderMode && !statusMode && (
+                <button
+                  onClick={openEdit}
+                  className="w-8 h-8 flex items-center justify-center rounded-xl text-muted-foreground hover:text-foreground active:bg-muted/60 flex-shrink-0 transition-all"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </>
           )}
         </div>
 

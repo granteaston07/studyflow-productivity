@@ -260,6 +260,7 @@ const Index = () => {
                       onDelete={(id) => deleteTask(id)}
                       selected={selectedTaskId === task.id}
                       onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
+                      statusMode
                     />
                   </div>
                 ))}
@@ -737,33 +738,37 @@ const Index = () => {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
         {/* Mobile header */}
-        <header className="md:hidden h-14 flex items-center justify-between px-4 border-b border-border/30 bg-card/70 backdrop-blur-xl flex-shrink-0 pt-safe">
+        <header className="md:hidden flex items-center justify-between px-4 border-b border-border/30 bg-card/70 backdrop-blur-xl flex-shrink-0 header-safe">
           <button
             onClick={() => setProfileOpen(true)}
-            className="flex items-center gap-2 active:opacity-60 transition-opacity min-h-[44px] pr-2"
+            className="flex items-center gap-2 active:opacity-60 transition-opacity pr-2"
           >
             <StudyFlowLogo size={26} />
             <span className="font-bold text-foreground text-base tracking-tight">StudyFlow</span>
           </button>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {overdueTasks.length > 0 && (
-              <div className="text-xs font-bold text-error bg-error/10 rounded-full px-2.5 py-1 border border-error/20">
-                {overdueTasks.length} late
+              <div className="flex items-center h-7 px-3 rounded-2xl bg-error text-white text-[11px] font-bold">
+                {overdueTasks.length} overdue
               </div>
             )}
             {activeTasks.length > 0 && (
-              <div className="text-xs font-medium text-muted-foreground bg-muted/50 rounded-full px-2.5 py-1 border border-border/40">
+              <div className={`flex items-center h-7 px-3 rounded-2xl text-[11px] font-bold border ${
+                overdueTasks.length > 0
+                  ? 'bg-muted/60 text-muted-foreground border-border/40'
+                  : 'bg-primary/10 text-primary border-primary/20'
+              }`}>
                 {activeTasks.length} left
               </div>
             )}
             {streakCount > 0 && (
-              <div className="flex items-center gap-1 text-xs font-bold text-warning bg-warning/10 rounded-full px-2.5 py-1 border border-warning/20">
+              <div className="flex items-center gap-1 h-7 px-3 rounded-2xl bg-warning/15 text-warning text-[11px] font-bold border border-warning/20">
                 <span className="streak-fire">🔥</span>
                 {streakCount}
               </div>
             )}
             <AddTaskDialog onAddTask={async (d) => { await addTask(d); }}>
-              <button className="w-9 h-9 flex items-center justify-center rounded-xl bg-primary text-primary-foreground active:bg-primary/80 transition-all shadow-sm">
+              <button className="w-8 h-8 flex items-center justify-center rounded-xl bg-primary text-primary-foreground active:bg-primary/80 transition-all">
                 <Plus className="h-4 w-4" />
               </button>
             </AddTaskDialog>
@@ -777,34 +782,34 @@ const Index = () => {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/20 z-50 nav-safe">
-          <div className="flex items-end">
+        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/20 z-50 rounded-t-2xl nav-safe">
+          <div className="flex items-center">
             {NAV.map(({ id, icon: Icon, label }) => (
               id === 'today' ? (
                 <button key={id} onClick={() => setActiveTab(id)}
-                  className="flex-1 flex flex-col items-center justify-center pb-2 pt-1 min-h-[60px] relative">
-                  <div className={`flex items-center justify-center w-14 h-9 rounded-2xl transition-all duration-200 shadow-sm ${
+                  className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 min-h-[50px] relative">
+                  <div className={`flex items-center justify-center w-11 h-8 rounded-xl transition-all duration-200 ${
                     activeTab === id
-                      ? 'bg-primary text-primary-foreground shadow-primary/30'
-                      : 'bg-muted/70 text-muted-foreground'
+                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
+                      : 'bg-muted/60 text-muted-foreground'
                   }`}>
-                    <Icon className="h-5 w-5" />
+                    <Icon className="h-[18px] w-[18px]" />
                   </div>
-                  <span className={`text-[10px] font-semibold mt-1 ${activeTab === id ? 'text-primary' : 'text-muted-foreground/70'}`}>Today</span>
+                  <span className={`text-[10px] font-semibold ${activeTab === id ? 'text-primary' : 'text-muted-foreground/70'}`}>Today</span>
                 </button>
               ) : (
                 <button key={id} onClick={() => setActiveTab(id)}
-                  className={`flex-1 flex flex-col items-center justify-center gap-1 py-2 min-h-[56px] relative transition-colors duration-150 ${
+                  className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 min-h-[50px] relative transition-colors duration-150 ${
                     activeTab === id ? 'text-primary' : 'text-muted-foreground/60'
                   }`}>
                   <div className={`flex items-center justify-center w-9 h-6 rounded-full transition-all duration-200 ${
                     activeTab === id ? 'bg-primary/10' : ''
                   }`}>
-                    <Icon className="h-[18px] w-[18px]" />
+                    <Icon className="h-[17px] w-[17px]" />
                   </div>
                   <span className={`text-[10px] transition-all duration-150 ${activeTab === id ? 'font-semibold' : 'font-medium'}`}>{label}</span>
                   {id === 'tasks' && overdueTasks.length > 0 && (
-                    <span className="absolute top-2 right-[calc(50%-10px)] w-2 h-2 bg-error rounded-full" />
+                    <span className="absolute top-1.5 right-[calc(50%-10px)] w-2 h-2 bg-error rounded-full" />
                   )}
                 </button>
               )

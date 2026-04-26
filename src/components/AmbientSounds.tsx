@@ -12,7 +12,6 @@ interface SoundOption {
 
 const SOUNDS: SoundOption[] = [
   { id: 'rain', emoji: '🌧️', label: 'Rain', frequency: 200, type: 'pink' },
-  { id: 'cafe', emoji: '☕', label: 'Coffee Shop', frequency: 400, type: 'brown' },
   { id: 'white', emoji: '🌊', label: 'White Noise', frequency: 0, type: 'pink' },
   { id: 'night', emoji: '🌙', label: 'Night', frequency: 100, type: 'sine' },
   { id: 'deep', emoji: '🎧', label: 'Deep Focus', frequency: 40, type: 'sine' },

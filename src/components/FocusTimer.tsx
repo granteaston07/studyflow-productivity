@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Play, Pause, RotateCcw, Coffee, Brain, Repeat, SkipForward } from "lucide-react";
+import { Play, Pause, RotateCcw, Coffee, Brain, Repeat, SkipForward, Settings2, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface FocusTimerProps {
@@ -16,8 +16,6 @@ interface FocusTimerProps {
 }
 
 const CIRCUMFERENCE = 2 * Math.PI * 54;
-const POMODORO_FOCUS = 20;
-const POMODORO_BREAK = 5;
 
 export function FocusTimer({
   timerActive, timeRemaining, timerPaused,
@@ -27,21 +25,25 @@ export function FocusTimer({
   const [phase, setPhase] = useState<'focus' | 'break'>('focus');
   const [round, setRound] = useState(1);
   const [started, setStarted] = useState(false);
+  const [focusMins, setFocusMins] = useState(20);
+  const [breakMins, setBreakMins] = useState(5);
+  const [showCustom, setShowCustom] = useState(false);
+  const [customFocusInput, setCustomFocusInput] = useState('20');
+  const [customBreakInput, setCustomBreakInput] = useState('5');
   const prevActiveRef = useRef(timerActive);
   const switchingRef = useRef(false);
 
-  const displayDuration = (phase === 'focus' ? POMODORO_FOCUS : POMODORO_BREAK) * 60;
+  const displayDuration = (phase === 'focus' ? focusMins : breakMins) * 60;
   const elapsed = displayDuration - timeRemaining;
   const progress = Math.max(0, Math.min(1, elapsed / Math.max(displayDuration, 1)));
   const dashOffset = CIRCUMFERENCE * (1 - progress);
 
-  // Auto-cycle phases when timer completes
   useEffect(() => {
     const justCompleted = prevActiveRef.current && !timerActive && timeRemaining === 0 && started;
     if (justCompleted && !switchingRef.current) {
       switchingRef.current = true;
       const nextPhase: 'focus' | 'break' = phase === 'focus' ? 'break' : 'focus';
-      const nextDuration = (nextPhase === 'focus' ? POMODORO_FOCUS : POMODORO_BREAK) * 60;
+      const nextDuration = (nextPhase === 'focus' ? focusMins : breakMins) * 60;
       const nextRound = nextPhase === 'focus' ? round + 1 : round;
       setPhase(nextPhase);
       if (nextPhase === 'focus') setRound(nextRound);
@@ -58,8 +60,9 @@ export function FocusTimer({
     setStarted(true);
     setPhase('focus');
     setRound(1);
+    setShowCustom(false);
     switchingRef.current = false;
-    const duration = POMODORO_FOCUS * 60;
+    const duration = focusMins * 60;
     onUpdateDuration(duration);
     onStartTimer(duration);
   };
@@ -70,17 +73,28 @@ export function FocusTimer({
     setRound(1);
     switchingRef.current = false;
     onResetTimer();
-    onUpdateDuration(POMODORO_FOCUS * 60);
+    onUpdateDuration(focusMins * 60);
   };
 
   const handleSkip = () => {
     const nextPhase: 'focus' | 'break' = phase === 'focus' ? 'break' : 'focus';
-    const nextDuration = (nextPhase === 'focus' ? POMODORO_FOCUS : POMODORO_BREAK) * 60;
+    const nextDuration = (nextPhase === 'focus' ? focusMins : breakMins) * 60;
     const nextRound = nextPhase === 'focus' ? round + 1 : round;
     setPhase(nextPhase);
     if (nextPhase === 'focus') setRound(nextRound);
     onUpdateDuration(nextDuration);
     onStartTimer(nextDuration);
+  };
+
+  const handleApplyCustom = () => {
+    const f = Math.max(1, Math.min(120, parseInt(customFocusInput) || 20));
+    const b = Math.max(1, Math.min(60, parseInt(customBreakInput) || 5));
+    setFocusMins(f);
+    setBreakMins(b);
+    setCustomFocusInput(String(f));
+    setCustomBreakInput(String(b));
+    setShowCustom(false);
+    if (!started) onUpdateDuration(f * 60);
   };
 
   const formatTime = (seconds: number) => {
@@ -102,20 +116,70 @@ export function FocusTimer({
               Auto Pomodoro · Round {round}
             </p>
             <p className="text-xs text-muted-foreground">
-              {isFocus ? `${POMODORO_FOCUS}m focus` : `${POMODORO_BREAK}m break`} · auto-cycles
+              {isFocus ? `${focusMins}m focus` : `${breakMins}m break`} · auto-cycles
             </p>
           </div>
         </div>
-        {(timerActive || timerPaused) && (
-          <button
-            onClick={handleSkip}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium text-muted-foreground border border-border/50 active:bg-muted/60 transition-all"
-          >
-            <SkipForward className="h-3 w-3" />
-            Skip
-          </button>
-        )}
+        <div className="flex items-center gap-1.5">
+          {(timerActive || timerPaused) && (
+            <button
+              onClick={handleSkip}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-medium text-muted-foreground border border-border/50 active:bg-muted/60 transition-all"
+            >
+              <SkipForward className="h-3 w-3" />
+              Skip
+            </button>
+          )}
+          {!started && (
+            <button
+              onClick={() => setShowCustom(v => !v)}
+              className={`flex items-center justify-center w-8 h-8 rounded-xl border transition-all active:bg-muted/60 ${
+                showCustom ? 'border-primary/30 text-primary bg-primary/8' : 'border-border/50 text-muted-foreground'
+              }`}
+            >
+              <Settings2 className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Custom duration inputs */}
+      {showCustom && !started && (
+        <div className="flex gap-2 px-1 animate-fade-in">
+          <div className="flex-1 space-y-1">
+            <p className="text-xs font-medium text-muted-foreground text-center">Focus (min)</p>
+            <input
+              type="number"
+              value={customFocusInput}
+              onChange={e => setCustomFocusInput(e.target.value)}
+              className="w-full bg-muted/40 rounded-xl px-3 py-2.5 text-center text-sm font-bold border border-border/50 outline-none focus:border-primary/50 text-foreground"
+              style={{ fontSize: '16px' }}
+              min={1}
+              max={120}
+            />
+          </div>
+          <div className="flex-1 space-y-1">
+            <p className="text-xs font-medium text-muted-foreground text-center">Break (min)</p>
+            <input
+              type="number"
+              value={customBreakInput}
+              onChange={e => setCustomBreakInput(e.target.value)}
+              className="w-full bg-muted/40 rounded-xl px-3 py-2.5 text-center text-sm font-bold border border-border/50 outline-none focus:border-success/50 text-foreground"
+              style={{ fontSize: '16px' }}
+              min={1}
+              max={60}
+            />
+          </div>
+          <div className="flex items-end pb-0.5">
+            <button
+              onClick={handleApplyCustom}
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary text-primary-foreground active:bg-primary/80 transition-all"
+            >
+              <Check className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Circular timer */}
       <div className="flex flex-col items-center gap-4">
@@ -182,7 +246,7 @@ export function FocusTimer({
 
         <p className="text-xs text-muted-foreground text-center">
           {!started
-            ? 'Tap Start to begin your first 20-minute focus session'
+            ? `Tap Start to begin a ${focusMins}m focus session`
             : isFocus
               ? 'Stay locked in. Break coming in a bit.'
               : 'Step away. Stretch. Come back fresh.'}

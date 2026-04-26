@@ -119,15 +119,21 @@
 @layer base {
   * {
     @apply border-border;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    user-select: text;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-  }
-
-  ::selection {
-    background: hsl(var(--primary) / 0.25);
   }
 }
 
@@ -207,8 +213,9 @@
   .nav-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
-  .pt-safe {
-    padding-top: env(safe-area-inset-top);
+  .header-safe {
+    padding-top: max(env(safe-area-inset-top), 0px);
+    padding-bottom: 10px;
   }
 
   /* Always-visible touch targets — no hover-only visibility */
