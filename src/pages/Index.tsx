@@ -5,7 +5,7 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSo
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import {
   CheckSquare, Timer, Plus, LogOut, LogIn,
-  ArrowUpDown, Check, NotebookPen, Flame,
+  ArrowUpDown, Check, CalendarDays, Flame,
   Zap, LayoutDashboard, GraduationCap, Sun, Moon,
   BarChart2, Sparkles, X, Search, Bell
 } from "lucide-react";
@@ -13,8 +13,7 @@ import { TaskCard, Task } from "@/components/TaskCard";
 import { DraggableTaskCard } from "@/components/DraggableTaskCard";
 import { AddTaskDialog } from "@/components/AddTaskDialog";
 import { FocusTimer } from "@/components/FocusTimer";
-import { QuickNotes } from "@/components/QuickNotes";
-import { StudyFlowLogo } from "@/components/StudyFlowLogo";
+import { PropelLogo } from "@/components/PropelLogo";
 import { StudyMode } from "@/components/StudyMode";
 import { AmbientSounds } from "@/components/AmbientSounds";
 import { StudyLinks } from "@/components/StudyLinks";
@@ -29,6 +28,11 @@ import { OnboardingFlow } from "@/components/OnboardingFlow";
 import { SubjectManager } from "@/components/SubjectManager";
 import { ProfileSheet } from "@/components/ProfileSheet";
 import { CalendarView } from "@/components/CalendarView";
+import { CountdownPins } from "@/components/CountdownPins";
+import { SwipeToDelete } from "@/components/SwipeToDelete";
+import { StudyWrapped, shouldShowWrapped, markWrappedSeen } from "@/components/StudyWrapped";
+import { WidgetGallery } from "@/components/WidgetGallery";
+import { hapticSuccess, hapticImpact } from "@/lib/haptics";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -41,7 +45,7 @@ import { useXP } from "@/hooks/useXP";
 import { useTheme } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
 
-type Tab = 'today' | 'tasks' | 'focus' | 'notes' | 'stats';
+type Tab = 'today' | 'tasks' | 'focus' | 'calendar' | 'stats';
 
 const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
 
@@ -52,7 +56,7 @@ const Index = () => {
 
   const { tasks, loading: tasksLoading, addTask, updateTask, deleteTask, toggleTask, reorderTasks } = useTasks();
   const { streak } = useStudyStreak();
-  const { level, levelName, xpInLevel, xpToNext, progress: xpProgress, awardTask } = useXP();
+  const { xp, level, levelName, xpInLevel, xpToNext, progress: xpProgress, awardTask } = useXP();
   const [activeTab, setActiveTab] = useState<Tab>('today');
   const [isReorderMode, setIsReorderMode] = useState(false);
   const [studyMode, setStudyMode] = useState(false);
@@ -61,14 +65,13 @@ const Index = () => {
   const [taskFilter, setTaskFilter] = useState<'all' | 'active' | 'overdue'>('all');
   const [calendarDay, setCalendarDay] = useState<Date | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(() =>
-    !localStorage.getItem('studyflow_onboarded')
-  );
-  const [guestName, setGuestName] = useState(() =>
-    localStorage.getItem('studyflow_guest_name') || ''
+    !localStorage.getItem('propel_onboarded')
   );
   const [profileOpen, setProfileOpen] = useState(false);
   const [subjectsOpen, setSubjectsOpen] = useState(false);
   const [linksOpen, setLinksOpen] = useState(false);
+  const [widgetGalleryOpen, setWidgetGalleryOpen] = useState(false);
+  const [showWrapped, setShowWrapped] = useState(() => shouldShowWrapped());
   const { permission, requestPermission, scheduleNotifications } = useNotifications();
 
   const {
@@ -90,15 +93,15 @@ const Index = () => {
     }
   }, [tasks, selectedTaskId]);
 
-  // Native app: no guest mode — redirect unsigned users to landing
+  // Always require auth — redirect unsigned users to auth page
   useEffect(() => {
-    if (isNative && !authLoading && !user) navigate('/');
+    if (!authLoading && !user) navigate('/auth');
   }, [user, authLoading]);
 
   // Must be before any early returns to satisfy Rules of Hooks
   useEffect(() => {
     if (!tasksLoading) scheduleNotifications(tasks, streak?.current_streak ?? 0);
-  }, [tasksLoading, streak]);
+  }, [tasksLoading, streak, scheduleNotifications]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -109,12 +112,8 @@ const Index = () => {
     }
   };
 
-  const handleOnboardingComplete = (name: string) => {
-    if (name) {
-      localStorage.setItem('studyflow_guest_name', name);
-      setGuestName(name);
-    }
-    localStorage.setItem('studyflow_onboarded', 'true');
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('propel_onboarded', 'true');
     setShowOnboarding(false);
   };
 
@@ -124,6 +123,9 @@ const Index = () => {
       const task = tasks.find(t => t.id === taskId);
       if (task) awardTask(task.priority);
       setSelectedTaskId(prev => prev === taskId ? null : prev);
+      hapticSuccess();
+    } else if (result?.task && !result.task.completed) {
+      hapticImpact('light');
     }
     return result;
   };
@@ -200,7 +202,7 @@ const Index = () => {
     );
   }
 
-  const userName = user?.user_metadata?.display_name?.split(' ')[0] || guestName || undefined;
+  const userName = user?.user_metadata?.display_name?.split(' ')[0] || undefined;
   const streakCount = streak?.current_streak ?? 0;
   const selectedTask = selectedTaskId ? tasks.find(t => t.id === selectedTaskId) : undefined;
 
@@ -222,7 +224,7 @@ const Index = () => {
 
   const NAV = [
     { id: 'tasks' as Tab, icon: CheckSquare, label: 'Tasks' },
-    { id: 'notes' as Tab, icon: NotebookPen, label: 'Notes' },
+    { id: 'calendar' as Tab, icon: CalendarDays, label: 'Calendar' },
     { id: 'today' as Tab, icon: LayoutDashboard, label: 'Today' },
     { id: 'focus' as Tab, icon: Timer, label: 'Focus' },
     { id: 'stats' as Tab, icon: BarChart2, label: 'Stats' },
@@ -284,11 +286,51 @@ const Index = () => {
             </div>
           )}
 
-          {/* Quick links */}
-          <div className="space-y-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
-            <StudyLinks />
-          </div>
+          {/* This Week strip */}
+          {(() => {
+            const days = Array.from({ length: 7 }, (_, i) => {
+              const d = new Date(today);
+              d.setDate(today.getDate() + i);
+              return d;
+            });
+            const DAY_LABELS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            return (
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">This Week</p>
+                <div className="flex gap-1.5">
+                  {days.map((d, i) => {
+                    const isToday = i === 0;
+                    const dayTasks = tasks.filter(t => {
+                      if (!t.dueDate) return false;
+                      const td = t.dueDate;
+                      return td.getFullYear() === d.getFullYear() && td.getMonth() === d.getMonth() && td.getDate() === d.getDate();
+                    });
+                    const hasDue = dayTasks.some(t => !t.completed);
+                    const hasCompleted = dayTasks.some(t => t.completed);
+                    return (
+                      <div key={i} className={`flex-1 flex flex-col items-center gap-1 py-2.5 rounded-2xl border transition-colors ${
+                        isToday ? 'bg-primary/10 border-primary/25' : 'bg-muted/30 border-border/40'
+                      }`}>
+                        <span className={`text-[10px] font-semibold uppercase tracking-wide ${isToday ? 'text-primary' : 'text-muted-foreground/60'}`}>
+                          {DAY_LABELS[d.getDay()]}
+                        </span>
+                        <span className={`text-sm font-bold leading-none ${isToday ? 'text-primary' : 'text-foreground'}`}>
+                          {d.getDate()}
+                        </span>
+                        <div className="flex items-center gap-[3px] min-h-[6px]">
+                          {hasDue && <div className="w-1.5 h-1.5 rounded-full bg-primary/70" />}
+                          {hasCompleted && <div className="w-1.5 h-1.5 rounded-full bg-success/70" />}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Countdown Pins */}
+          <CountdownPins tasks={tasks} />
 
           {/* Quick focus */}
           <div className="space-y-2">
@@ -311,8 +353,14 @@ const Index = () => {
             </div>
           </div>
 
+          {/* Quick links */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Quick Links</p>
+            <StudyLinks />
+          </div>
+
           {/* Notification permission banner */}
-          {permission === 'default' && (
+          {permission === 'default' && !isNative && (
             <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/50">
               <Bell className="h-4 w-4 text-primary flex-shrink-0" />
               <div className="flex-1 min-w-0">
@@ -328,15 +376,6 @@ const Index = () => {
             </div>
           )}
 
-          {!user && (
-            <div className="bg-primary/8 border border-primary/20 rounded-xl p-4 text-sm">
-              <p className="text-foreground font-medium mb-1">Guest mode — tasks won't be saved</p>
-              <p className="text-muted-foreground text-xs mb-2">Sign in to keep your tasks, streaks, and XP.</p>
-              <button onClick={() => navigate('/auth')} className="text-primary font-medium text-xs hover:text-primary/80">
-                Sign in for free →
-              </button>
-            </div>
-          )}
         </div>
       );
 
@@ -452,18 +491,20 @@ const Index = () => {
                     <div className="space-y-2">
                       {filteredActiveTasks.sort((a, b) => a.sortOrder - b.sortOrder).map((task, i) => (
                         <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
-                          <TaskCard
-                            task={task}
-                            onToggle={handleToggleTask}
-                            onUpdateDueDate={handleUpdateDueDate}
-                            onUpdateStatus={(id, s) => updateTask(id, { status: s })}
-                            onUpdateTitle={(id, t) => updateTask(id, { title: t })}
-                            onUpdatePriority={(id, p) => updateTask(id, { priority: p })}
-                            onUpdateSubject={(id, s) => updateTask(id, { subject: s })}
-                            onDelete={(id) => deleteTask(id)}
-                            selected={selectedTaskId === task.id}
-                            onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
-                          />
+                          <SwipeToDelete onDelete={() => { hapticImpact('medium'); deleteTask(task.id); }}>
+                            <TaskCard
+                              task={task}
+                              onToggle={handleToggleTask}
+                              onUpdateDueDate={handleUpdateDueDate}
+                              onUpdateStatus={(id, s) => updateTask(id, { status: s })}
+                              onUpdateTitle={(id, t) => updateTask(id, { title: t })}
+                              onUpdatePriority={(id, p) => updateTask(id, { priority: p })}
+                              onUpdateSubject={(id, s) => updateTask(id, { subject: s })}
+                              onDelete={(id) => deleteTask(id)}
+                              selected={selectedTaskId === task.id}
+                              onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
+                            />
+                          </SwipeToDelete>
                         </div>
                       ))}
                     </div>
@@ -474,13 +515,19 @@ const Index = () => {
                 <p className="text-sm text-muted-foreground text-center py-8">No tasks match your search.</p>
               )}
 
-              {completedTasks.length > 0 && (
+              {completedTasks.length > 0 && (() => {
+                const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
+                const recentCompleted = completedTasks.filter(t =>
+                  (t.completedAt || t.updatedAt) >= twoDaysAgo
+                );
+                if (recentCompleted.length === 0) return null;
+                return (
                 <div className="mt-8 space-y-2">
                   <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Completed · {completedTasks.length}
+                    Completed · {recentCompleted.length}
                   </p>
                   <div className="space-y-2">
-                    {completedTasks
+                    {recentCompleted
                       .sort((a, b) => (b.completedAt || b.updatedAt).getTime() - (a.completedAt || a.updatedAt).getTime())
                       .map((task, i) => (
                         <div key={task.id} className="animate-slide-up" style={{ animationDelay: `${i * 0.03}s` }}>
@@ -499,25 +546,11 @@ const Index = () => {
                       ))}
                   </div>
                 </div>
-              )}
+                );
+              })()}
             </>
           )}
 
-          {/* Calendar */}
-          <div className="pt-2">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Calendar</p>
-            <CalendarView
-              tasks={tasks}
-              onDayFilter={setCalendarDay}
-              activeDay={calendarDay}
-            />
-            {calendarDay && (
-              <p className="text-xs text-muted-foreground text-center mt-2">
-                Showing tasks due {calendarDay.toLocaleDateString('default', { month: 'long', day: 'numeric' })} ·{' '}
-                <button onClick={() => setCalendarDay(null)} className="text-primary hover:underline">clear</button>
-              </p>
-            )}
-          </div>
         </div>
       );
 
@@ -623,15 +656,19 @@ const Index = () => {
         </div>
       );
 
-      // NOTES ──────────────────────────────────────────────────────
-      case 'notes': return (
-        <div className="space-y-6">
+      // CALENDAR ──────────────────────────────────────────────────────
+      case 'calendar': return (
+        <div className="space-y-5">
           <div className="animate-slide-up" style={{ animationDelay: '0s' }}>
-            <h1 className="text-2xl font-bold text-foreground">Notes</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">Quick captures, ideas, anything.</p>
+            <h1 className="text-2xl font-bold text-foreground">Calendar</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">Tasks by date, color-coded by subject.</p>
           </div>
           <div className="animate-slide-up" style={{ animationDelay: '0.06s' }}>
-            <QuickNotes />
+            <CalendarView
+              tasks={tasks}
+              onDayFilter={setCalendarDay}
+              activeDay={calendarDay}
+            />
           </div>
         </div>
       );
@@ -673,8 +710,8 @@ const Index = () => {
             className="flex items-center gap-2 hover:opacity-75 transition-opacity"
             title="Profile & Settings"
           >
-            <StudyFlowLogo size={28} />
-            <span className="font-bold text-foreground text-sm tracking-tight">StudyFlow</span>
+            <PropelLogo size={28} />
+            <span className="font-bold text-foreground text-sm tracking-tight">Propel</span>
           </button>
         </div>
 
@@ -755,8 +792,8 @@ const Index = () => {
             onClick={() => setProfileOpen(true)}
             className="flex items-center gap-2 active:opacity-60 transition-opacity pr-2"
           >
-            <StudyFlowLogo size={26} />
-            <span className="font-bold text-foreground text-base tracking-tight">StudyFlow</span>
+            <PropelLogo size={26} />
+            <span className="font-bold text-foreground text-base tracking-tight">Propel</span>
           </button>
           <div className="flex items-center gap-2">
             {overdueTasks.length > 0 && (
@@ -788,7 +825,7 @@ const Index = () => {
         </header>
 
         <main className="flex-1 overflow-y-auto scroll-ios overscroll-none">
-          <div className="px-4 py-5 pb-32 md:px-5 md:py-6 md:pb-8">
+          <div key={activeTab} className="px-4 py-5 pb-32 md:px-5 md:py-6 md:pb-8 animate-tab-in">
             {renderContent()}
           </div>
         </main>
@@ -796,36 +833,28 @@ const Index = () => {
         {/* Mobile bottom nav */}
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-50">
           <div className="bg-card/90 backdrop-blur-xl border-t border-border/20 rounded-t-2xl flex items-center pt-1">
-            {NAV.map(({ id, icon: Icon, label }) => (
-              id === 'today' ? (
+            {NAV.map(({ id, icon: Icon, label }) => {
+              const isActive = activeTab === id;
+              const isToday = id === 'today';
+              return (
                 <button key={id} onClick={() => setActiveTab(id)}
-                  className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 min-h-[44px] relative">
-                  <div className={`flex items-center justify-center w-11 h-8 rounded-xl transition-all duration-200 ${
-                    activeTab === id
-                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
-                      : 'bg-muted/60 text-muted-foreground'
-                  }`}>
-                    <Icon className="h-[18px] w-[18px]" />
-                  </div>
-                  <span className={`text-[10px] font-semibold ${activeTab === id ? 'text-primary' : 'text-muted-foreground/70'}`}>Today</span>
-                </button>
-              ) : (
-                <button key={id} onClick={() => setActiveTab(id)}
-                  className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 min-h-[44px] relative transition-colors duration-150 ${
-                    activeTab === id ? 'text-primary' : 'text-muted-foreground/60'
-                  }`}>
-                  <div className={`flex items-center justify-center w-9 h-6 rounded-full transition-all duration-200 ${
-                    activeTab === id ? 'bg-primary/10' : ''
+                  className="flex-1 flex flex-col items-center justify-center py-1.5 min-h-[44px] relative">
+                  <div className={`flex flex-col items-center justify-center gap-0.5 px-3 py-1.5 rounded-2xl transition-all duration-200 ${
+                    isActive && isToday
+                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/25'
+                      : isActive
+                        ? 'bg-primary/12 text-primary'
+                        : 'text-muted-foreground/60'
                   }`}>
                     <Icon className="h-[17px] w-[17px]" />
+                    <span className={`text-[10px] leading-none transition-all duration-150 ${isActive ? 'font-semibold' : 'font-medium'}`}>{label}</span>
                   </div>
-                  <span className={`text-[10px] transition-all duration-150 ${activeTab === id ? 'font-semibold' : 'font-medium'}`}>{label}</span>
                   {id === 'tasks' && overdueTasks.length > 0 && (
                     <span className="absolute top-1.5 right-[calc(50%-10px)] w-2 h-2 bg-error rounded-full" />
                   )}
                 </button>
-              )
-            ))}
+              );
+            })}
           </div>
         </nav>
       </div>
@@ -838,8 +867,6 @@ const Index = () => {
         open={profileOpen}
         onOpenChange={setProfileOpen}
         userName={userName}
-        guestName={guestName}
-        onGuestNameChange={setGuestName}
         streakCount={streakCount}
         level={level}
         levelName={levelName}
@@ -849,6 +876,7 @@ const Index = () => {
         completedCount={completedTasks.length}
         onManageLinks={() => setLinksOpen(true)}
         onManageSubjects={() => setSubjectsOpen(true)}
+        onOpenWidgets={() => setWidgetGalleryOpen(true)}
       />
 
       {/* Root-level quick links editor — triggered from ProfileSheet on any tab */}
@@ -875,6 +903,24 @@ const Index = () => {
           selectedTask={selectedTask}
           tasks={tasks}
           onGoToFocus={() => setActiveTab('focus')}
+        />
+      )}
+
+      {widgetGalleryOpen && (
+        <WidgetGallery onClose={() => setWidgetGalleryOpen(false)} />
+      )}
+
+      {showWrapped && (
+        <StudyWrapped
+          tasks={tasks}
+          streakCount={streakCount}
+          level={level}
+          levelName={levelName}
+          xp={xp}
+          onClose={() => {
+            markWrappedSeen();
+            setShowWrapped(false);
+          }}
         />
       )}
     </div>

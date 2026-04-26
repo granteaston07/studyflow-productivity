@@ -1,24 +1,57 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  LogOut, LogIn, Sun, Moon, Bell, BellOff, Check, Pencil, X,
-  Shield, Palette, Link, BookOpen, ChevronRight,
+  LogOut, Sun, Moon, Laptop, Bell, BellOff, Check, Pencil, X,
+  Shield, Palette, Link, BookOpen, ChevronRight, Info, Snowflake,
+  Smartphone,
 } from "lucide-react";
+
+const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useAccentColor, AccentColor } from "@/hooks/useAccentColor";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+const STREAK_FREEZE_KEY = 'propel_streak_freeze';
+
+function getStreakFreezeState(): { available: number; lastGranted: string } {
+  try {
+    const raw = localStorage.getItem(STREAK_FREEZE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {}
+  // Grant 1 on first load
+  const state = { available: 1, lastGranted: new Date().toISOString().split('T')[0] };
+  localStorage.setItem(STREAK_FREEZE_KEY, JSON.stringify(state));
+  return state;
+}
+
+function useStreakFreeze() {
+  const [freezeState, setFreezeState] = useState(() => getStreakFreezeState());
+
+  const useFreeze = () => {
+    if (freezeState.available < 1) {
+      toast.error("No streak freeze available. Earn one by maintaining a 7-day streak!");
+      return false;
+    }
+    const next = { ...freezeState, available: freezeState.available - 1 };
+    localStorage.setItem(STREAK_FREEZE_KEY, JSON.stringify(next));
+    setFreezeState(next);
+    toast.success("Streak freeze used! Your streak is protected for today. ❄️");
+    return true;
+  };
+
+  return { available: freezeState.available, useFreeze };
+}
 
 interface ProfileSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   userName?: string;
-  guestName?: string;
-  onGuestNameChange?: (name: string) => void;
   streakCount: number;
   level: number;
   levelName: string;
@@ -28,25 +61,26 @@ interface ProfileSheetProps {
   completedCount: number;
   onManageSubjects?: () => void;
   onManageLinks?: () => void;
+  onOpenWidgets?: () => void;
 }
 
 export function ProfileSheet({
-  open, onOpenChange, userName, guestName, onGuestNameChange,
+  open, onOpenChange, userName,
   streakCount, level, levelName, xpInLevel, xpToNext, xpProgress, completedCount,
-  onManageSubjects, onManageLinks,
+  onManageSubjects, onManageLinks, onOpenWidgets,
 }: ProfileSheetProps) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { permission, requestPermission, settings, updateSettings } = useNotifications();
+  const { accentColor, setAccentColor, accentColors } = useAccentColor();
+  const { available: freezesAvailable, useFreeze } = useStreakFreeze();
 
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState("");
+  const [showStreakInfo, setShowStreakInfo] = useState(false);
 
-  const displayName = user
-    ? (user.user_metadata?.display_name || user.email?.split("@")[0] || "User")
-    : (guestName || "Guest");
-
+  const displayName = user?.user_metadata?.display_name || user?.email?.split("@")[0] || "User";
   const initials = displayName.slice(0, 2).toUpperCase();
   const email = user?.email ?? null;
 
@@ -58,28 +92,75 @@ export function ProfileSheet({
   const saveName = async () => {
     const trimmed = nameInput.trim();
     if (!trimmed) return;
-    if (user) {
-      const { error } = await supabase.auth.updateUser({ data: { display_name: trimmed } });
-      if (error) { toast.error("Failed to update name"); return; }
-      toast.success("Name updated");
-    } else {
-      localStorage.setItem("studyflow_guest_name", trimmed);
-      onGuestNameChange?.(trimmed);
-      toast.success("Name updated");
-    }
+    const { error } = await supabase.auth.updateUser({ data: { display_name: trimmed } });
+    if (error) { toast.error("Failed to update name"); return; }
+    toast.success("Name updated");
     setEditingName(false);
   };
 
+  if (showStreakInfo) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="left" className="w-full sm:w-80 flex flex-col gap-0 p-0">
+          <SheetHeader className="flex-shrink-0 px-5 pb-4 border-b border-border/40" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)' }}>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowStreakInfo(false)} className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:bg-muted/60">
+                <X className="h-4 w-4" />
+              </button>
+              <SheetTitle className="text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                How Streaks Work
+              </SheetTitle>
+            </div>
+          </SheetHeader>
+          <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5">
+            <div className="flex items-center justify-center py-4">
+              <span className="text-5xl streak-fire">🔥</span>
+            </div>
+            <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
+              <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50 space-y-1.5">
+                <p className="font-semibold text-foreground text-sm">What counts as a study day?</p>
+                <p>Complete at least one task on a given day to count it as an active study day.</p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50 space-y-1.5">
+                <p className="font-semibold text-foreground text-sm">Building your streak</p>
+                <p>Each consecutive day you complete a task, your streak grows by 1. Miss a day and the streak resets to 0 — unless you use a freeze.</p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50 space-y-1.5">
+                <p className="font-semibold text-foreground text-sm">❄️ Streak Freeze</p>
+                <p>A streak freeze protects your streak for one day when you can't study. Use it wisely — you get one freeze, and earn more by hitting 7-day milestones.</p>
+              </div>
+              <div className="p-3.5 rounded-xl bg-muted/40 border border-border/50 space-y-1.5">
+                <p className="font-semibold text-foreground text-sm">Streak milestones</p>
+                <ul className="space-y-1 mt-1">
+                  <li>🔥 3 days — Building momentum</li>
+                  <li>🔥🔥 7 days — On fire! Earn a freeze</li>
+                  <li>🔥🔥🔥 14 days — Unstoppable</li>
+                  <li>⚡ 30 days — Legend</li>
+                </ul>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowStreakInfo(false)}
+              className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold active:opacity-80"
+            >
+              Got it
+            </button>
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="left" className="w-full sm:w-80 flex flex-col gap-0 p-0 overflow-y-auto">
-        <SheetHeader className="px-5 pt-6 pb-4 border-b border-border/40">
+      <SheetContent side="left" className="w-full sm:w-80 flex flex-col gap-0 p-0">
+        <SheetHeader className="flex-shrink-0 px-5 pb-4 border-b border-border/40" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 20px)' }}>
           <SheetTitle className="text-left text-sm font-semibold text-muted-foreground uppercase tracking-wider">
             Profile & Settings
           </SheetTitle>
         </SheetHeader>
 
-        <div className="flex-1 px-5 py-5 space-y-6">
+        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
 
           {/* Avatar + name */}
           <div className="flex items-center gap-3">
@@ -112,7 +193,6 @@ export function ProfileSheet({
                 </div>
               )}
               {email && <p className="text-xs text-muted-foreground truncate mt-0.5">{email}</p>}
-              {!user && <p className="text-xs text-muted-foreground mt-0.5">Guest mode</p>}
             </div>
           </div>
 
@@ -132,34 +212,98 @@ export function ProfileSheet({
           </div>
 
           {/* Streak */}
-          <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/50">
-            <span className="text-xl streak-fire">🔥</span>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/50">
+              <span className="text-xl streak-fire">🔥</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground">{streakCount} day streak</p>
+                <p className="text-xs text-muted-foreground">
+                  {streakCount === 0 ? "Complete a task to start!" : streakCount >= 7 ? "You're on fire!" : "Keep it going!"}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowStreakInfo(true)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 flex-shrink-0"
+              >
+                <Info className="h-4 w-4" />
+              </button>
+            </div>
+            {/* Streak freeze */}
+            <button
+              onClick={useFreeze}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border transition-colors duration-150 ${
+                freezesAvailable > 0
+                  ? 'bg-blue-500/8 border-blue-500/25 hover:bg-blue-500/15 active:bg-blue-500/20'
+                  : 'bg-muted/30 border-border/40 opacity-60'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Snowflake className={`h-4 w-4 ${freezesAvailable > 0 ? 'text-blue-400' : 'text-muted-foreground'}`} />
+                <div className="text-left">
+                  <p className={`text-sm font-medium ${freezesAvailable > 0 ? 'text-foreground' : 'text-muted-foreground'}`}>
+                    Streak Freeze
+                  </p>
+                  <p className="text-xs text-muted-foreground">Protect your streak for one day</p>
+                </div>
+              </div>
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                freezesAvailable > 0
+                  ? 'bg-blue-500/15 text-blue-400'
+                  : 'bg-muted/60 text-muted-foreground'
+              }`}>
+                {freezesAvailable} left
+              </span>
+            </button>
+          </div>
+
+          {/* Appearance */}
+          <div className="space-y-3">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+              <Palette className="h-3.5 w-3.5" /> Appearance
+            </p>
+            {/* Theme */}
+            <div className="flex gap-1.5 p-1 rounded-xl bg-muted/40 border border-border/40">
+              {([
+                { value: 'light', icon: Sun, label: 'Light' },
+                { value: 'dark', icon: Moon, label: 'Dark' },
+                { value: 'system', icon: Laptop, label: 'System' },
+              ] as const).map(({ value, icon: Icon, label }) => (
+                <button
+                  key={value}
+                  onClick={() => setTheme(value)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                    theme === value
+                      ? 'bg-background text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                  {label}
+                </button>
+              ))}
+            </div>
+            {/* Accent color */}
             <div>
-              <p className="text-sm font-bold text-foreground">{streakCount} day streak</p>
-              <p className="text-xs text-muted-foreground">
-                {streakCount === 0 ? "Complete a task to start!" : streakCount >= 7 ? "You're on fire!" : "Keep it going!"}
-              </p>
+              <p className="text-xs text-muted-foreground mb-2">Accent color</p>
+              <div className="flex gap-2 flex-wrap">
+                {(Object.entries(accentColors) as [AccentColor, typeof accentColors[AccentColor]][]).map(([key, def]) => (
+                  <button
+                    key={key}
+                    onClick={() => setAccentColor(key)}
+                    title={def.label}
+                    className={`w-8 h-8 rounded-full border-2 transition-all duration-150 flex items-center justify-center ${
+                      accentColor === key ? 'border-foreground scale-110' : 'border-transparent hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: def.swatch }}
+                  >
+                    {accentColor === key && <Check className="h-3.5 w-3.5 text-white" />}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Settings */}
-          <div className="space-y-1">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
-              <Palette className="h-3.5 w-3.5" /> Appearance
-            </p>
-            <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 active:bg-muted/70 transition-colors duration-150"
-            >
-              <div className="flex items-center gap-2.5">
-                {theme === "dark" ? <Moon className="h-4 w-4 text-muted-foreground" /> : <Sun className="h-4 w-4 text-muted-foreground" />}
-                <span className="text-sm text-foreground font-medium">Theme</span>
-              </div>
-              <span className="text-xs text-muted-foreground capitalize">{theme}</span>
-            </button>
-
-          </div>
-
+          {/* Notifications */}
           <div className="space-y-1">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
               <Bell className="h-3.5 w-3.5" /> Notifications
@@ -185,7 +329,6 @@ export function ProfileSheet({
                 <span className="text-xs text-primary font-semibold">Enable</span>
               </button>
             ) : (
-              /* permission === "granted" — show settings */
               <div className="rounded-xl bg-muted/30 border border-border/40 divide-y divide-border/30 overflow-hidden">
                 <NotifRow
                   label="Due today"
@@ -262,6 +405,16 @@ export function ProfileSheet({
               </div>
               <ChevronRight className="h-4 w-4 text-muted-foreground" />
             </button>
+            <button
+              onClick={() => { onOpenChange(false); onOpenWidgets?.(); }}
+              className="w-full flex items-center justify-between px-3 py-3 rounded-xl bg-muted/30 border border-border/40 hover:bg-muted/50 active:bg-muted/70 transition-colors duration-150"
+            >
+              <div className="flex items-center gap-2.5">
+                <Smartphone className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm text-foreground font-medium">Home Screen Widgets</span>
+              </div>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+            </button>
           </div>
 
           {/* Account */}
@@ -269,29 +422,19 @@ export function ProfileSheet({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2">
               <Shield className="h-3.5 w-3.5" /> Account
             </p>
-            {user ? (
-              <button
-                onClick={() => { onOpenChange(false); signOut(); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40 hover:bg-error/8 hover:border-error/20 hover:text-error transition-colors duration-150"
-              >
-                <LogOut className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Sign out</span>
-              </button>
-            ) : (
-              <button
-                onClick={() => { onOpenChange(false); navigate("/auth"); }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-primary/8 border border-primary/20 text-primary hover:bg-primary/12 transition-colors duration-150"
-              >
-                <LogIn className="h-4 w-4" />
-                <span className="text-sm font-medium">Sign in to save data</span>
-              </button>
-            )}
+            <button
+              onClick={() => { onOpenChange(false); signOut(); }}
+              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-muted/30 border border-border/40 hover:bg-error/8 hover:border-error/20 hover:text-error transition-colors duration-150"
+            >
+              <LogOut className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Sign out</span>
+            </button>
           </div>
         </div>
 
         {/* Version footer */}
-        <div className="px-5 py-3 border-t border-border/40">
-          <p className="text-xs text-muted-foreground text-center">StudyFlow · studyflow.us</p>
+        <div className="flex-shrink-0 px-5 py-3 border-t border-border/40">
+          <p className="text-xs text-muted-foreground text-center">Propel · Made By Grant Easton · 2025</p>
         </div>
       </SheetContent>
     </Sheet>
