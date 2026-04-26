@@ -131,9 +131,19 @@
     user-select: text;
   }
 
+  html {
+    height: 100%;
+    background-color: hsl(var(--background));
+  }
+
   body {
+    height: 100%;
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  #root {
+    height: 100%;
   }
 }
 
@@ -214,7 +224,7 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   .header-safe {
-    padding-top: max(env(safe-area-inset-top), 12px);
+    padding-top: 12px;
     padding-bottom: 12px;
   }
 

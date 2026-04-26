@@ -737,8 +737,11 @@ const Index = () => {
       {/* ── Main content ──────────────────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
 
+        {/* iOS status bar spacer — fills notch/Dynamic Island height exactly */}
+        <div className="md:hidden flex-shrink-0 bg-card/70 backdrop-blur-xl" style={{ height: 'env(safe-area-inset-top)' }} />
+
         {/* Mobile header */}
-        <header className="md:hidden flex items-center justify-between px-4 border-b border-border/30 bg-card/70 backdrop-blur-xl flex-shrink-0 header-safe">
+        <header className="md:hidden h-12 flex items-center justify-between px-4 border-b border-border/30 bg-card/70 backdrop-blur-xl flex-shrink-0">
           <button
             onClick={() => setProfileOpen(true)}
             className="flex items-center gap-2 active:opacity-60 transition-opacity pr-2"
