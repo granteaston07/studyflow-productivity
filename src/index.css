@@ -131,7 +131,7 @@
     background: hsl(var(--primary) / 0.25);
   }
 
-  /* Touch devices only: disable long-press selection highlight */
+  /* Touch devices only: app-like behavior */
   @media (hover: none) and (pointer: coarse) {
     * {
       -webkit-user-select: none;
@@ -144,6 +144,15 @@
       -webkit-user-select: text;
       -moz-user-select: text;
       user-select: text;
+    }
+
+    /* Lock the body so rubber-band scroll never exposes white behind the layout */
+    html, body {
+      overflow: hidden;
+      overscroll-behavior: none;
+      height: 100%;
+      width: 100%;
+      position: fixed;
     }
   }
 

@@ -43,6 +43,8 @@ import { useNotifications } from "@/hooks/useNotifications";
 
 type Tab = 'today' | 'tasks' | 'focus' | 'notes' | 'stats';
 
+const isNative = !!(window as any).Capacitor?.isNativePlatform?.();
+
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
@@ -87,6 +89,11 @@ const Index = () => {
       if (!t || t.completed) setSelectedTaskId(null);
     }
   }, [tasks, selectedTaskId]);
+
+  // Native app: no guest mode — redirect unsigned users to landing
+  useEffect(() => {
+    if (isNative && !authLoading && !user) navigate('/');
+  }, [user, authLoading]);
 
   // Must be before any early returns to satisfy Rules of Hooks
   useEffect(() => {
@@ -780,7 +787,7 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto scroll-ios">
+        <main className="flex-1 overflow-y-auto scroll-ios overscroll-none">
           <div className="px-4 py-5 pb-32 md:px-5 md:py-6 md:pb-8">
             {renderContent()}
           </div>

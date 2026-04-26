@@ -29,7 +29,7 @@ const App = () => (
             <Routes>
               <Route path="/app" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={isNative ? <Navigate to="/app" replace /> : <Landing />} />
+              <Route path="/" element={<Landing />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
               <Route path="/cookies" element={<CookiePolicy />} />
