@@ -188,19 +188,19 @@ export function TaskCard({
           {statusMode && !task.completed ? (
             <button
               onClick={() => {
-                const next = task.status === 'in_progress' ? 'pending' : 'in_progress';
+                const next = task.status === 'in-progress' ? 'pending' : 'in-progress';
                 onUpdateStatus(task.id, next);
               }}
               className={cn(
                 "flex-shrink-0 h-7 px-2.5 rounded-full text-[11px] font-semibold border transition-all active:scale-95",
-                task.status === 'in_progress'
+                task.status === 'in-progress'
                   ? 'bg-primary/10 text-primary border-primary/25'
                   : task.status === 'overdue'
                     ? 'bg-error/10 text-error border-error/25'
                     : 'bg-muted/50 text-muted-foreground border-border/40'
               )}
             >
-              {task.status === 'in_progress' ? 'In Progress' : task.status === 'overdue' ? 'Overdue' : 'To Do'}
+              {task.status === 'in-progress' ? 'In Progress' : task.status === 'overdue' ? 'Overdue' : 'To Do'}
             </button>
           ) : (
             <>
