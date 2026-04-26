@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
@@ -77,6 +77,7 @@ const Index = () => {
   const [showWrapped, setShowWrapped] = useState(() => shouldShowWrapped());
   const { permission, requestPermission, scheduleNotifications } = useNotifications();
   const { countdowns } = useCountdowns();
+  const mainScrollRef = useRef<HTMLElement>(null);
 
   const {
     timerActive, timeRemaining, timerPaused, selectedSessionDuration,
@@ -101,6 +102,11 @@ const Index = () => {
   useEffect(() => {
     if (!authLoading && !user) navigate('/auth');
   }, [user, authLoading]);
+
+  // Scroll to top whenever the active tab changes
+  useEffect(() => {
+    mainScrollRef.current?.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeTab]);
 
   // Must be before any early returns to satisfy Rules of Hooks
   useEffect(() => {
@@ -867,7 +873,7 @@ const Index = () => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto scroll-ios overscroll-none">
+        <main ref={mainScrollRef} className="flex-1 overflow-y-auto scroll-ios overscroll-none">
           <div key={activeTab} className="px-4 py-5 pb-32 md:px-5 md:py-6 md:pb-8 animate-tab-in">
             {renderContent()}
           </div>
