@@ -146,13 +146,11 @@
       user-select: text;
     }
 
-    /* Lock the body so rubber-band scroll never exposes white behind the layout */
+    /* Prevent rubber-band scroll from exposing white behind layout */
     html, body {
-      overflow: hidden;
       overscroll-behavior: none;
-      height: 100%;
       width: 100%;
-      position: fixed;
+      min-height: 100dvh;
     }
   }
 

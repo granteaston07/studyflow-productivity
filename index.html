@@ -21,6 +21,50 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@studyflowapp" />
     <meta name="twitter:image" content="/favicon.svg" />
+    <style>
+      :root {
+        --liquid-glass-blur: 24px;
+        --liquid-glass-light: linear-gradient(180deg, rgba(255,255,255,0.56) 0%, rgba(255,255,255,0.24) 100%);
+        --liquid-glass-dark: linear-gradient(180deg, rgba(28,34,44,0.82) 0%, rgba(17,23,35,0.56) 100%);
+        --liquid-glass-border-light: rgba(255,255,255,0.48);
+        --liquid-glass-border-dark: rgba(255,255,255,0.14);
+      }
+
+      html, body, #root {
+        min-height: 100%;
+        background-color: hsl(var(--background, 0 0% 100%));
+      }
+
+      @media (hover: none) and (pointer: coarse) {
+        html, body {
+          position: relative !important;
+          width: 100%;
+          min-height: 100dvh;
+        }
+
+        [class*="fixed top-0 inset-x-0 z-50 h-14 flex items-center justify-between px-6"] {
+          height: calc(3.5rem + env(safe-area-inset-top));
+          padding-top: env(safe-area-inset-top);
+          padding-left: max(1.5rem, env(safe-area-inset-left));
+          padding-right: max(1.5rem, env(safe-area-inset-right));
+        }
+
+        [class*="fixed top-0 inset-x-0 z-50 border-b border-border/40 bg-background/80 backdrop-blur-xl"] {
+          padding-top: env(safe-area-inset-top);
+        }
+
+        [class*="md:hidden fixed bottom-0 inset-x-0 z-50"] {
+          bottom: 0 !important;
+          padding: 0 !important;
+        }
+
+        [class*="bg-card/90 backdrop-blur-xl border-t border-border/20 rounded-t-2xl flex items-center"] {
+          padding-bottom: env(safe-area-inset-bottom);
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>

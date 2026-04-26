@@ -8,7 +8,7 @@ const config: CapacitorConfig = {
     allowNavigation: ['*.supabase.co'],
   },
   ios: {
-    contentInset: 'automatic',
+    contentInset: 'never',
   },
 };
 
