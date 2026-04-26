@@ -799,7 +799,7 @@ const Index = () => {
             {NAV.map(({ id, icon: Icon, label }) => (
               id === 'today' ? (
                 <button key={id} onClick={() => setActiveTab(id)}
-                  className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2 min-h-[50px] relative">
+                  className="flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 min-h-[44px] relative">
                   <div className={`flex items-center justify-center w-11 h-8 rounded-xl transition-all duration-200 ${
                     activeTab === id
                       ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/30'
@@ -811,7 +811,7 @@ const Index = () => {
                 </button>
               ) : (
                 <button key={id} onClick={() => setActiveTab(id)}
-                  className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2 min-h-[50px] relative transition-colors duration-150 ${
+                  className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-1.5 min-h-[44px] relative transition-colors duration-150 ${
                     activeTab === id ? 'text-primary' : 'text-muted-foreground/60'
                   }`}>
                   <div className={`flex items-center justify-center w-9 h-6 rounded-full transition-all duration-200 ${
