@@ -787,8 +787,8 @@ const Index = () => {
         </main>
 
         {/* Mobile bottom nav */}
-        <nav className="md:hidden fixed bottom-0 inset-x-0 bg-card/80 backdrop-blur-xl border-t border-border/20 z-50 rounded-t-2xl nav-safe">
-          <div className="flex items-center">
+        <nav className="md:hidden fixed bottom-0 inset-x-0 z-50">
+          <div className="bg-card/90 backdrop-blur-xl border-t border-border/20 rounded-t-2xl flex items-center">
             {NAV.map(({ id, icon: Icon, label }) => (
               id === 'today' ? (
                 <button key={id} onClick={() => setActiveTab(id)}
@@ -820,6 +820,8 @@ const Index = () => {
               )
             ))}
           </div>
+          {/* Solid fill behind iPhone home indicator — prevents white gap */}
+          <div className="bg-card" style={{ height: 'env(safe-area-inset-bottom)' }} />
         </nav>
       </div>
 

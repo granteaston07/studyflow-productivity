@@ -226,9 +226,6 @@
   .pb-safe {
     padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
   }
-  .nav-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
   .header-safe {
     padding-top: 12px;
     padding-bottom: 12px;
