@@ -20,7 +20,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 54;
 export function FocusTimer({
   timerActive, timeRemaining, timerPaused,
   onStartTimer, onUpdateDuration, onPauseTimer, onResetTimer,
-  selectedTask,
+  selectedSession, selectedTask,
 }: FocusTimerProps) {
   const [phase, setPhase] = useState<'focus' | 'break'>('focus');
   const [round, setRound] = useState(1);
@@ -30,6 +30,15 @@ export function FocusTimer({
   const [showCustom, setShowCustom] = useState(false);
   const [customFocusInput, setCustomFocusInput] = useState('20');
   const [customBreakInput, setCustomBreakInput] = useState('5');
+
+  // When Today tab quick-focus buttons set a duration, pick it up here
+  useEffect(() => {
+    if (!started && selectedSession?.duration) {
+      setFocusMins(selectedSession.duration);
+      setCustomFocusInput(String(selectedSession.duration));
+      onUpdateDuration(selectedSession.duration * 60);
+    }
+  }, [selectedSession?.duration]);
   const prevActiveRef = useRef(timerActive);
   const switchingRef = useRef(false);
 
