@@ -33,6 +33,9 @@ import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { StudyWrapped, shouldShowWrapped, markWrappedSeen } from "@/components/StudyWrapped";
 import { WidgetGallery } from "@/components/WidgetGallery";
 import { hapticSuccess, hapticImpact } from "@/lib/haptics";
+import { syncWidgetData } from "@/lib/widgetData";
+import { useCountdowns } from "@/hooks/useCountdowns";
+import { differenceInCalendarDays, parseISO } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
@@ -73,6 +76,7 @@ const Index = () => {
   const [widgetGalleryOpen, setWidgetGalleryOpen] = useState(false);
   const [showWrapped, setShowWrapped] = useState(() => shouldShowWrapped());
   const { permission, requestPermission, scheduleNotifications } = useNotifications();
+  const { countdowns } = useCountdowns();
 
   const {
     timerActive, timeRemaining, timerPaused, selectedSessionDuration,
@@ -102,6 +106,45 @@ const Index = () => {
   useEffect(() => {
     if (!tasksLoading) scheduleNotifications(tasks, streak?.current_streak ?? 0);
   }, [tasksLoading, streak, scheduleNotifications]);
+
+  // Sync live data to iOS widgets via shared App Group
+  useEffect(() => {
+    if (tasksLoading) return;
+    const today = new Date(); today.setHours(0, 0, 0, 0);
+    const activeTasks = tasks.filter(t => !t.completed);
+    const completedToday = tasks.filter(t => {
+      if (!t.completed || !t.completedAt) return false;
+      const d = new Date(t.completedAt); d.setHours(0, 0, 0, 0);
+      return d.getTime() === today.getTime();
+    }).length;
+    const nextTasks = activeTasks.slice(0, 4).map(t => {
+      const now = new Date(); const tod = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      let dueDateLabel: string | undefined;
+      if (t.dueDate) {
+        const d = new Date(t.dueDate.getFullYear(), t.dueDate.getMonth(), t.dueDate.getDate());
+        if (d.getTime() === tod.getTime()) dueDateLabel = 'Due today';
+        else if (d.getTime() === tod.getTime() + 86400000) dueDateLabel = 'Due tomorrow';
+        else if (d < tod) dueDateLabel = 'Overdue';
+      }
+      return { id: t.id, title: t.title, priority: t.priority, subject: t.subject ?? undefined, dueDateLabel };
+    });
+    // Nearest upcoming countdown
+    const nearest = countdowns
+      .map(c => ({ ...c, daysLeft: differenceInCalendarDays(parseISO(c.date), today) }))
+      .filter(c => c.daysLeft >= 0)
+      .sort((a, b) => a.daysLeft - b.daysLeft)[0];
+    syncWidgetData({
+      taskCount: activeTasks.length,
+      completedToday,
+      streak: streak?.current_streak ?? 0,
+      levelName,
+      xp,
+      xpToNext,
+      nextTasks,
+      countdownTitle: nearest?.title,
+      countdownDays: nearest?.daysLeft,
+    });
+  }, [tasks, tasksLoading, streak, xp, xpToNext, levelName, countdowns]);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
