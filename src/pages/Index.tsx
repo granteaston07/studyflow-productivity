@@ -795,7 +795,7 @@ const Index = () => {
 
         {/* Mobile bottom nav */}
         <nav className="md:hidden fixed bottom-0 inset-x-0 z-50">
-          <div className="bg-card/90 backdrop-blur-xl border-t border-border/20 rounded-t-2xl flex items-center">
+          <div className="bg-card/90 backdrop-blur-xl border-t border-border/20 rounded-t-2xl flex items-center pt-1">
             {NAV.map(({ id, icon: Icon, label }) => (
               id === 'today' ? (
                 <button key={id} onClick={() => setActiveTab(id)}
