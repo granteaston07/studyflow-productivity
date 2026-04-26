@@ -211,6 +211,8 @@ const Index = () => {
     return levelName;
   })();
 
+  const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+
   const NAV = [
     { id: 'tasks' as Tab, icon: CheckSquare, label: 'Tasks' },
     { id: 'notes' as Tab, icon: NotebookPen, label: 'Notes' },
@@ -260,7 +262,7 @@ const Index = () => {
                       onDelete={(id) => deleteTask(id)}
                       selected={selectedTaskId === task.id}
                       onSelect={(id) => setSelectedTaskId(prev => prev === id ? null : id)}
-                      statusMode
+                      statusMode={isMobile}
                     />
                   </div>
                 ))}

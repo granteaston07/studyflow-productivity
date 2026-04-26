@@ -119,31 +119,37 @@
 @layer base {
   * {
     @apply border-border;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-    -webkit-touch-callout: none;
-  }
-
-  input, textarea, [contenteditable="true"] {
-    -webkit-user-select: text;
-    -moz-user-select: text;
-    user-select: text;
-  }
-
-  html {
-    height: 100%;
-    background-color: hsl(var(--background));
   }
 
   body {
-    height: 100%;
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
-  #root {
-    height: 100%;
+  /* Desktop: restore text selection highlight */
+  ::selection {
+    background: hsl(var(--primary) / 0.25);
+  }
+
+  /* Touch devices only: disable long-press selection highlight */
+  @media (hover: none) and (pointer: coarse) {
+    * {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    input, textarea, [contenteditable="true"] {
+      -webkit-user-select: text;
+      -moz-user-select: text;
+      user-select: text;
+    }
+  }
+
+  /* Prevent white flash on app load */
+  html {
+    background-color: hsl(var(--background));
   }
 }
 
