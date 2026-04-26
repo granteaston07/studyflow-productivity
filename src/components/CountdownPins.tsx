@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, X, CalendarDays } from 'lucide-react';
+import { Plus, CalendarDays } from 'lucide-react';
+import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { useCountdowns } from '@/hooks/useCountdowns';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
@@ -77,41 +78,32 @@ export function CountdownPins() {
             {sorted.map(c => {
               const style = cardStyle(c.daysLeft);
               return (
-                <div
-                  key={c.id}
-                  className={`relative flex items-center gap-4 px-4 py-4 rounded-2xl border ${style.bg}`}
-                >
-                  {/* Emoji */}
-                  <div className="w-12 h-12 rounded-2xl bg-background/60 flex items-center justify-center flex-shrink-0 text-2xl shadow-sm">
-                    {c.emoji}
-                  </div>
+                <SwipeToDelete key={c.id} onDelete={() => deleteCountdown(c.id)}>
+                  <div className={`flex items-center gap-4 px-4 py-4 rounded-2xl border ${style.bg}`}>
+                    {/* Emoji */}
+                    <div className="w-12 h-12 rounded-2xl bg-background/60 flex items-center justify-center flex-shrink-0 text-2xl shadow-sm">
+                      {c.emoji}
+                    </div>
 
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-bold text-foreground leading-tight truncate">{c.title}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {format(parseISO(c.date), 'MMMM d, yyyy')}
-                    </p>
-                  </div>
+                    {/* Info */}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-bold text-foreground leading-tight truncate">{c.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {format(parseISO(c.date), 'MMMM d, yyyy')}
+                      </p>
+                    </div>
 
-                  {/* Countdown number */}
-                  <div className="flex flex-col items-end flex-shrink-0 gap-1">
-                    <span className={`text-3xl font-black leading-none ${style.num}`}>
-                      {c.daysLeft <= 0 ? '!' : c.daysLeft}
-                    </span>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${style.badge}`}>
-                      {daysUntilLabel(c.daysLeft)}
-                    </span>
+                    {/* Countdown number */}
+                    <div className="flex flex-col items-end flex-shrink-0 gap-1">
+                      <span className={`text-3xl font-black leading-none ${style.num}`}>
+                        {c.daysLeft <= 0 ? '!' : c.daysLeft}
+                      </span>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${style.badge}`}>
+                        {daysUntilLabel(c.daysLeft)}
+                      </span>
+                    </div>
                   </div>
-
-                  {/* Delete */}
-                  <button
-                    onClick={() => deleteCountdown(c.id)}
-                    className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-background/70 text-muted-foreground active:bg-muted/80 transition-colors"
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
-                </div>
+                </SwipeToDelete>
               );
             })}
 
