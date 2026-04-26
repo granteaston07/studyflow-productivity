@@ -827,8 +827,6 @@ const Index = () => {
               )
             ))}
           </div>
-          {/* Solid fill behind iPhone home indicator — prevents white gap */}
-          <div className="bg-card" style={{ height: 'env(safe-area-inset-bottom)' }} />
         </nav>
       </div>
 
