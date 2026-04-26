@@ -214,8 +214,8 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
   .header-safe {
-    padding-top: max(env(safe-area-inset-top), 0px);
-    padding-bottom: 10px;
+    padding-top: max(env(safe-area-inset-top), 12px);
+    padding-bottom: 12px;
   }
 
   /* Always-visible touch targets — no hover-only visibility */
