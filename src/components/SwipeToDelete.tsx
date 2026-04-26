@@ -7,81 +7,112 @@ interface SwipeToDeleteProps {
   disabled?: boolean;
 }
 
-const THRESHOLD = 80; // px to trigger delete
+const THRESHOLD = 90; // px to trigger delete
+
+type State = 'idle' | 'dragging' | 'returning' | 'flying';
 
 export function SwipeToDelete({ onDelete, children, disabled = false }: SwipeToDeleteProps) {
   const [offset, setOffset] = useState(0);
-  const [swiping, setSwiping] = useState(false);
-  const [confirmed, setConfirmed] = useState(false);
+  const [state, setState] = useState<State>('idle');
   const startX = useRef(0);
   const startY = useRef(0);
   const isHorizontal = useRef<boolean | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   if (disabled) return <>{children}</>;
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    if (state === 'flying') return;
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
     isHorizontal.current = null;
-    setSwiping(false);
+    setState('idle');
     setOffset(0);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
+    if (state === 'flying') return;
     const dx = e.touches[0].clientX - startX.current;
     const dy = e.touches[0].clientY - startY.current;
 
     if (isHorizontal.current === null) {
-      if (Math.abs(dx) < 5 && Math.abs(dy) < 5) return;
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       isHorizontal.current = Math.abs(dx) > Math.abs(dy);
     }
 
     if (!isHorizontal.current) return;
-
-    // Only left-swipe (negative dx)
-    if (dx >= 0) { setOffset(0); setSwiping(false); return; }
+    if (dx >= 0) { setOffset(0); setState('idle'); return; }
 
     e.preventDefault();
-    setSwiping(true);
-    // Rubber-band past threshold
+    setState('dragging');
+
     const raw = Math.abs(dx);
-    const capped = raw > THRESHOLD ? THRESHOLD + (raw - THRESHOLD) * 0.3 : raw;
-    setOffset(capped);
+    // Light resistance past threshold to signal it's ready
+    const dampened = raw > THRESHOLD ? THRESHOLD + (raw - THRESHOLD) * 0.15 : raw;
+    setOffset(dampened);
   };
 
   const handleTouchEnd = () => {
+    if (state === 'flying') return;
+    isHorizontal.current = null;
+
     if (offset >= THRESHOLD) {
-      setConfirmed(true);
-      setOffset(THRESHOLD);
+      // Fly card fully off screen, then delete
+      setState('flying');
+      const width = containerRef.current?.offsetWidth ?? 400;
+      setOffset(width + 60);
       setTimeout(() => {
         onDelete();
-        setConfirmed(false);
-        setOffset(0);
-        setSwiping(false);
-      }, 250);
+      }, 320);
     } else {
+      // Snap back
+      setState('returning');
       setOffset(0);
-      setSwiping(false);
+      setTimeout(() => setState('idle'), 300);
     }
-    isHorizontal.current = null;
   };
 
-  const deleteOpacity = Math.min(offset / THRESHOLD, 1);
+  const isDragging = state === 'dragging';
+  const isFlying  = state === 'flying';
+  const isReturning = state === 'returning';
+
+  // Background fills the full card as it flies out
+  const bgWidth = isFlying ? '100%' : `${Math.max(offset, 0)}px`;
+  const trashOpacity = offset > 24 ? 1 : 0;
+  // Scale up the icon slightly when past threshold for a satisfying "locked in" feel
+  const trashScale = offset >= THRESHOLD ? 1.2 : 1;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl">
-      {/* Delete background */}
+    <div ref={containerRef} className="relative overflow-hidden rounded-2xl">
+      {/* Red background — always full height, width grows with swipe */}
       <div
-        className="absolute inset-y-0 right-0 flex items-center justify-end pr-4 bg-error rounded-2xl"
-        style={{ opacity: deleteOpacity, width: `${offset + 16}px` }}
+        className="absolute inset-y-0 right-0 bg-error rounded-2xl flex items-center justify-end pr-5"
+        style={{
+          width: bgWidth,
+          transition: isDragging ? 'none' : isFlying ? 'width 0.32s cubic-bezier(0.4,0,0.2,1)' : 'width 0.25s ease-out',
+        }}
       >
-        <Trash2 className="h-4 w-4 text-white flex-shrink-0" style={{ opacity: offset > 20 ? 1 : 0, transition: 'opacity 0.1s' }} />
+        <Trash2
+          className="h-5 w-5 text-white flex-shrink-0"
+          style={{
+            opacity: trashOpacity,
+            transform: `scale(${trashScale})`,
+            transition: 'opacity 0.12s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1)',
+          }}
+        />
       </div>
 
-      {/* Content layer */}
+      {/* Card — slides left while dragging, flies off on confirm, snaps back on cancel */}
       <div
-        className={`relative transition-transform ${swiping || confirmed ? '' : 'transition-transform duration-200 ease-out'}`}
-        style={{ transform: `translateX(-${offset}px)` }}
+        style={{
+          transform: `translateX(-${offset}px)`,
+          transition: isDragging
+            ? 'none'
+            : isFlying
+              ? 'transform 0.32s cubic-bezier(0.4,0,0.2,1)'
+              : 'transform 0.3s cubic-bezier(0.34,1.2,0.64,1)',
+          willChange: 'transform',
+        }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
