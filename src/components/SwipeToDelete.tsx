@@ -1,5 +1,6 @@
 import { useRef, useState, ReactNode } from 'react';
 import { Trash2 } from 'lucide-react';
+import { hapticImpact } from '@/lib/haptics';
 
 interface SwipeToDeleteProps {
   onDelete: () => void;
@@ -18,6 +19,7 @@ export function SwipeToDelete({ onDelete, children, disabled = false }: SwipeToD
   const startY = useRef(0);
   const isHorizontal = useRef<boolean | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const thresholdHapticFired = useRef(false);
 
   if (disabled) return <>{children}</>;
 
@@ -26,6 +28,7 @@ export function SwipeToDelete({ onDelete, children, disabled = false }: SwipeToD
     startX.current = e.touches[0].clientX;
     startY.current = e.touches[0].clientY;
     isHorizontal.current = null;
+    thresholdHapticFired.current = false;
     setState('idle');
     setOffset(0);
   };
@@ -47,6 +50,13 @@ export function SwipeToDelete({ onDelete, children, disabled = false }: SwipeToD
     setState('dragging');
 
     const raw = Math.abs(dx);
+    // Fire a light haptic exactly when crossing the threshold
+    if (raw >= THRESHOLD && !thresholdHapticFired.current) {
+      thresholdHapticFired.current = true;
+      hapticImpact('medium');
+    } else if (raw < THRESHOLD) {
+      thresholdHapticFired.current = false;
+    }
     // Light resistance past threshold to signal it's ready
     const dampened = raw > THRESHOLD ? THRESHOLD + (raw - THRESHOLD) * 0.15 : raw;
     setOffset(dampened);
@@ -59,6 +69,7 @@ export function SwipeToDelete({ onDelete, children, disabled = false }: SwipeToD
     if (offset >= THRESHOLD) {
       // Fly card fully off screen, then delete
       setState('flying');
+      hapticImpact('heavy');
       const width = containerRef.current?.offsetWidth ?? 400;
       setOffset(width + 60);
       setTimeout(() => {
